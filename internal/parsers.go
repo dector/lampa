@@ -48,6 +48,20 @@ func (d Dependency) IsEquals(other Dependency) bool {
 		d.RequestedVersion == other.RequestedVersion
 }
 
+// FIXME add error handling
+func ParseTreeFromOutput(output string, name string) (DependenciesTree, error) {
+	// TODO improve with iterator
+	lines := strings.Split(output, "\n")
+	_, startIdx, _ := lo.FindIndexOf(lines, func(it string) bool {
+		return strings.HasPrefix(it, name)
+	})
+	_, endIdx, _ := lo.FindIndexOf(lines[startIdx:], func(it string) bool {
+		return strings.TrimSpace(it) == ""
+	})
+
+	return ParseTree(strings.Join(lines[startIdx+1:endIdx], "\n"))
+}
+
 func ParseTree(source string) (DependenciesTree, error) {
 	result := DependenciesTree{}
 
@@ -96,6 +110,7 @@ func parseDependencyLine(line string) (ParsedDependency, error) {
 	result := ParsedDependency{}
 
 	line = strings.TrimSpace(line)
+	// fmt.Println(line)
 
 	// FIXME implement proper parser
 	if strings.Contains(line, ":{strictly ") {
@@ -121,7 +136,10 @@ func parseDependencyLine(line string) (ParsedDependency, error) {
 	artefactParts := strings.Split(artefact, ":")
 	result.Dependency.GroupID = artefactParts[0]
 	result.Dependency.ArtifactID = artefactParts[1]
-	result.Dependency.RequestedVersion = strings.TrimSuffix(artefactParts[2], "}")
+
+	if len(artefactParts) > 2 {
+		result.Dependency.RequestedVersion = strings.TrimSuffix(artefactParts[2], "}")
+	}
 
 	// Parse resolved version
 	resolvedVersionMarkerIdx := lo.IndexOf(parts, "->")
@@ -131,6 +149,10 @@ func parseDependencyLine(line string) (ParsedDependency, error) {
 	} else {
 		result.Dependency.Version = result.Dependency.RequestedVersion
 	}
+
+	// if !result.IsASummary && result.Dependency.RequestedVersion == "" {
+	// 	return result, errors.New("dependency missing requested version for:\n" + line)
+	// }
 
 	return result, nil
 }

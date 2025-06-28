@@ -223,3 +223,25 @@ func TestParseDependency_SummaryLine(t *testing.T) {
 		t.Errorf("Parsed dependency does not match expected structure.\nGot: %#v\nWnt: %#v", expected, actual)
 	}
 }
+
+func TestParseDependency_SummaryLine2(t *testing.T) {
+	line := "+--- androidx.compose.ui:ui-tooling-preview -> 1.8.0-beta02"
+	actual, err := parseDependencyLine(line)
+	if err != nil {
+		t.Fatalf("ParseDependency returned error: %v", err)
+	}
+
+	expected := ParsedDependency{
+		Dependency: Dependency{
+			GroupID:          "androidx.compose.ui",
+			ArtifactID:       "ui-tooling-preview",
+			Version:          "1.8.0-beta02",
+			RequestedVersion: "",
+		},
+		Level:      1,
+		IsASummary: true,
+	}
+	if !actual.IsEquals(expected) {
+		t.Errorf("Parsed dependency does not match expected structure.\nGot: %#v\nWant: %#v", actual, expected)
+	}
+}
