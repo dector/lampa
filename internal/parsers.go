@@ -18,10 +18,32 @@ type Dependency struct {
 	GroupID    string
 	ArtifactID string
 	Version    string
+
+	RequestedVersion string
 }
 
 func (d Dependency) String() string {
 	return fmt.Sprintf("%s:%s:%s", d.GroupID, d.ArtifactID, d.Version)
+}
+
+func (d ParsedDependency) IsEquals(other ParsedDependency) bool {
+	return d.Dependency.IsEquals(other.Dependency) &&
+		d.Level == other.Level
+}
+
+func (d Dependency) IsEquals(other Dependency) bool {
+	if len(d.Children) != len(other.Children) {
+		return false
+	}
+	for i := range d.Children {
+		if !d.Children[i].IsEquals(other.Children[i]) {
+			return false
+		}
+	}
+	return d.GroupID == other.GroupID &&
+		d.ArtifactID == other.ArtifactID &&
+		d.Version == other.Version &&
+		d.RequestedVersion == other.RequestedVersion
 }
 
 func ParseTree(source string) (DependenciesTree, error) {
@@ -85,7 +107,16 @@ func parseDependencyLine(line string) (ParsedDependency, error) {
 	artefactParts := strings.Split(artefact, ":")
 	result.Dependency.GroupID = artefactParts[0]
 	result.Dependency.ArtifactID = artefactParts[1]
-	result.Dependency.Version = artefactParts[2]
+	result.Dependency.RequestedVersion = artefactParts[2]
+
+	// Parse resolved version
+	resolvedVersionMarkerIdx := lo.IndexOf(parts, "->")
+	resolvedVersionIdx := resolvedVersionMarkerIdx + 1
+	if resolvedVersionMarkerIdx != -1 && resolvedVersionIdx < len(parts) {
+		result.Dependency.Version = parts[resolvedVersionIdx]
+	} else {
+		result.Dependency.Version = result.Dependency.RequestedVersion
+	}
 
 	return result, nil
 }

@@ -15,9 +15,9 @@ func TestParseTree_ShortInput(t *testing.T) {
 	input := `
 +--- com.google.dagger:hilt-android:2.56
 |    +--- com.google.dagger:dagger:2.56
-|    |    +--- jakarta.inject:jakarta.inject-api:2.0.1
+|    |    +--- jakarta.inject:jakarta.inject-api:2.0.1 -> 2.0.2
 |    |    +--- javax.inject:javax.inject:1
-|    |    \--- org.jspecify:jspecify:1.0.0
+|    |    \--- org.jspecify:jspecify:1.0.0 -> 2.0.0 (c)
 |    +--- com.google.dagger:dagger-lint-aar:2.56
 |    +--- com.google.dagger:hilt-core:2.56
 |    |    +--- com.google.dagger:dagger:2.56 (*)
@@ -46,9 +46,10 @@ func TestParseTree_ShortInput(t *testing.T) {
 							Version:    "2.56",
 							Children: []Dependency{
 								{
-									GroupID:    "jakarta.inject",
-									ArtifactID: "jakarta.inject-api",
-									Version:    "2.0.1",
+									GroupID:          "jakarta.inject",
+									ArtifactID:       "jakarta.inject-api",
+									Version:          "2.0.2",
+									RequestedVersion: "2.0.1",
 								},
 								{
 									GroupID:    "javax.inject",
@@ -56,9 +57,10 @@ func TestParseTree_ShortInput(t *testing.T) {
 									Version:    "1",
 								},
 								{
-									GroupID:    "org.jspecify",
-									ArtifactID: "jspecify",
-									Version:    "1.0.0",
+									GroupID:          "org.jspecify",
+									ArtifactID:       "jspecify",
+									Version:          "2.0.0",
+									RequestedVersion: "1.0.0",
 								},
 							},
 						},
@@ -135,23 +137,64 @@ func dependencyNodeEqual(a, b Dependency) bool {
 	return true
 }
 
-func TestParseDependency_FirstLevel(t *testing.T) {
+func TestParseDependency_1(t *testing.T) {
 	line := "|    |    +--- javax.inject:javax.inject:1.2.3"
-	dep, err := parseDependencyLine(line)
+	actual, err := parseDependencyLine(line)
 	if err != nil {
 		t.Fatalf("ParseDependency returned error: %v", err)
 	}
 
-	if dep.Dependency.GroupID != "javax.inject" {
-		t.Errorf("Failed to parse dependency group, got: %s", dep.Dependency.GroupID)
+	expected := ParsedDependency{
+		Dependency: Dependency{
+			GroupID:    "javax.inject",
+			ArtifactID: "javax.inject",
+			Version:    "1.2.3",
+		},
+		Level: 3,
 	}
-	if dep.Dependency.ArtifactID != "javax.inject" {
-		t.Errorf("Failed to parse dependency name, got: %s", dep.Dependency.ArtifactID)
+	if actual.IsEquals(expected) {
+		t.Errorf("Parsed dependency does not match expected structure.\nGot: %#v\nWant: %#v", actual, expected)
 	}
-	if dep.Dependency.Version != "1.2.3" {
-		t.Errorf("Failed to parse dependency version, got: %s", dep.Dependency.Version)
+}
+
+func TestParseDependency_2(t *testing.T) {
+	line := "|    +--- javax.inject:javax.inject:1.2.3 -> 2.1.2"
+	actual, err := parseDependencyLine(line)
+	if err != nil {
+		t.Fatalf("ParseDependency returned error: %v", err)
 	}
-	if dep.Level != 3 {
-		t.Errorf("Failed to parse depth, got: %d", dep.Level)
+
+	expected := ParsedDependency{
+		Dependency: Dependency{
+			GroupID:          "javax.inject",
+			ArtifactID:       "javax.inject",
+			Version:          "2.1.2",
+			RequestedVersion: "1.2.3",
+		},
+		Level: 2,
+	}
+	if !actual.IsEquals(expected) {
+		t.Errorf("Parsed dependency does not match expected structure.\nGot: %#v\nWant: %#v", actual, expected)
+	}
+}
+
+func TestParseDependency_3(t *testing.T) {
+	line := "|    +--- javax.inject:javax.inject:1.2.3 -> 2.1.2 (c)"
+	actual, err := parseDependencyLine(line)
+	if err != nil {
+		t.Fatalf("ParseDependency returned error: %v", err)
+	}
+
+	expected := ParsedDependency{
+		Dependency: Dependency{
+			GroupID:          "javax.inject",
+			ArtifactID:       "javax.inject",
+			Version:          "2.1.2",
+			RequestedVersion: "1.2.3",
+		},
+		Level: 2,
+	}
+	if !actual.IsEquals(expected) {
+		t.Errorf("Parsed dependency does not match expected structure.\nGot: %#v\nWnt: %#v", expected, actual)
 	}
 }
