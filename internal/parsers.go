@@ -71,17 +71,27 @@ func parseDependencyLine(line string) (ParsedDependency, error) {
 
 	// Parse level
 	result.Level = lo.CountBy(parts, func(it string) bool {
-		return it == "|" || it == "+---" || it == "\\---"
+		return IsATreeMarker(it)
 	})
 
 	// Parse arttefact
-	artefact := parts[len(parts)-1]
+	artefact := ""
+	for _, part := range parts {
+		if !IsATreeMarker(part) {
+			artefact = part
+			break
+		}
+	}
 	artefactParts := strings.Split(artefact, ":")
 	result.Dependency.GroupID = artefactParts[0]
 	result.Dependency.ArtifactID = artefactParts[1]
 	result.Dependency.Version = artefactParts[2]
 
 	return result, nil
+}
+
+func IsATreeMarker(it string) bool {
+	return it == "|" || it == "+---" || it == "\\---"
 }
 
 var ErrEmptyInput = errors.New("input is empty")
