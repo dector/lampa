@@ -34,7 +34,13 @@ func ParseTree(source string) (DependenciesTree, error) {
 
 	result.Root = Dependency{}
 
-	// parseDependencies(result, source, 1)
+	for line := range strings.Lines(source) {
+		line := strings.TrimSpace(line)
+		dep := lo.Must(parseDependencyLine(line))
+
+		node := findLatestOnLevel(&result.Root, dep.Level-1)
+		node.Children = append(node.Children, dep.Dependency)
+	}
 
 	return result, nil
 }
@@ -42,6 +48,19 @@ func ParseTree(source string) (DependenciesTree, error) {
 type ParsedDependency struct {
 	Dependency Dependency
 	Level      int
+}
+
+func findLatestOnLevel(root *Dependency, level int) *Dependency {
+	if level == 0 {
+		return root
+	}
+
+	if len(root.Children) == 0 {
+		return nil
+	}
+	latestChild := &root.Children[len(root.Children)-1]
+
+	return findLatestOnLevel(latestChild, level-1)
 }
 
 func parseDependencyLine(line string) (ParsedDependency, error) {
