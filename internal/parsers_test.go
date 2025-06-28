@@ -245,3 +245,26 @@ func TestParseDependency_SummaryLine2(t *testing.T) {
 		t.Errorf("Parsed dependency does not match expected structure.\nGot: %#v\nWant: %#v", actual, expected)
 	}
 }
+
+func TestParseDependency_Project(t *testing.T) {
+	line := "+--- project :feature:interests"
+	actual, err := parseDependencyLine(line)
+	if err != nil {
+		t.Fatalf("ParseDependency returned error: %v", err)
+	}
+
+	expected := ParsedDependency{
+		Dependency: Dependency{
+			GroupID:          "",
+			ArtifactID:       ":feature:interests",
+			Version:          "",
+			RequestedVersion: "",
+			IsAModule:        true,
+		},
+		Level:      1,
+		IsASummary: false,
+	}
+	if !actual.IsEquals(expected) {
+		t.Errorf("Parsed dependency does not match expected structure.\nGot: %#v\nWant: %#v", actual, expected)
+	}
+}

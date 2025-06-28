@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"lampa/internal"
 	"os"
 )
@@ -26,5 +28,15 @@ func main() {
 	}
 	content := string(data)
 
-	internal.ParseTreeFromOutput(content, configName)
+	tree, err := internal.ParseTreeFromOutput(content, configName)
+	if err != nil {
+		panic(err)
+	}
+
+	jsonTree, err := json.MarshalIndent(tree.Root, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(jsonTree))
 }

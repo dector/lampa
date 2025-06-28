@@ -22,6 +22,9 @@ type Dependency struct {
 	Version    string
 
 	RequestedVersion string
+
+	// TODO change model
+	IsAModule bool
 }
 
 func (d Dependency) String() string {
@@ -133,26 +136,37 @@ func parseDependencyLine(line string) (ParsedDependency, error) {
 			break
 		}
 	}
-	artefactParts := strings.Split(artefact, ":")
-	result.Dependency.GroupID = artefactParts[0]
-	result.Dependency.ArtifactID = artefactParts[1]
 
-	if len(artefactParts) > 2 {
-		result.Dependency.RequestedVersion = strings.TrimSuffix(artefactParts[2], "}")
-	}
-
-	// Parse resolved version
-	resolvedVersionMarkerIdx := lo.IndexOf(parts, "->")
-	resolvedVersionIdx := resolvedVersionMarkerIdx + 1
-	if resolvedVersionMarkerIdx != -1 && resolvedVersionIdx < len(parts) {
-		result.Dependency.Version = parts[resolvedVersionIdx]
+	if artefact == "project" {
+		projectMarkerIdx := lo.IndexOf(parts, "project")
+		if projectMarkerIdx == -1 {
+			panic("project marker found but no project name")
+		}
+		projectNameIdx := projectMarkerIdx + 1
+		result.Dependency.ArtifactID = parts[projectNameIdx]
+		result.Dependency.IsAModule = true
 	} else {
-		result.Dependency.Version = result.Dependency.RequestedVersion
-	}
+		artefactParts := strings.Split(artefact, ":")
+		result.Dependency.GroupID = artefactParts[0]
+		result.Dependency.ArtifactID = artefactParts[1]
 
-	// if !result.IsASummary && result.Dependency.RequestedVersion == "" {
-	// 	return result, errors.New("dependency missing requested version for:\n" + line)
-	// }
+		if len(artefactParts) > 2 {
+			result.Dependency.RequestedVersion = strings.TrimSuffix(artefactParts[2], "}")
+		}
+
+		// Parse resolved version
+		resolvedVersionMarkerIdx := lo.IndexOf(parts, "->")
+		resolvedVersionIdx := resolvedVersionMarkerIdx + 1
+		if resolvedVersionMarkerIdx != -1 && resolvedVersionIdx < len(parts) {
+			result.Dependency.Version = parts[resolvedVersionIdx]
+		} else {
+			result.Dependency.Version = result.Dependency.RequestedVersion
+		}
+
+		// if !result.IsASummary && result.Dependency.RequestedVersion == "" {
+		// 	return result, errors.New("dependency missing requested version for:\n" + line)
+		// }
+	}
 
 	return result, nil
 }
