@@ -10,6 +10,8 @@ import (
 
 type DependenciesTree struct {
 	Root Dependency
+
+	Summary []Dependency
 }
 
 type Dependency struct {
@@ -60,8 +62,12 @@ func ParseTree(source string) (DependenciesTree, error) {
 		line := strings.TrimSpace(line)
 		dep := lo.Must(parseDependencyLine(line))
 
-		node := findLatestOnLevel(&result.Root, dep.Level-1)
-		node.Children = append(node.Children, dep.Dependency)
+		if dep.IsASummary {
+			result.Summary = append(result.Summary, dep.Dependency)
+		} else {
+			node := findLatestOnLevel(&result.Root, dep.Level-1)
+			node.Children = append(node.Children, dep.Dependency)
+		}
 	}
 
 	return result, nil
@@ -70,6 +76,7 @@ func ParseTree(source string) (DependenciesTree, error) {
 type ParsedDependency struct {
 	Dependency Dependency
 	Level      int
+	IsASummary bool
 }
 
 func findLatestOnLevel(root *Dependency, level int) *Dependency {
@@ -89,6 +96,13 @@ func parseDependencyLine(line string) (ParsedDependency, error) {
 	result := ParsedDependency{}
 
 	line = strings.TrimSpace(line)
+
+	// FIXME implement proper parser
+	if strings.Contains(line, ":{strictly ") {
+		line = strings.Replace(line, "{strictly ", "", 1)
+		result.IsASummary = true
+	}
+
 	parts := strings.Fields(line)
 
 	// Parse level
@@ -107,7 +121,7 @@ func parseDependencyLine(line string) (ParsedDependency, error) {
 	artefactParts := strings.Split(artefact, ":")
 	result.Dependency.GroupID = artefactParts[0]
 	result.Dependency.ArtifactID = artefactParts[1]
-	result.Dependency.RequestedVersion = artefactParts[2]
+	result.Dependency.RequestedVersion = strings.TrimSuffix(artefactParts[2], "}")
 
 	// Parse resolved version
 	resolvedVersionMarkerIdx := lo.IndexOf(parts, "->")

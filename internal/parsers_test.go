@@ -150,7 +150,8 @@ func TestParseDependency_1(t *testing.T) {
 			ArtifactID: "javax.inject",
 			Version:    "1.2.3",
 		},
-		Level: 3,
+		Level:      3,
+		IsASummary: false,
 	}
 	if actual.IsEquals(expected) {
 		t.Errorf("Parsed dependency does not match expected structure.\nGot: %#v\nWant: %#v", actual, expected)
@@ -171,7 +172,8 @@ func TestParseDependency_2(t *testing.T) {
 			Version:          "2.1.2",
 			RequestedVersion: "1.2.3",
 		},
-		Level: 2,
+		Level:      2,
+		IsASummary: false,
 	}
 	if !actual.IsEquals(expected) {
 		t.Errorf("Parsed dependency does not match expected structure.\nGot: %#v\nWant: %#v", actual, expected)
@@ -192,7 +194,30 @@ func TestParseDependency_3(t *testing.T) {
 			Version:          "2.1.2",
 			RequestedVersion: "1.2.3",
 		},
-		Level: 2,
+		Level:      2,
+		IsASummary: false,
+	}
+	if !actual.IsEquals(expected) {
+		t.Errorf("Parsed dependency does not match expected structure.\nGot: %#v\nWnt: %#v", expected, actual)
+	}
+}
+
+func TestParseDependency_SummaryLine(t *testing.T) {
+	line := "+--- org.jetbrains.kotlin:kotlin-stdlib:{strictly 1.0.10} -> 2.1.10 (c)"
+	actual, err := parseDependencyLine(line)
+	if err != nil {
+		t.Fatalf("ParseDependency returned error: %v", err)
+	}
+
+	expected := ParsedDependency{
+		Dependency: Dependency{
+			GroupID:          "org.jetbrains.kotlin",
+			ArtifactID:       "kotlin-stdlib",
+			Version:          "2.1.10",
+			RequestedVersion: "1.0.10",
+		},
+		Level:      1,
+		IsASummary: true,
 	}
 	if !actual.IsEquals(expected) {
 		t.Errorf("Parsed dependency does not match expected structure.\nGot: %#v\nWnt: %#v", expected, actual)
