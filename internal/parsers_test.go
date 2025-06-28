@@ -22,7 +22,7 @@ func TestParseTree_ShortInput(t *testing.T) {
 |    +--- com.google.dagger:hilt-core:2.56
 |    |    +--- com.google.dagger:dagger:2.56 (*)
 |    |    +--- com.google.code.findbugs:jsr305:3.0.2
-|    |    \--- javax.inject:javax.inject:1
+|    |    \--- javax.inject:javax.inject:1 (c)
 `
 	result, err := ParseTree(input)
 	if err != nil {
@@ -31,4 +31,25 @@ func TestParseTree_ShortInput(t *testing.T) {
 
 	// TODO check result
 	_ = result
+}
+
+func TestParseDependency_FirstLevel(t *testing.T) {
+	line := "|    |    +--- javax.inject:javax.inject:1.2.3"
+	dep, err := parseDependencyLine(line)
+	if err != nil {
+		t.Fatalf("ParseDependency returned error: %v", err)
+	}
+
+	if dep.Dependency.GroupID != "javax.inject" {
+		t.Errorf("Failed to parse dependency group, got: %s", dep.Dependency.GroupID)
+	}
+	if dep.Dependency.ArtifactID != "javax.inject" {
+		t.Errorf("Failed to parse dependency name, got: %s", dep.Dependency.ArtifactID)
+	}
+	if dep.Dependency.Version != "1.2.3" {
+		t.Errorf("Failed to parse dependency version, got: %s", dep.Dependency.Version)
+	}
+	if dep.Level != 3 {
+		t.Errorf("Failed to parse depth, got: %d", dep.Level)
+	}
 }
