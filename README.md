@@ -1,6 +1,6 @@
-<div style="text-align: center;">
+<p align="center">
   <img src="docs/lampa-logo.webp" alt="Lampa logo">
-</div>
+</p>
 
 # Lampa
 
