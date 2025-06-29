@@ -127,7 +127,7 @@ func execCollect(c *cli.Command) {
 
 	log.Printf("collect: from=%s to=%s", from, to)
 
-	gradlewPath := path.Join(to, "gradlew")
+	gradlewPath := path.Join(from, "gradlew")
 	info, err := os.Stat(gradlewPath)
 	if err != nil {
 		if os.IsNotExist(err) {
