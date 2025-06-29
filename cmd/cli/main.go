@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 
 	"lampa/internal"
 	. "lampa/internal/globals"
@@ -213,6 +214,32 @@ func collectReport(args CollectReportArgs) report.Report {
 	for _, info := range tree.Summary {
 		d := info.String()
 		result.Dependencies.Compiled = append(result.Dependencies.Compiled, d)
+	}
+
+	result.Context = parseContext(args)
+
+	return result
+}
+
+func parseContext(args CollectReportArgs) report.ContextSegment {
+	result := report.ContextSegment{}
+
+	_, err := exec.LookPath("git")
+	if err != nil {
+		log.Fatalf("git not found in PATH: %v", err)
+	}
+
+	cmd := exec.Command("git", "rev-parse", "--is-inside-work-tree")
+	cmd.Dir = args.ProjectDir
+	if err := cmd.Run(); err != nil {
+		return result
+	}
+
+	cmd = exec.Command("git", "rev-parse", "HEAD")
+	cmd.Dir = args.ProjectDir
+	out, err := cmd.Output()
+	if err == nil {
+		result.GitCommit = strings.TrimSpace(string(out))
 	}
 
 	return result
