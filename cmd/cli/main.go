@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"strings"
 
 	"lampa/internal"
@@ -215,6 +216,7 @@ type CollectReportArgs struct {
 func collectReport(args CollectReportArgs) report.Report {
 	result := report.Report{
 		Version: "0.0.1-SNAPSHOT",
+		Type:    "CollectionReport",
 		Tool: report.ToolSegment{
 			Name:       "lampa",
 			Repository: "https://github.com/dector/lampa/",
@@ -270,7 +272,41 @@ func parseContext(args CollectReportArgs) report.ContextSegment {
 	cmd.Dir = args.ProjectDir
 	out, err := cmd.Output()
 	if err == nil {
-		result.GitCommit = strings.TrimSpace(string(out))
+		result.Git.Commit = strings.TrimSpace(string(out))
+	}
+
+	cmd = exec.Command("git", "status", "--porcelain")
+	cmd.Dir = args.ProjectDir
+	out, err = cmd.Output()
+	if err == nil {
+		result.Git.IsDirty = len(strings.TrimSpace(string(out))) > 0
+	}
+
+	cmd = exec.Command("git", "describe", "--tags", "--long")
+	cmd.Dir = args.ProjectDir
+	out, err = cmd.Output()
+	if err == nil {
+		parts := strings.SplitN(strings.TrimSpace(string(out)), "-", 3)
+		if len(parts) == 3 {
+			result.Git.Tag = parts[0]
+			commitsAfterTag, err := strconv.ParseUint(parts[1], 10, 64)
+			if err != nil {
+				log.Printf("warning: could not parse commits after tag %q as uint: %v", parts[1], err)
+			} else {
+				result.Git.CommitsAfterTag = uint(commitsAfterTag)
+			}
+		} else {
+			log.Printf("warning: unexpected format from git describe: %q", string(out))
+		}
+	} else {
+		log.Printf("warning: git describe failed: %v", err)
+	}
+
+	cmd = exec.Command("git", "branch", "--show-current")
+	cmd.Dir = args.ProjectDir
+	out, err = cmd.Output()
+	if err == nil {
+		result.Git.Branch = strings.TrimSpace(string(out))
 	}
 
 	return result
@@ -320,7 +356,7 @@ func execCompare(c *cli.Command) error {
 		log.Fatalf("error: could not parse %s as report.Report: %v", file2, err)
 	}
 
-	fmt.Printf("Comparing releases %s...%s\n", report1.Context.GitCommit, report2.Context.GitCommit)
+	fmt.Printf("Comparing releases %s...%s\n", report1.Context.Git.Commit, report2.Context.Git.Commit)
 
 	dep1 := parseDependencies(report1)
 	dep2 := parseDependencies(report2)

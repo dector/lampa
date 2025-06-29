@@ -2,6 +2,7 @@ package report
 
 type Report struct {
 	Version string `json:"v"`
+	Type    string
 	Tool    ToolSegment
 	Context ContextSegment
 
@@ -19,5 +20,13 @@ type DependenciesSegment struct {
 }
 
 type ContextSegment struct {
-	GitCommit string
+	Git GitSegment
+}
+
+type GitSegment struct {
+	Commit          string
+	Branch          string
+	Tag             string
+	CommitsAfterTag uint
+	IsDirty         bool
 }
