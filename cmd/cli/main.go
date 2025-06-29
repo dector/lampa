@@ -28,11 +28,16 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:  "from",
-						Usage: "project directory",
+						Usage: "specify project directory",
 					},
 					&cli.StringFlag{
 						Name:  "to",
-						Usage: "report directory",
+						Usage: "specify report directory",
+					},
+					&cli.StringFlag{
+						Name:        "variant",
+						Usage:       "build variant to use",
+						DefaultText: "release",
 					},
 					&cli.StringFlag{
 						Name:        "with-name",
@@ -114,6 +119,11 @@ func execCollect(c *cli.Command) {
 		fWithName = "lampa"
 	}
 
+	buildVariant := c.String("variant")
+	if buildVariant == "" {
+		buildVariant = "release"
+	}
+
 	from := "."
 	if fFrom != "" {
 		info, err := os.Stat(fFrom)
@@ -171,8 +181,9 @@ func execCollect(c *cli.Command) {
 	}
 
 	report := collectReport(CollectReportArgs{
-		ProjectDir: from,
-		ReportDir:  to,
+		ProjectDir:   from,
+		ReportDir:    to,
+		BuildVariant: buildVariant,
 	})
 
 	file, err := os.Create(reportFile)
@@ -196,8 +207,9 @@ func execCollect(c *cli.Command) {
 }
 
 type CollectReportArgs struct {
-	ProjectDir string
-	ReportDir  string
+	ProjectDir   string
+	ReportDir    string
+	BuildVariant string
 }
 
 func collectReport(args CollectReportArgs) report.Report {
@@ -210,7 +222,7 @@ func collectReport(args CollectReportArgs) report.Report {
 		},
 	}
 
-	configurationName := "prodReleaseCompileClasspath"
+	configurationName := args.BuildVariant + "CompileClasspath"
 
 	gradlewPath := path.Join(args.ProjectDir, "gradlew")
 	cmd := exec.Command(gradlewPath, "--no-daemon", "--console", "plain", "-q", "app:dependencies", "--configuration", configurationName)
