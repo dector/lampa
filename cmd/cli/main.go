@@ -1,29 +1,39 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"os"
 
 	. "lampa/internal/globals"
 
-	"github.com/samber/lo"
+	"github.com/urfave/cli/v3"
 )
 
 func main() {
-	command := lo.NthOrEmpty(os.Args, 1)
+	cmd := &cli.Command{
+		Name: "lampa",
+		Commands: []*cli.Command{
+			{
+				Name: "collect",
+				Action: func(ctx context.Context, c *cli.Command) error {
+					execCollect()
+					return nil
+				},
+			},
+			{
+				Name: "version",
+				Action: func(ctx context.Context, c *cli.Command) error {
+					fmt.Println(G.Version)
+					return nil
+				},
+			},
+		},
+	}
 
-	switch command {
-	case "collect":
-		execCollect()
-	case "help":
-		printUsage()
-		os.Exit(0)
-	case "version":
-		fmt.Println(G.Version)
-		os.Exit(0)
-	default:
-		printUsage()
-		os.Exit(2)
+	if err := cmd.Run(context.Background(), os.Args); err != nil {
+		log.Fatal(err)
 	}
 
 	// file := ""
@@ -64,8 +74,4 @@ func main() {
 func execCollect() {
 	fmt.Println("Not Implemented Yet")
 	os.Exit(127)
-}
-
-func printUsage() {
-	fmt.Println("usage: lampa ...")
 }
