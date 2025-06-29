@@ -1,0 +1,223 @@
+package collect
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"lampa/internal"
+	"lampa/internal/report"
+	"log"
+	"os"
+	"os/exec"
+	"path"
+	"strconv"
+	"strings"
+
+	"github.com/urfave/cli/v3"
+
+	. "lampa/internal/globals"
+)
+
+func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
+	fFrom := cmd.String("from")
+	fTo := cmd.String("to")
+
+	fWithName := cmd.String("with-name")
+	if fWithName == "" {
+		fWithName = "lampa"
+	}
+
+	buildVariant := cmd.String("variant")
+	if buildVariant == "" {
+		buildVariant = "release"
+	}
+
+	from := "."
+	if fFrom != "" {
+		info, err := os.Stat(fFrom)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		if !info.IsDir() {
+			fmt.Fprintf(os.Stderr, "error: %s is not a directory\n", fFrom)
+			os.Exit(1)
+		}
+		from = fFrom
+	}
+
+	to := from
+	if fTo != "" {
+		info, err := os.Stat(fTo)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		if !info.IsDir() {
+			fmt.Fprintf(os.Stderr, "error: %s is not a directory\n", fTo)
+			os.Exit(1)
+		}
+		to = fTo
+	}
+
+	log.Printf("collect: from=%s to=%s", from, to)
+
+	gradlewPath := path.Join(from, "gradlew")
+	info, err := os.Stat(gradlewPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "error: %s does not exist\n", gradlewPath)
+			os.Exit(1)
+		} else {
+			fmt.Fprintf(os.Stderr, "error: could not stat %s: %v\n", gradlewPath, err)
+			os.Exit(1)
+		}
+	}
+	if info.IsDir() {
+		fmt.Fprintf(os.Stderr, "error: %s exists but is a directory, not a file\n", gradlewPath)
+		os.Exit(1)
+	}
+
+	reportFile := path.Join(to, fWithName+".report.json")
+	if cmd.Bool("rewrite-report") {
+		log.Printf("rewrite-report flag is enabled, existing report file (if any) will be overwritten")
+	} else {
+		if _, err := os.Stat(reportFile); err == nil {
+			fmt.Fprintf(os.Stderr, "error: report file %s already exists\n", reportFile)
+			os.Exit(1)
+		}
+	}
+
+	report := collectReport(CollectReportArgs{
+		ProjectDir:   from,
+		ReportDir:    to,
+		BuildVariant: buildVariant,
+	})
+
+	file, err := os.Create(reportFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: could not create report file: %v\n", err)
+		os.Exit(1)
+	}
+	defer file.Close()
+
+	reportJson, err := json.MarshalIndent(report, "", "  ")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: could not marshal report: %v\n", err)
+		os.Exit(1)
+	}
+
+	if _, err := file.Write(reportJson); err != nil {
+		fmt.Fprintf(os.Stderr, "error: could not write report: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("Report written to %s\n", reportFile)
+
+	return nil
+}
+
+func collectReport(args CollectReportArgs) report.Report {
+	result := report.Report{
+		Version: "0.0.1-SNAPSHOT",
+		Type:    "CollectionReport",
+		Tool: report.ToolSegment{
+			Name:        "lampa",
+			Repository:  "https://github.com/dector/lampa/",
+			Version:     G.Version,
+			BuildCommit: G.BuildCommit,
+		},
+	}
+
+	configurationName := args.BuildVariant + "CompileClasspath"
+
+	gradlewPath := path.Join(args.ProjectDir, "gradlew")
+	cmd := exec.Command(gradlewPath, "--no-daemon", "--console", "plain", "-q", "app:dependencies", "--configuration", configurationName)
+	cmd.Dir = args.ProjectDir
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("failed to execute gradlew: %v\nOutput:\n%s", err, string(output))
+	}
+
+	// fmt.Println(string(output))
+
+	tree, err := internal.ParseTreeFromOutput(string(output), configurationName)
+	if err != nil {
+		log.Fatalf("failed to parse tree: %v", err)
+	}
+
+	result.Dependencies = report.DependenciesSegment{
+		Compiled: make([]string, 0),
+	}
+	for _, info := range tree.Summary {
+		d := info.String()
+		result.Dependencies.Compiled = append(result.Dependencies.Compiled, d)
+	}
+
+	result.Context = parseContext(args)
+
+	return result
+}
+
+func parseContext(args CollectReportArgs) report.ContextSegment {
+	result := report.ContextSegment{}
+
+	_, err := exec.LookPath("git")
+	if err != nil {
+		log.Fatalf("git not found in PATH: %v", err)
+	}
+
+	cmd := exec.Command("git", "rev-parse", "--is-inside-work-tree")
+	cmd.Dir = args.ProjectDir
+	if err := cmd.Run(); err != nil {
+		return result
+	}
+
+	cmd = exec.Command("git", "rev-parse", "HEAD")
+	cmd.Dir = args.ProjectDir
+	out, err := cmd.Output()
+	if err == nil {
+		result.Git.Commit = strings.TrimSpace(string(out))
+	}
+
+	cmd = exec.Command("git", "status", "--porcelain")
+	cmd.Dir = args.ProjectDir
+	out, err = cmd.Output()
+	if err == nil {
+		result.Git.IsDirty = len(strings.TrimSpace(string(out))) > 0
+	}
+
+	cmd = exec.Command("git", "describe", "--tags", "--long")
+	cmd.Dir = args.ProjectDir
+	out, err = cmd.Output()
+	if err == nil {
+		parts := strings.SplitN(strings.TrimSpace(string(out)), "-", 3)
+		if len(parts) == 3 {
+			result.Git.Tag = parts[0]
+			commitsAfterTag, err := strconv.ParseUint(parts[1], 10, 64)
+			if err != nil {
+				log.Printf("warning: could not parse commits after tag %q as uint: %v", parts[1], err)
+			} else {
+				result.Git.CommitsAfterTag = uint(commitsAfterTag)
+			}
+		} else {
+			log.Printf("warning: unexpected format from git describe: %q", string(out))
+		}
+	} else {
+		log.Printf("warning: git describe failed: %v", err)
+	}
+
+	cmd = exec.Command("git", "branch", "--show-current")
+	cmd.Dir = args.ProjectDir
+	out, err = cmd.Output()
+	if err == nil {
+		result.Git.Branch = strings.TrimSpace(string(out))
+	}
+
+	return result
+}
+
+type CollectReportArgs struct {
+	ProjectDir   string
+	ReportDir    string
+	BuildVariant string
+}
