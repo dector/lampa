@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path"
 
+	"lampa/internal"
 	. "lampa/internal/globals"
 	"lampa/internal/report"
 
@@ -15,6 +17,8 @@ import (
 )
 
 func main() {
+	log.Printf("os.Args: %v", os.Args)
+
 	cmd := &cli.Command{
 		Name: "lampa",
 		Commands: []*cli.Command{
@@ -28,6 +32,10 @@ func main() {
 					&cli.StringFlag{
 						Name:  "to",
 						Usage: "report directory",
+					},
+					&cli.BoolFlag{
+						Name:  "rewrite-report",
+						Usage: "allow to rewrite report file if it already exists",
 					},
 				},
 				Action: func(ctx context.Context, c *cli.Command) error {
@@ -118,20 +126,35 @@ func execCollect(c *cli.Command) {
 
 	log.Printf("collect: from=%s to=%s", from, to)
 
-	reportFile := path.Join(to, "lampa.report.json")
-	if _, err := os.Stat(reportFile); err == nil {
-		fmt.Fprintf(os.Stderr, "error: report file %s already exists\n", reportFile)
+	gradlewPath := path.Join(to, "gradlew")
+	info, err := os.Stat(gradlewPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "error: %s does not exist\n", gradlewPath)
+			os.Exit(1)
+		} else {
+			fmt.Fprintf(os.Stderr, "error: could not stat %s: %v\n", gradlewPath, err)
+			os.Exit(1)
+		}
+	}
+	if info.IsDir() {
+		fmt.Fprintf(os.Stderr, "error: %s exists but is a directory, not a file\n", gradlewPath)
 		os.Exit(1)
 	}
 
-	report := report.Report{
-		Version: "0.0.1",
-		Tool: report.ToolSegment{
-			Name:       "lampa",
-			Repository: "https://github.com/dector/lampa/",
-			Version:    G.Version,
-		},
+	reportFile := path.Join(to, "lampa.report.json")
+	if c.Bool("rewrite-report") {
+		log.Printf("rewrite-report flag is enabled, existing report file (if any) will be overwritten")
+	} else {
+		if _, err := os.Stat(reportFile); err == nil {
+			fmt.Fprintf(os.Stderr, "error: report file %s already exists\n", reportFile)
+			os.Exit(1)
+		}
 	}
+
+	report := collectReport(CollectReportArgs{
+		ProjectDir: to,
+	})
 
 	file, err := os.Create(reportFile)
 	if err != nil {
@@ -151,7 +174,46 @@ func execCollect(c *cli.Command) {
 		os.Exit(1)
 	}
 	fmt.Printf("Report written to %s\n", reportFile)
+}
 
-	fmt.Println("Not Implemented Yet")
-	os.Exit(127)
+type CollectReportArgs struct {
+	ProjectDir string
+}
+
+func collectReport(args CollectReportArgs) report.Report {
+	result := report.Report{
+		Version: "0.0.1-SNAPSHOT",
+		Tool: report.ToolSegment{
+			Name:       "lampa",
+			Repository: "https://github.com/dector/lampa/",
+			Version:    G.Version,
+		},
+	}
+
+	configurationName := "prodReleaseCompileClasspath"
+
+	gradlewPath := path.Join(args.ProjectDir, "gradlew")
+	cmd := exec.Command(gradlewPath, "--no-daemon", "--console", "plain", "-q", "app:dependencies", "--configuration", configurationName)
+	cmd.Dir = args.ProjectDir
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("failed to execute gradlew: %v\nOutput:\n%s", err, string(output))
+	}
+
+	// fmt.Println(string(output))
+
+	tree, err := internal.ParseTreeFromOutput(string(output), configurationName)
+	if err != nil {
+		log.Fatalf("failed to parse tree: %v", err)
+	}
+
+	result.Dependencies = report.DependenciesSegment{
+		Compiled: make([]string, 0),
+	}
+	for _, info := range tree.Summary {
+		d := info.String()
+		result.Dependencies.Compiled = append(result.Dependencies.Compiled, d)
+	}
+
+	return result
 }
