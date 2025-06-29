@@ -34,6 +34,12 @@ func main() {
 						Name:  "to",
 						Usage: "report directory",
 					},
+					&cli.StringFlag{
+						Name:        "with-name",
+						Usage:       "report file name (without extension)",
+						DefaultText: "report",
+					},
+
 					&cli.BoolFlag{
 						Name:  "rewrite-report",
 						Usage: "allow to rewrite report file if it already exists",
@@ -42,6 +48,12 @@ func main() {
 				Action: func(ctx context.Context, c *cli.Command) error {
 					execCollect(c)
 					return nil
+				},
+			},
+			{
+				Name: "Compare",
+				Action: func(ctx context.Context, c *cli.Command) error {
+					return execCompare(c)
 				},
 			},
 			{
@@ -97,6 +109,11 @@ func execCollect(c *cli.Command) {
 	fFrom := c.String("from")
 	fTo := c.String("to")
 
+	fWithName := c.String("with-name")
+	if fWithName == "" {
+		fWithName = "lampa"
+	}
+
 	from := "."
 	if fFrom != "" {
 		info, err := os.Stat(fFrom)
@@ -143,7 +160,7 @@ func execCollect(c *cli.Command) {
 		os.Exit(1)
 	}
 
-	reportFile := path.Join(to, "lampa.report.json")
+	reportFile := path.Join(to, fWithName+".report.json")
 	if c.Bool("rewrite-report") {
 		log.Printf("rewrite-report flag is enabled, existing report file (if any) will be overwritten")
 	} else {
@@ -154,7 +171,8 @@ func execCollect(c *cli.Command) {
 	}
 
 	report := collectReport(CollectReportArgs{
-		ProjectDir: to,
+		ProjectDir: from,
+		ReportDir:  to,
 	})
 
 	file, err := os.Create(reportFile)
@@ -179,6 +197,7 @@ func execCollect(c *cli.Command) {
 
 type CollectReportArgs struct {
 	ProjectDir string
+	ReportDir  string
 }
 
 func collectReport(args CollectReportArgs) report.Report {
@@ -243,4 +262,8 @@ func parseContext(args CollectReportArgs) report.ContextSegment {
 	}
 
 	return result
+}
+
+func execCompare(c *cli.Command) error {
+	return nil
 }
