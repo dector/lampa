@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"path"
 
 	. "lampa/internal/globals"
+	"lampa/internal/report"
 
 	"github.com/urfave/cli/v3"
 )
@@ -17,8 +20,18 @@ func main() {
 		Commands: []*cli.Command{
 			{
 				Name: "collect",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "from",
+						Usage: "project directory",
+					},
+					&cli.StringFlag{
+						Name:  "to",
+						Usage: "report directory",
+					},
+				},
 				Action: func(ctx context.Context, c *cli.Command) error {
-					execCollect()
+					execCollect(c)
 					return nil
 				},
 			},
@@ -71,7 +84,74 @@ func main() {
 	// }
 }
 
-func execCollect() {
+func execCollect(c *cli.Command) {
+	fFrom := c.String("from")
+	fTo := c.String("to")
+
+	from := "."
+	if fFrom != "" {
+		info, err := os.Stat(fFrom)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		if !info.IsDir() {
+			fmt.Fprintf(os.Stderr, "error: %s is not a directory\n", fFrom)
+			os.Exit(1)
+		}
+		from = fFrom
+	}
+
+	to := from
+	if fTo != "" {
+		info, err := os.Stat(fTo)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		if !info.IsDir() {
+			fmt.Fprintf(os.Stderr, "error: %s is not a directory\n", fTo)
+			os.Exit(1)
+		}
+		to = fTo
+	}
+
+	log.Printf("collect: from=%s to=%s", from, to)
+
+	reportFile := path.Join(to, "lampa.report.json")
+	if _, err := os.Stat(reportFile); err == nil {
+		fmt.Fprintf(os.Stderr, "error: report file %s already exists\n", reportFile)
+		os.Exit(1)
+	}
+
+	report := report.Report{
+		Version: "0.0.1",
+		Tool: report.ToolSegment{
+			Name:       "lampa",
+			Repository: "https://github.com/dector/lampa/",
+			Version:    G.Version,
+		},
+	}
+
+	file, err := os.Create(reportFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: could not create report file: %v\n", err)
+		os.Exit(1)
+	}
+	defer file.Close()
+
+	reportJson, err := json.MarshalIndent(report, "", "  ")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: could not marshal report: %v\n", err)
+		os.Exit(1)
+	}
+
+	if _, err := file.Write(reportJson); err != nil {
+		fmt.Fprintf(os.Stderr, "error: could not write report: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("Report written to %s\n", reportFile)
+
 	fmt.Println("Not Implemented Yet")
 	os.Exit(127)
 }
