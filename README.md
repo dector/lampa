@@ -4,11 +4,10 @@
 
 # Lampa
 
-<div style="background: #fff3cd; border-left: 6px solid #ffe066; padding: 1em; margin-bottom: 1em;">
-  <strong>⚠️ Warning: Pre-1.0 software.<br/>Lampa is currently in a pre-1.0 release state.!</strong>
-</div>
-
-> **This is Work In Progress software**
+> [!WARNING]
+> Pre-1.0 software: Lampa is currently in the early stages of development.
+>
+> :construction:
 >
 > Expect frequent breaking changes, bugs, suboptimal code, and limited functionality.
 >
