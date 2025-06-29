@@ -21,6 +21,8 @@ import (
 func main() {
 	log.Printf("os.Args: %v", os.Args)
 
+	G.Init()
+
 	cmd := &cli.Command{
 		Name: "lampa",
 		Commands: []*cli.Command{
@@ -218,9 +220,10 @@ func collectReport(args CollectReportArgs) report.Report {
 		Version: "0.0.1-SNAPSHOT",
 		Type:    "CollectionReport",
 		Tool: report.ToolSegment{
-			Name:       "lampa",
-			Repository: "https://github.com/dector/lampa/",
-			Version:    G.Version,
+			Name:        "lampa",
+			Repository:  "https://github.com/dector/lampa/",
+			Version:     G.Version,
+			BuildCommit: G.BuildCommit,
 		},
 	}
 

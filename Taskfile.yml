@@ -1,17 +1,28 @@
 version: "3"
 
 tasks:
+  _prepare:
+    cmds:
+      - go generate ./...
+    silent: true
+
   run:
+    deps:
+      - _prepare
     cmds:
       - go run cmd/cli/main.go {{.CLI_ARGS}}
     silent: true
 
   test:
+    deps:
+      - _prepare
     cmds:
       - go test ./...
     silent: true
 
   sample1:
+    deps:
+      - _prepare
     cmds:
       - go run cmd/cli/main.go samples/nowindandroid-compile.txt prodReleaseCompileClasspath
     silent: true

@@ -10,9 +10,10 @@ type Report struct {
 }
 
 type ToolSegment struct {
-	Name       string
-	Repository string
-	Version    string
+	Name        string
+	Repository  string
+	Version     string
+	BuildCommit string
 }
 
 type DependenciesSegment struct {
