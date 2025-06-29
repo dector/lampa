@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"lampa/internal"
 	"os"
@@ -33,10 +32,12 @@ func main() {
 		panic(err)
 	}
 
-	jsonTree, err := json.MarshalIndent(tree.Root, "", "  ")
-	if err != nil {
-		panic(err)
-	}
+	// jsonTree, err := json.MarshalIndent(tree.Summary, "", "  ")
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	fmt.Println(string(jsonTree))
+	for _, it := range tree.Summary {
+		fmt.Println(it.String())
+	}
 }
