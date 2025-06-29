@@ -6,6 +6,7 @@ import (
 	"lampa/cmd/cli/collect"
 	"lampa/cmd/cli/compare"
 	. "lampa/internal/globals"
+	"lampa/internal/out"
 
 	"github.com/urfave/cli/v3"
 )
@@ -54,6 +55,11 @@ func CreateCliCommand() *cli.Command {
 					return nil
 				},
 			},
+		},
+		CommandNotFound: func(ctx context.Context, c *cli.Command, s string) {
+			out.PrintfErr("Command '%s' not found\n\n", s)
+
+			cli.ShowAppHelpAndExit(c, 127)
 		},
 	}
 	return cmd

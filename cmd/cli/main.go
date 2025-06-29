@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	log.Printf("os.Args: %v", os.Args)
+	// log.Printf("os.Args: %v", os.Args)
 
 	G.Init()
 
