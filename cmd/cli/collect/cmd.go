@@ -24,55 +24,25 @@ import (
 )
 
 func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
-	fFrom := cmd.String("from")
-	fTo := cmd.String("to")
-
-	fWithName := cmd.String("with-name")
-	if fWithName == "" {
-		fWithName = "lampa"
-	}
-
 	buildVariant := cmd.String("variant")
 	if buildVariant == "" {
 		buildVariant = "release"
 	}
 
-	from := "."
-	if fFrom != "" {
-		info, err := os.Stat(fFrom)
-		if err != nil {
-			out.PrintlnErr("error: %v", err)
-			os.Exit(1)
-		}
-		if !info.IsDir() {
-			out.PrintlnErr("error: %s is not a directory", fFrom)
-			os.Exit(1)
-		}
-		from = fFrom
-	}
-	absFrom, err := filepath.Abs(from)
-	if err == nil {
-		from = absFrom
+	from, err := decodeProjectPath(cmd)
+	if err != nil {
+		return err
 	}
 
-	to := from
-	if fTo != "" {
-		info, err := os.Stat(fTo)
-		if err != nil {
-			out.PrintlnErr("error: %v", err)
-			os.Exit(1)
-		}
-		if !info.IsDir() {
-			out.PrintlnErr("error: %s is not a directory", fTo)
-			os.Exit(1)
-		}
-		to = fTo
-	}
-	absTo, err := filepath.Abs(to)
-	if err == nil {
-		to = absTo
+	to, err := decodeTargetPath(cmd)
+	if err != nil {
+		return err
 	}
 
+	fWithName := cmd.String("with-name")
+	if fWithName == "" {
+		fWithName = "lampa"
+	}
 	reportFile := path.Join(to, fWithName+".report.json")
 
 	fmt.Printf("Project directory: %s\n", from)
@@ -247,4 +217,54 @@ type CollectReportArgs struct {
 	ProjectDir   string
 	ReportDir    string
 	BuildVariant string
+}
+
+func decodeProjectPath(cmd *cli.Command) (string, error) {
+	path := cmd.String("from")
+	if path == "" {
+		return ".", nil
+	}
+
+	inf, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("error: project directory `%s` does not exist", path)
+		} else {
+			return "", fmt.Errorf("internal error: %v", err)
+		}
+	}
+	if !inf.IsDir() {
+		return "", fmt.Errorf("error: `%s` is not a directory", path)
+	}
+
+	absolutePath, err := filepath.Abs(path)
+	if err != nil {
+		return path, nil
+	}
+	return absolutePath, nil
+}
+
+func decodeTargetPath(cmd *cli.Command) (string, error) {
+	path := cmd.String("to")
+	if path == "" {
+		return ".", nil
+	}
+
+	inf, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("error: target directory `%s` does not exist", path)
+		} else {
+			return "", fmt.Errorf("internal error: %v", err)
+		}
+	}
+	if !inf.IsDir() {
+		return "", fmt.Errorf("error: `%s` is not a directory", path)
+	}
+
+	absolutePath, err := filepath.Abs(path)
+	if err != nil {
+		return path, nil
+	}
+	return absolutePath, nil
 }
