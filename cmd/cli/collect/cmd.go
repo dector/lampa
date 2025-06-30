@@ -53,8 +53,7 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 		out.PrintlnWarn("Existing report file will be overwritten (if it exists)")
 	} else {
 		if _, err := os.Stat(reportFile); err == nil {
-			out.PrintlnErr("error: report file %s already exists", reportFile)
-			os.Exit(1)
+			return fmt.Errorf("report file `%s` already exists", reportFile)
 		}
 	}
 
@@ -62,16 +61,13 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 	info, err := os.Stat(gradlewPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			out.PrintlnErr("error: %s does not exist", gradlewPath)
-			os.Exit(1)
+			return fmt.Errorf("%s does not exist", gradlewPath)
 		} else {
-			out.PrintlnErr("error: could not stat %s: %v", gradlewPath, err)
-			os.Exit(1)
+			return fmt.Errorf("could not stat %s: %v", gradlewPath, err)
 		}
 	}
 	if info.IsDir() {
-		out.PrintlnErr("error: %s exists but is a directory, not a file", gradlewPath)
-		os.Exit(1)
+		return fmt.Errorf("%s exists but is a directory, not a file", gradlewPath)
 	}
 
 	blue := color.New(color.FgBlue).SprintfFunc()
@@ -93,20 +89,17 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 
 	file, err := os.Create(reportFile)
 	if err != nil {
-		out.PrintlnErr("error: could not create report file: %v", err)
-		os.Exit(1)
+		return fmt.Errorf("could not create report file: %v", err)
 	}
 	defer file.Close()
 
 	reportJson, err := json.MarshalIndent(report, "", "  ")
 	if err != nil {
-		out.PrintlnErr("error: could not marshal report: %v", err)
-		os.Exit(1)
+		return fmt.Errorf("could not marshal report: %v", err)
 	}
 
 	if _, err := file.Write(reportJson); err != nil {
-		out.PrintlnErr("error: could not write report: %v", err)
-		os.Exit(1)
+		return fmt.Errorf("could not write report: %v", err)
 	}
 	fmt.Printf("Report written to %s\n", reportFile)
 
@@ -228,7 +221,7 @@ func decodeProjectPath(cmd *cli.Command) (string, error) {
 	inf, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return "", fmt.Errorf("error: project directory `%s` does not exist", path)
+			return "", fmt.Errorf("project directory `%s` does not exist", path)
 		} else {
 			return "", fmt.Errorf("internal error: %v", err)
 		}
@@ -253,13 +246,13 @@ func decodeTargetPath(cmd *cli.Command) (string, error) {
 	inf, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return "", fmt.Errorf("error: target directory `%s` does not exist", path)
+			return "", fmt.Errorf("target directory `%s` does not exist", path)
 		} else {
 			return "", fmt.Errorf("internal error: %v", err)
 		}
 	}
 	if !inf.IsDir() {
-		return "", fmt.Errorf("error: `%s` is not a directory", path)
+		return "", fmt.Errorf("`%s` is not a directory", path)
 	}
 
 	absolutePath, err := filepath.Abs(path)

@@ -14,7 +14,7 @@ import (
 
 func ActionCmdCompare(context context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 2 {
-		log.Fatalf("error: expected exactly two files to compare, got %d", cmd.NArg())
+		return fmt.Errorf("expected exactly two files to compare, got %d", cmd.NArg())
 	}
 
 	file1 := cmd.Args().Get(0)
@@ -22,33 +22,33 @@ func ActionCmdCompare(context context.Context, cmd *cli.Command) error {
 
 	info1, err := os.Stat(file1)
 	if err != nil {
-		log.Fatalf("error: could not stat %s: %v", file1, err)
+		return fmt.Errorf("could not stat %s: %v", file1, err)
 	}
 	if info1.IsDir() {
-		log.Fatalf("error: %s exists but is a directory, not a file", file1)
+		return fmt.Errorf("%s exists but is a directory, not a file", file1)
 	}
 
 	info2, err := os.Stat(file2)
 	if err != nil {
-		log.Fatalf("error: could not stat %s: %v", file2, err)
+		return fmt.Errorf("could not stat %s: %v", file2, err)
 	}
 	if info2.IsDir() {
-		log.Fatalf("error: %s exists but is a directory, not a file", file2)
+		return fmt.Errorf("%s exists but is a directory, not a file", file2)
 	}
 
 	data1, err := os.ReadFile(file1)
 	if err != nil {
-		log.Fatalf("error: could not read %s: %v", file1, err)
+		return fmt.Errorf("could not read %s: %v", file1, err)
 	}
 
 	var report1 report.Report
 	if err := json.Unmarshal(data1, &report1); err != nil {
-		log.Fatalf("error: could not parse %s as report.Report: %v", file1, err)
+		return fmt.Errorf("could not parse %s as report.Report: %v", file1, err)
 	}
 
 	data2, err := os.ReadFile(file2)
 	if err != nil {
-		log.Fatalf("error: could not read %s: %v", file2, err)
+		return fmt.Errorf("could not read %s: %v", file2, err)
 	}
 
 	var report2 report.Report
@@ -58,8 +58,14 @@ func ActionCmdCompare(context context.Context, cmd *cli.Command) error {
 
 	fmt.Printf("Comparing releases %s...%s\n", report1.Context.Git.Commit, report2.Context.Git.Commit)
 
-	dep1 := parseDependencies(report1)
-	dep2 := parseDependencies(report2)
+	dep1, err := parseDependencies(report1)
+	if err != nil {
+		return fmt.Errorf("could not parse %s as report.Report: %v", file1, err)
+	}
+	dep2, err := parseDependencies(report2)
+	if err != nil {
+		return fmt.Errorf("could not parse %s as report.Report: %v", file2, err)
+	}
 
 	newDeps := findNewDeps(dep1, dep2)
 	removedDeps := findRemovedDeps(dep1, dep2)
@@ -98,7 +104,7 @@ type Dependency struct {
 	Version string
 }
 
-func parseDependencies(report report.Report) []Dependency {
+func parseDependencies(report report.Report) ([]Dependency, error) {
 	result := make([]Dependency, 0, len(report.Dependencies.Compiled))
 
 	for _, depStr := range report.Dependencies.Compiled {
@@ -110,11 +116,12 @@ func parseDependencies(report report.Report) []Dependency {
 				Version: parts[2],
 			})
 		} else {
-			log.Fatalf("error: dependency string %q does not have 3 parts (group:name:version)", depStr)
+			err := fmt.Errorf("dependency string %q does not have 3 parts (group:name:version)", depStr)
+			return []Dependency{}, err
 		}
 	}
 
-	return result
+	return result, nil
 }
 
 func findNewDeps(oldDeps, newDeps []Dependency) []Dependency {
