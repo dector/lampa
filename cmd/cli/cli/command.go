@@ -57,7 +57,7 @@ func CreateCliCommand() *cli.Command {
 			},
 		},
 		CommandNotFound: func(ctx context.Context, c *cli.Command, s string) {
-			out.PrintfErr("Command '%s' not found\n\n", s)
+			out.PrintlnErr("Command '%s' not found\n", s)
 
 			cli.ShowAppHelpAndExit(c, 127)
 		},

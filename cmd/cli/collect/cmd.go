@@ -5,14 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"lampa/internal"
+	"lampa/internal/out"
 	"lampa/internal/report"
 	"log"
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/briandowns/spinner"
+	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
 
 	. "lampa/internal/globals"
@@ -36,57 +41,77 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 	if fFrom != "" {
 		info, err := os.Stat(fFrom)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			out.PrintlnErr("error: %v", err)
 			os.Exit(1)
 		}
 		if !info.IsDir() {
-			fmt.Fprintf(os.Stderr, "error: %s is not a directory\n", fFrom)
+			out.PrintlnErr("error: %s is not a directory", fFrom)
 			os.Exit(1)
 		}
 		from = fFrom
+	}
+	absFrom, err := filepath.Abs(from)
+	if err == nil {
+		from = absFrom
 	}
 
 	to := from
 	if fTo != "" {
 		info, err := os.Stat(fTo)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			out.PrintlnErr("error: %v", err)
 			os.Exit(1)
 		}
 		if !info.IsDir() {
-			fmt.Fprintf(os.Stderr, "error: %s is not a directory\n", fTo)
+			out.PrintlnErr("error: %s is not a directory", fTo)
 			os.Exit(1)
 		}
 		to = fTo
 	}
+	absTo, err := filepath.Abs(to)
+	if err == nil {
+		to = absTo
+	}
 
-	log.Printf("collect: from=%s to=%s", from, to)
+	reportFile := path.Join(to, fWithName+".report.json")
+
+	fmt.Printf("Project directory: %s\n", from)
+	// fmt.Printf("Report directory: %s\n", to)
+	fmt.Printf("Report file: %s\n", reportFile)
+
+	if cmd.Bool("rewrite-report") {
+		out.PrintlnWarn("Existing report file will be overwritten (if it exists)")
+	} else {
+		if _, err := os.Stat(reportFile); err == nil {
+			out.PrintlnErr("error: report file %s already exists", reportFile)
+			os.Exit(1)
+		}
+	}
 
 	gradlewPath := path.Join(from, "gradlew")
 	info, err := os.Stat(gradlewPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			fmt.Fprintf(os.Stderr, "error: %s does not exist\n", gradlewPath)
+			out.PrintlnErr("error: %s does not exist", gradlewPath)
 			os.Exit(1)
 		} else {
-			fmt.Fprintf(os.Stderr, "error: could not stat %s: %v\n", gradlewPath, err)
+			out.PrintlnErr("error: could not stat %s: %v", gradlewPath, err)
 			os.Exit(1)
 		}
 	}
 	if info.IsDir() {
-		fmt.Fprintf(os.Stderr, "error: %s exists but is a directory, not a file\n", gradlewPath)
+		out.PrintlnErr("error: %s exists but is a directory, not a file", gradlewPath)
 		os.Exit(1)
 	}
 
-	reportFile := path.Join(to, fWithName+".report.json")
-	if cmd.Bool("rewrite-report") {
-		log.Printf("rewrite-report flag is enabled, existing report file (if any) will be overwritten")
-	} else {
-		if _, err := os.Stat(reportFile); err == nil {
-			fmt.Fprintf(os.Stderr, "error: report file %s already exists\n", reportFile)
-			os.Exit(1)
-		}
-	}
+	blue := color.New(color.FgBlue).SprintfFunc()
+	green := color.New(color.FgGreen).SprintfFunc()
+	cs := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+	s := spinner.New(cs, 100*time.Millisecond)
+	s.Color("blue")
+	s.Suffix = blue(" Capturing report...")
+	s.FinalMSG = green("✔ Capturing report: Done.\n")
+	s.Start()
 
 	report := collectReport(CollectReportArgs{
 		ProjectDir:   from,
@@ -94,21 +119,23 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 		BuildVariant: buildVariant,
 	})
 
+	s.Stop()
+
 	file, err := os.Create(reportFile)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: could not create report file: %v\n", err)
+		out.PrintlnErr("error: could not create report file: %v", err)
 		os.Exit(1)
 	}
 	defer file.Close()
 
 	reportJson, err := json.MarshalIndent(report, "", "  ")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: could not marshal report: %v\n", err)
+		out.PrintlnErr("error: could not marshal report: %v", err)
 		os.Exit(1)
 	}
 
 	if _, err := file.Write(reportJson); err != nil {
-		fmt.Fprintf(os.Stderr, "error: could not write report: %v\n", err)
+		out.PrintlnErr("error: could not write report: %v", err)
 		os.Exit(1)
 	}
 	fmt.Printf("Report written to %s\n", reportFile)
