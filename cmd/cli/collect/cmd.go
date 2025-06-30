@@ -72,20 +72,24 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 
 	blue := color.New(color.FgBlue).SprintfFunc()
 	green := color.New(color.FgGreen).SprintfFunc()
+	red := color.New(color.FgRed).SprintfFunc()
 	cs := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
 	s := spinner.New(cs, 100*time.Millisecond)
 	s.Color("blue")
 	s.Suffix = blue(" Capturing report...")
 	s.FinalMSG = green("✔ Capturing report: Done.\n")
 	s.Start()
+	defer s.Stop()
 
-	report := collectReport(CollectReportArgs{
+	report, err := collectReport(CollectReportArgs{
 		ProjectDir:   from,
 		ReportDir:    to,
 		BuildVariant: buildVariant,
 	})
-
-	s.Stop()
+	if err != nil {
+		s.FinalMSG = red("✗ Capturing report: Failed.\n")
+		return err
+	}
 
 	file, err := os.Create(reportFile)
 	if err != nil {
@@ -106,7 +110,7 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func collectReport(args CollectReportArgs) report.Report {
+func collectReport(args CollectReportArgs) (report.Report, error) {
 	result := report.Report{
 		Version: "0.0.1-SNAPSHOT",
 		Type:    "CollectionReport",
@@ -118,6 +122,12 @@ func collectReport(args CollectReportArgs) report.Report {
 		},
 	}
 
+	context, err := parseContext(args)
+	if err != nil {
+		return report.Report{}, err
+	}
+	result.Context = context
+
 	configurationName := args.BuildVariant + "CompileClasspath"
 
 	gradlewPath := path.Join(args.ProjectDir, "gradlew")
@@ -125,14 +135,14 @@ func collectReport(args CollectReportArgs) report.Report {
 	cmd.Dir = args.ProjectDir
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("failed to execute gradlew: %v\nOutput:\n%s", err, string(output))
+		return report.Report{}, fmt.Errorf("failed to execute gradlew: %v\nOutput:\n%s", err, string(output))
 	}
 
 	// fmt.Println(string(output))
 
 	tree, err := internal.ParseTreeFromOutput(string(output), configurationName)
 	if err != nil {
-		log.Fatalf("failed to parse tree: %v", err)
+		return report.Report{}, fmt.Errorf("failed to parse tree: %v", err)
 	}
 
 	result.Dependencies = report.DependenciesSegment{
@@ -143,54 +153,52 @@ func collectReport(args CollectReportArgs) report.Report {
 		result.Dependencies.Compiled = append(result.Dependencies.Compiled, d)
 	}
 
-	result.Context = parseContext(args)
-
-	return result
+	return result, nil
 }
 
-func parseContext(args CollectReportArgs) report.ContextSegment {
+func parseContext(args CollectReportArgs) (report.ContextSegment, error) {
 	result := report.ContextSegment{}
 
 	_, err := exec.LookPath("git")
 	if err != nil {
-		log.Fatalf("git not found in PATH: %v", err)
+		return result, fmt.Errorf("git not found in PATH: %v", err)
 	}
 
 	cmd := exec.Command("git", "rev-parse", "--is-inside-work-tree")
 	cmd.Dir = args.ProjectDir
 	if err := cmd.Run(); err != nil {
-		return result
+		return result, nil
 	}
 
 	cmd = exec.Command("git", "rev-parse", "HEAD")
 	cmd.Dir = args.ProjectDir
-	out, err := cmd.Output()
+	output, err := cmd.Output()
 	if err == nil {
-		result.Git.Commit = strings.TrimSpace(string(out))
+		result.Git.Commit = strings.TrimSpace(string(output))
 	}
 
 	cmd = exec.Command("git", "status", "--porcelain")
 	cmd.Dir = args.ProjectDir
-	out, err = cmd.Output()
+	output, err = cmd.Output()
 	if err == nil {
-		result.Git.IsDirty = len(strings.TrimSpace(string(out))) > 0
+		result.Git.IsDirty = len(strings.TrimSpace(string(output))) > 0
 	}
 
 	cmd = exec.Command("git", "describe", "--tags", "--long")
 	cmd.Dir = args.ProjectDir
-	out, err = cmd.Output()
+	output, err = cmd.Output()
 	if err == nil {
-		parts := strings.SplitN(strings.TrimSpace(string(out)), "-", 3)
+		parts := strings.SplitN(strings.TrimSpace(string(output)), "-", 3)
 		if len(parts) == 3 {
 			result.Git.Tag = parts[0]
 			commitsAfterTag, err := strconv.ParseUint(parts[1], 10, 64)
 			if err != nil {
-				log.Printf("warning: could not parse commits after tag %q as uint: %v", parts[1], err)
+				out.PrintlnWarn("could not parse commits after tag from %q: %v", parts[1], err)
 			} else {
 				result.Git.CommitsAfterTag = uint(commitsAfterTag)
 			}
 		} else {
-			log.Printf("warning: unexpected format from git describe: %q", string(out))
+			log.Printf("warning: unexpected format from git describe: %q", string(output))
 		}
 	} else {
 		log.Printf("warning: git describe failed: %v", err)
@@ -198,12 +206,12 @@ func parseContext(args CollectReportArgs) report.ContextSegment {
 
 	cmd = exec.Command("git", "branch", "--show-current")
 	cmd.Dir = args.ProjectDir
-	out, err = cmd.Output()
+	output, err = cmd.Output()
 	if err == nil {
-		result.Git.Branch = strings.TrimSpace(string(out))
+		result.Git.Branch = strings.TrimSpace(string(output))
 	}
 
-	return result
+	return result, nil
 }
 
 type CollectReportArgs struct {
