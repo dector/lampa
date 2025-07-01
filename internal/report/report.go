@@ -6,7 +6,7 @@ type Report struct {
 	Tool    ToolSegment
 	Context ContextSegment
 
-	Dependencies DependenciesSegment
+	Build BuildSegment
 }
 
 type ToolSegment struct {
@@ -16,8 +16,22 @@ type ToolSegment struct {
 	BuildCommit string
 }
 
-type DependenciesSegment struct {
-	Compiled []string
+type BuildSegment struct {
+	ApkName string
+	ApkSha1 string
+
+	ApplicationId string
+	VersionName   string
+	VersionCode   string
+	BuildVariant  string
+
+	MinSdkVersion     string
+	TargetSdkVersion  string
+	CompileSdkVersion string
+
+	Locales []string
+
+	CompileDependencies []string
 }
 
 type ContextSegment struct {

@@ -2,8 +2,10 @@ package collect
 
 import (
 	"context"
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
+	"io"
 	"lampa/internal"
 	"lampa/internal/out"
 	"lampa/internal/report"
@@ -15,10 +17,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
+	"github.com/samber/lo"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	. "lampa/internal/globals"
 )
@@ -70,9 +76,71 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("%s exists but is a directory, not a file", gradlewPath)
 	}
 
+	pathToAppt, err := detectAaptExecutable()
+	if err != nil {
+		return err
+	}
+
+	pathToApk, err := DynamicSpinner(SpinnerArgs{
+		Msg:             "Building...",
+		MsgAfterSuccess: "Building: Done.",
+		MsgAfterFail:    "Building: Failed.",
+	}, func() (string, error) {
+		task := "assemble" + cases.Title(language.BritishEnglish).String(buildVariant)
+		cmd := exec.Command(gradlewPath, "--no-daemon", "--console", "plain", "-q", task)
+		cmd.Dir = from
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			return "", fmt.Errorf("failed to build app: %v\nOutput:\n%s", err, string(output))
+		}
+
+		var variantPaths []string
+		var wordStart int
+		for i, r := range buildVariant {
+			if i > 0 && unicode.IsUpper(r) {
+				variantPaths = append(variantPaths, strings.ToLower(buildVariant[wordStart:i]))
+				wordStart = i
+			}
+		}
+		variantPaths = append(variantPaths, strings.ToLower(buildVariant[wordStart:]))
+
+		apkDir := path.Join(append([]string{from, "app", "build", "outputs", "apk"}, variantPaths...)...)
+
+		info, err := os.Stat(apkDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return "", fmt.Errorf("APK directory `%s` does not exist", apkDir)
+			}
+			return "", fmt.Errorf("error accessing APK directory `%s`: %v", apkDir, err)
+		}
+		if !info.IsDir() {
+			return "", fmt.Errorf("APK directory `%s` is not a directory", apkDir)
+		}
+
+		files, err := os.ReadDir(apkDir)
+		if err != nil {
+			return "", fmt.Errorf("could not read APK directory `%s`: %v", apkDir, err)
+		}
+		var apkFilePath string
+		for _, file := range files {
+			if !file.IsDir() && strings.HasSuffix(file.Name(), ".apk") {
+				apkFilePath = path.Join(apkDir, file.Name())
+				break
+			}
+		}
+		if apkFilePath == "" {
+			return "", fmt.Errorf("no APK file found in `%s`", apkDir)
+		}
+
+		return apkFilePath, nil
+	})
+	if err != nil {
+		return err
+	}
+
 	report, err := DynamicSpinner(
 		SpinnerArgs{
-			Msg:             "Collecting report...",
+			Msg:             "Capturing report...",
 			MsgAfterSuccess: "Capturing report: Done.",
 			MsgAfterFail:    "Capturing report: Failed.",
 		}, func() (report.Report, error) {
@@ -80,6 +148,8 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 				ProjectDir:   from,
 				ReportDir:    to,
 				BuildVariant: buildVariant,
+				PathToAapt:   pathToAppt,
+				PathToApk:    *pathToApk,
 			})
 		})
 	if err != nil {
@@ -125,6 +195,11 @@ func collectReport(args CollectReportArgs) (report.Report, error) {
 
 	configurationName := args.BuildVariant + "CompileClasspath"
 
+	err = analyzeBuild(&result, args)
+	if err != nil {
+		return report.Report{}, err
+	}
+
 	gradlewPath := path.Join(args.ProjectDir, "gradlew")
 	cmd := exec.Command(gradlewPath, "--no-daemon", "--console", "plain", "-q", "app:dependencies", "--configuration", configurationName)
 	cmd.Dir = args.ProjectDir
@@ -140,12 +215,9 @@ func collectReport(args CollectReportArgs) (report.Report, error) {
 		return report.Report{}, fmt.Errorf("failed to parse tree: %v", err)
 	}
 
-	result.Dependencies = report.DependenciesSegment{
-		Compiled: make([]string, 0),
-	}
 	for _, info := range tree.Summary {
 		d := info.String()
-		result.Dependencies.Compiled = append(result.Dependencies.Compiled, d)
+		result.Build.CompileDependencies = append(result.Build.CompileDependencies, d)
 	}
 
 	return result, nil
@@ -213,6 +285,9 @@ type CollectReportArgs struct {
 	ProjectDir   string
 	ReportDir    string
 	BuildVariant string
+
+	PathToAapt string
+	PathToApk  string
 }
 
 func decodeProjectPath(cmd *cli.Command) (string, error) {
@@ -290,4 +365,110 @@ func DynamicSpinner[T any](args SpinnerArgs, action func() (T, error)) (*T, erro
 	}
 
 	return &data, err
+}
+
+func analyzeBuild(result *report.Report, args CollectReportArgs) error {
+	result.Build.BuildVariant = args.BuildVariant
+	result.Build.ApkName = filepath.Base(args.PathToApk)
+
+	file, err := os.Open(args.PathToApk)
+	if err == nil {
+		defer file.Close()
+		hasher := sha1.New()
+		if _, err := io.Copy(hasher, file); err == nil {
+			result.Build.ApkSha1 = fmt.Sprintf("%x", hasher.Sum(nil))
+		}
+	} else {
+		return err
+	}
+
+	cmd := exec.Command(args.PathToAapt, "dump", "badging", args.PathToApk)
+	cmd.Dir = args.ProjectDir
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to analyze build: %v.\nReason: %s", err, string(output))
+	}
+
+	lines := strings.Split(string(output), "\n")
+	props := make(map[string]string)
+	for _, l := range lines {
+		if idx := strings.Index(l, ":"); idx != -1 {
+			key := strings.TrimSpace(l[:idx])
+			val := strings.TrimSpace(l[idx+1:])
+			props[key] = val
+		}
+	}
+
+	for k, v := range props {
+		switch k {
+		case "minSdkVersion":
+			result.Build.MinSdkVersion = strings.Trim(v, "'")
+		case "targetSdkVersion":
+			result.Build.TargetSdkVersion = strings.Trim(v, "'")
+		case "package":
+			{
+				parts := strings.Split(v, " ")
+				for _, part := range parts {
+					if kv := strings.SplitN(part, "=", 2); len(kv) == 2 {
+						key := strings.TrimSpace(kv[0])
+						val := strings.Trim(strings.TrimSpace(kv[1]), "'")
+						switch key {
+						case "name":
+							result.Build.ApplicationId = val
+						case "versionCode":
+							result.Build.VersionCode = val
+						case "versionName":
+							result.Build.VersionName = val
+						case "compileSdkVersion":
+							result.Build.CompileSdkVersion = val
+						}
+					}
+				}
+			}
+		case "locales":
+			{
+				result.Build.Locales = lo.Map(strings.Fields(v), func(locale string, _ int) string {
+					return strings.Trim(locale, "'")
+				})
+			}
+		}
+	}
+
+	return nil
+}
+
+func detectAaptExecutable() (string, error) {
+	envSdkRoot := os.Getenv("ANDROID_SDK_ROOT")
+	if envSdkRoot == "" {
+		return "", fmt.Errorf("ANDROID_SDK_ROOT environment variable is not set")
+	}
+	envSdkRoot = strings.ReplaceAll(envSdkRoot, "~", os.Getenv("HOME"))
+	envSdkRoot, err := filepath.Abs(envSdkRoot)
+	if err != nil {
+		return "", fmt.Errorf("failed to get absolute path of ANDROID_SDK_ROOT: %w", err)
+	}
+	if sdkRoot := envSdkRoot; sdkRoot != "" {
+		aaptPath := filepath.Join(sdkRoot, "build-tools")
+		entries, err := os.ReadDir(aaptPath)
+		if err == nil {
+			// Find the latest build-tools version
+			var latest string
+			for _, entry := range entries {
+				if entry.IsDir() {
+					// TODO improve
+					if latest == "" || entry.Name() > latest {
+						latest = entry.Name()
+					}
+				}
+			}
+			if latest != "" {
+				aaptFullPath := filepath.Join(aaptPath, latest, "aapt2")
+				if _, err := os.Stat(aaptFullPath); err == nil {
+					return aaptFullPath, nil
+				}
+			}
+		}
+	}
+	return "", fmt.Errorf("aapt executable not found in %s", envSdkRoot)
 }

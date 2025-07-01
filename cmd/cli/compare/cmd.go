@@ -74,9 +74,9 @@ type Dependency struct {
 }
 
 func parseDependencies(report report.Report) ([]Dependency, error) {
-	result := make([]Dependency, 0, len(report.Dependencies.Compiled))
+	result := make([]Dependency, 0, len(report.Build.CompileDependencies))
 
-	for _, depStr := range report.Dependencies.Compiled {
+	for _, depStr := range report.Build.CompileDependencies {
 		parts := strings.Split(depStr, ":")
 		if len(parts) == 3 {
 			result = append(result, Dependency{
