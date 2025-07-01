@@ -70,24 +70,19 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("%s exists but is a directory, not a file", gradlewPath)
 	}
 
-	blue := color.New(color.FgBlue).SprintfFunc()
-	green := color.New(color.FgGreen).SprintfFunc()
-	red := color.New(color.FgRed).SprintfFunc()
-	cs := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
-	s := spinner.New(cs, 100*time.Millisecond)
-	s.Color("blue")
-	s.Suffix = blue(" Capturing report...")
-	s.FinalMSG = green("✔ Capturing report: Done.\n")
-	s.Start()
-	defer s.Stop()
-
-	report, err := collectReport(CollectReportArgs{
-		ProjectDir:   from,
-		ReportDir:    to,
-		BuildVariant: buildVariant,
-	})
+	report, err := DynamicSpinner(
+		SpinnerArgs{
+			Msg:             "Collecting report...",
+			MsgAfterSuccess: "Capturing report: Done.",
+			MsgAfterFail:    "Capturing report: Failed.",
+		}, func() (report.Report, error) {
+			return collectReport(CollectReportArgs{
+				ProjectDir:   from,
+				ReportDir:    to,
+				BuildVariant: buildVariant,
+			})
+		})
 	if err != nil {
-		s.FinalMSG = red("✗ Capturing report: Failed.\n")
 		return err
 	}
 
@@ -268,4 +263,31 @@ func decodeTargetPath(cmd *cli.Command) (string, error) {
 		return path, nil
 	}
 	return absolutePath, nil
+}
+
+type SpinnerArgs struct {
+	Msg             string
+	MsgAfterSuccess string
+	MsgAfterFail    string
+}
+
+func DynamicSpinner[T any](args SpinnerArgs, action func() (T, error)) (*T, error) {
+	blue := color.New(color.FgBlue).SprintfFunc()
+	green := color.New(color.FgGreen).SprintfFunc()
+	red := color.New(color.FgRed).SprintfFunc()
+	cs := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+	s := spinner.New(cs, 100*time.Millisecond)
+	s.Color("blue")
+	s.Suffix = blue(" " + args.Msg)
+	s.FinalMSG = green("✔ " + args.MsgAfterSuccess + "\n")
+	s.Start()
+	defer s.Stop()
+
+	data, err := action()
+	if err != nil {
+		s.FinalMSG = red("✗ " + args.MsgAfterFail + "\n")
+		return nil, err
+	}
+
+	return &data, err
 }
