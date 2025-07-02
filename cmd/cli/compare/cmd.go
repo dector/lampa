@@ -13,8 +13,8 @@ import (
 )
 
 func ActionCmdCompare(context context.Context, cmd *cli.Command) error {
-	if cmd.NArg() != 2 {
-		return fmt.Errorf("expected exactly two files to compare, got %d", cmd.NArg())
+	if cmd.NArg() != 3 {
+		return fmt.Errorf("usage: lampa report1.json report2.json out.html", cmd.NArg())
 	}
 
 	file1, err := checkReportFile(cmd.Args().Get(0))
@@ -26,44 +26,60 @@ func ActionCmdCompare(context context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	dep1, release1, err := readReport(file1)
+	r1, err := ReadReportFromFile(file1)
 	if err != nil {
 		return err
 	}
-	dep2, release2, err := readReport(file2)
+	r2, err := ReadReportFromFile(file2)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Comparing releases %s...%s\n", release1, release2)
-
-	newDeps := findNewDeps(dep1, dep2)
-	removedDeps := findRemovedDeps(dep1, dep2)
-	changedDeps := findChangedDeps(dep1, dep2)
-
-	fmt.Println()
-	fmt.Printf("Total dependencies before: %d\n", len(dep1))
-	fmt.Printf("Total dependencies after: %d\n", len(dep2))
-
-	fmt.Println()
-	fmt.Printf("New dependencies:\n")
-	for _, dep := range newDeps {
-		fmt.Printf("- %s:%s: %s\n", dep.Group, dep.Name, dep.Version)
+	html, err := GenerateComparingHtmlReport(r1, r2)
+	if err != nil {
+		return err
 	}
 
-	fmt.Println()
-	fmt.Printf("Removed dependencies:\n")
-	for _, dep := range removedDeps {
-		fmt.Printf("- %s:%s: %s\n", dep.Group, dep.Name, dep.Version)
+	outFile := cmd.Args().Get(2)
+	outF, err := os.Create(outFile)
+	if err != nil {
+		return err
+	}
+	defer outF.Close()
+	_, err = outF.Write([]byte(html))
+	if err != nil {
+		return err
 	}
 
-	fmt.Println()
-	fmt.Printf("Changed dependencies:\n")
-	for _, dep := range changedDeps {
-		fmt.Printf("- %s:%s: %s -> %s\n", dep.Dependency.Group, dep.Dependency.Name, dep.PrevVersion, dep.Dependency.Version)
-	}
+	fmt.Printf("Comparing releases %s...%s\n", r1.Build.VersionName, r2.Build.VersionName)
 
-	fmt.Println()
+	// newDeps := findNewDeps(dep1, dep2)
+	// removedDeps := findRemovedDeps(dep1, dep2)
+	// changedDeps := findChangedDeps(dep1, dep2)
+
+	// fmt.Println()
+	// fmt.Printf("Total dependencies before: %d\n", len(dep1))
+	// fmt.Printf("Total dependencies after: %d\n", len(dep2))
+
+	// fmt.Println()
+	// fmt.Printf("New dependencies:\n")
+	// for _, dep := range newDeps {
+	// 	fmt.Printf("- %s:%s: %s\n", dep.Group, dep.Name, dep.Version)
+	// }
+
+	// fmt.Println()
+	// fmt.Printf("Removed dependencies:\n")
+	// for _, dep := range removedDeps {
+	// 	fmt.Printf("- %s:%s: %s\n", dep.Group, dep.Name, dep.Version)
+	// }
+
+	// fmt.Println()
+	// fmt.Printf("Changed dependencies:\n")
+	// for _, dep := range changedDeps {
+	// 	fmt.Printf("- %s:%s: %s -> %s\n", dep.Dependency.Group, dep.Dependency.Name, dep.PrevVersion, dep.Dependency.Version)
+	// }
+
+	// fmt.Println()
 
 	return nil
 }
@@ -94,64 +110,6 @@ func parseDependencies(report report.Report) ([]Dependency, error) {
 	return result, nil
 }
 
-func findNewDeps(oldDeps, newDeps []Dependency) []Dependency {
-	result := []Dependency{}
-	oldMap := make(map[string]Dependency)
-	for _, dep := range oldDeps {
-		key := dep.Group + ":" + dep.Name
-		oldMap[key] = dep
-	}
-	for _, dep := range newDeps {
-		key := dep.Group + ":" + dep.Name
-		if _, exists := oldMap[key]; !exists {
-			result = append(result, dep)
-		}
-	}
-	return result
-}
-
-func findRemovedDeps(oldDeps, newDeps []Dependency) []Dependency {
-	result := []Dependency{}
-	newMap := make(map[string]Dependency)
-	for _, dep := range newDeps {
-		key := dep.Group + ":" + dep.Name
-		newMap[key] = dep
-	}
-	for _, dep := range oldDeps {
-		key := dep.Group + ":" + dep.Name
-		if _, exists := newMap[key]; !exists {
-			result = append(result, dep)
-		}
-	}
-	return result
-}
-
-type DependencyChange struct {
-	Dependency  Dependency
-	PrevVersion string
-}
-
-func findChangedDeps(oldDeps, newDeps []Dependency) []DependencyChange {
-	result := []DependencyChange{}
-	oldMap := make(map[string]Dependency)
-	for _, dep := range oldDeps {
-		key := dep.Group + ":" + dep.Name
-		oldMap[key] = dep
-	}
-	for _, dep := range newDeps {
-		key := dep.Group + ":" + dep.Name
-		if oldDep, exists := oldMap[key]; exists {
-			if oldDep.Version != dep.Version {
-				result = append(result, DependencyChange{
-					Dependency:  dep,
-					PrevVersion: oldDep.Version,
-				})
-			}
-		}
-	}
-	return result
-}
-
 func checkReportFile(path string) (string, error) {
 	info, err := os.Stat(path)
 	if err != nil {
@@ -178,19 +136,19 @@ func ReadReportFromFile(file string) (*report.Report, error) {
 	return &report, nil
 }
 
-func readReport(file string) ([]Dependency, string, error) {
-	report, err := ReadReportFromFile(file)
-	if err != nil {
-		return nil, "", err
-	}
+// func readReport(file string) ([]Dependency, string, error) {
+// 	report, err := ReadReportFromFile(file)
+// 	if err != nil {
+// 		return nil, "", err
+// 	}
 
-	dep, err := parseDependencies(*report)
-	if err != nil {
-		return nil, "", fmt.Errorf("could not parse %s as report.Report: %v", file, err)
-	}
+// 	dep, err := parseDependencies(*report)
+// 	if err != nil {
+// 		return nil, "", fmt.Errorf("could not parse %s as report.Report: %v", file, err)
+// 	}
 
-	return dep, report.Context.Git.Commit, err
-}
+// 	return dep, report.Context.Git.Commit, err
+// }
 
 func GenerateComparingHtmlReport(r1 *report.Report, r2 *report.Report) (string, error) {
 	w := &strings.Builder{}
