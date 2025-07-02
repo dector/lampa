@@ -151,9 +151,9 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 
 	report, err := DynamicSpinner(
 		SpinnerArgs{
-			Msg:             "Capturing report...",
-			MsgAfterSuccess: "Capturing report: Done.",
-			MsgAfterFail:    "Capturing report: Failed.",
+			Msg:             "Generating report...",
+			MsgAfterSuccess: "Generating report: Done.",
+			MsgAfterFail:    "Generating report: Failed.",
 		}, func() (report.Report, error) {
 			return collectReport(CollectReportArgs{
 				ProjectDir:   from,

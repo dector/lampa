@@ -1,0 +1,497 @@
+package compare
+
+import (
+	"fmt"
+	"github.com/Masterminds/semver/v3"
+	"github.com/samber/lo"
+	"lampa/internal/report"
+	"lampa/internal/templates/html"
+	"lampa/internal/templates/icons"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+)
+
+templ CompareHtml(r1 *report.Report, r2 *report.Report) {
+	{{
+		title := fmt.Sprintf("%s %s+%s → %s+%s :: Lampa Report",
+			r2.Build.AppName,
+			r1.Build.VersionName, r1.Build.VersionCode,
+			r2.Build.VersionName, r2.Build.VersionCode,
+		)
+	}}
+	@pages.HtmlPage(title) {
+		@layout() {
+			<div class="text-center space-y-2">
+				<h1 class="text-4xl tracking-wider text-gray-900 mt-8">
+					<span class="font-bold">{ r2.Build.AppName }</span>
+					<p class="text-lg text-gray-600">
+						Comparing versions
+						<br/>
+						{ r1.Build.VersionName } ({ r1.Build.VersionCode })
+						<span class="mx-2 text-gray-400">→</span>
+						{ r2.Build.VersionName } ({ r2.Build.VersionCode })
+					</p>
+				</h1>
+				<div class="flex flex-col items-center justify-center gap-1 text-sm text-gray-500 my-8">
+					<p>
+						Lampa report generated
+					</p>
+					<p class="flex gap-1 items-center justify-center">
+						on
+						@icons.Calendar(4)
+						{ formatGenerationTime(r2.Context.GenerationTime) }
+						UTC
+					</p>
+				</div>
+			</div>
+			// Build section
+			@SectionCard(SectionCardArg{
+				Name: "Build",
+				Icon: "package",
+			}) {
+				@SubSection("Application", 2) {
+					@InfoItem("Application Id", r2.Build.ApplicationId)
+					@InfoItem("Build Variant", r2.Build.BuildVariant)
+					@InfoItem("Version Name", diff(r1.Build.VersionName, r2.Build.VersionName))
+					@InfoItem("Version Code", diff(r1.Build.VersionCode, r2.Build.VersionCode))
+				}
+				@Divider()
+				@SubSection("SDK", 2) {
+					@InfoItem("Min SDK", diff(r1.Build.MinSdkVersion, r2.Build.MinSdkVersion))
+					@InfoItem("Target SDK", diff(r1.Build.TargetSdkVersion, r2.Build.TargetSdkVersion))
+					@InfoItem("Compile SDK", diff(r1.Build.CompileSdkVersion, r2.Build.CompileSdkVersion))
+				}
+				@Divider()
+				@SubSection("Git", 2) {
+					@InfoItem("Branch", r2.Context.Git.Branch)
+					@InfoItem("Tag", r2.Context.Git.Tag)
+					@InfoItem("Commit", r2.Context.Git.Commit)
+					@InfoItem("Commits after Tag", r2.Context.Git.CommitsAfterTag)
+				}
+				@Divider()
+				@SubSection("File", 2) {
+					@InfoItem("Name", r2.Build.ApkName)
+					@InfoItem("Size", diff(formatFileSize(r1.Build.ApkSize), formatFileSize(r2.Build.ApkSize)))
+					@InfoItem("SHA1", r2.Build.ApkSha1)
+				}
+			}
+			@DependenciesSection(r1, r2)
+			@SectionCard(SectionCardArg{
+				Name:          "Tool",
+				Icon:          "lamp",
+				IsCollapsible: true,
+				IsCollapsed:   true,
+			}) {
+				@SubSection("", 2) {
+					@InfoItem("Name", r2.Context.Tool.Name)
+					@InfoItem("Tool Version", r2.Context.Tool.Version)
+					@InfoItem("Build Commit", r2.Context.Tool.BuildCommit)
+					@InfoItem("Format Version", r2.Version)
+					@InfoItem("Website", r2.Context.Tool.Website)
+					@InfoItem("Sources", r2.Context.Tool.Sources)
+				}
+			}
+		}
+	}
+}
+
+templ layout() {
+	<div class="min-h-screen bg-gray-100 py-8 px-4">
+		<div class="max-w-4xl mx-auto space-y-8">
+			{ children... }
+		</div>
+	</div>
+}
+
+func formatGenerationTime(s string) string {
+	t, _ := time.Parse(time.RFC3339, s)
+	return t.Format("January 2, 2006 at 15:04:05")
+}
+
+templ Card(arg SectionCardArg) {
+	{{
+		xData := fmt.Sprintf("{collapsed:%v}", arg.IsCollapsed)
+	}}
+	<div
+		class="rounded-lg border border-gray-100 bg-white text-card-foreground shadow-sm"
+		x-data={ xData }
+	>
+		{ children... }
+	</div>
+}
+
+templ CardHeader() {
+	<div class="flex flex-col space-y-1.5 p-6">
+		{ children... }
+	</div>
+}
+
+templ CardTitle(classes string, arg SectionCardArg) {
+	{{
+		expansionClasses := ""
+		// if arg.IsCollapsible {
+		expansionClasses = "cursor-pointer"
+		// }
+
+		onClick := ""
+		// if arg.IsCollapsible {
+		onClick = `collapsed = !collapsed`
+		// }
+	}}
+	<h3
+		class={ "text-2xl font-semibold leading-none tracking-tight",
+		classes,
+		expansionClasses }
+		x-on:click={ onClick }
+	>
+		{ children... }
+		<span class="text-xs font-normal tracking-normal text-gray-400 group-open:hidden" x-show="collapsed">Click to expand</span>
+	</h3>
+}
+
+templ CardContent() {
+	<div class="p-6 pt-0" x-show="!collapsed">
+		<div class="flex flex-col space-y-4">
+			{ children... }
+		</div>
+	</div>
+}
+
+type SectionCardArg struct {
+	Name string
+	Icon string
+
+	IsCollapsible bool
+	IsCollapsed   bool
+}
+
+templ CardIcon(name string, size int) {
+	switch name {
+		case "package":
+			@icons.Package(size)
+		case "lamp":
+			@icons.Lamp(size)
+		case "blocks":
+			@icons.Blocks(size)
+		default:
+			@icons.Hash(size)
+	}
+}
+
+templ SectionCard(arg SectionCardArg) {
+	@Card(arg) {
+		@CardHeader() {
+			@CardTitle("flex items-center gap-2", arg) {
+				@CardIcon(arg.Icon, 5)
+				{ arg.Name }
+			}
+		}
+		@CardContent() {
+			{ children... }
+		}
+	}
+}
+
+templ Divider() {
+	<div class="h-[1px] shrink-0 bg-gray-300 mx-2"></div>
+}
+
+templ SubSection(name string, columns int) {
+	<div>
+		if name != "" {
+			<h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+				@icons.Hasher(5)
+				// <Icon class={`w-5 h-5 ${iconColor}`} />
+				{ name }
+			</h3>
+		}
+		{{
+			colsClasses := fmt.Sprintf("grid-cols-1 md:grid-cols-%d", columns)
+		}}
+		<div class={ "grid gap-6", colsClasses }>
+			// <div class="flex flex-col space-y-4">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ InfoItem(name string, value any) {
+	<div class="flex items-center gap-3">
+		<span class="text-gray-500">
+			@icons.Hash(4)
+		</span>
+		<div>
+			<div class="text-sm font-medium text-gray-900">{ name }</div>
+			// <div class={ `text-sm text-gray-600 ${isHash ? 'font-mono break-all text-xs' : ''}` }>
+			<div class={ "text-sm text-gray-600" }>
+				{{
+				s := str(value)
+
+				isUrl := strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://")
+				}}
+				if isUrl {
+					<a
+						class="hover:text-orange-500"
+						href={ s }
+						referrerpolicy="no-referrer"
+						target="_blank"
+					>{ s }</a>
+				} else {
+					{ s }
+				}
+			</div>
+		</div>
+	</div>
+}
+
+func formatFileSize(sizeBytes string) string {
+	size, err := strconv.Atoi(sizeBytes)
+	if err != nil {
+		return "??"
+	}
+
+	return fmt.Sprintf("%.2f MB", float64(size)/(1024*1024))
+}
+
+templ DependenciesSection(r1, r2 *report.Report) {
+	@SectionCard(SectionCardArg{
+		Name: "Dependencies",
+		Icon: "blocks",
+		/* IsCollapsed: true, */
+	}) {
+		{{
+	d1 := lo.Map(r1.Build.CompileDependencies, func(d string, _ int) Dep {
+		return parseDep(d)
+	})
+	d2 := lo.Map(r2.Build.CompileDependencies, func(d string, _ int) Dep {
+		return parseDep(d)
+	})
+	depsNew := findNewDeps(d1, d2)
+	sort.Slice(depsNew, func(i, j int) bool {
+		return depsNew[i].Coordinate < depsNew[j].Coordinate
+	})
+	depsRemoved := findRemovedDeps(d1, d2)
+	sort.Slice(depsRemoved, func(i, j int) bool {
+		return depsRemoved[i].Coordinate < depsRemoved[j].Coordinate
+	})
+	depsUpgraded := findUpgradedDeps(d1, d2)
+	sort.Slice(depsUpgraded, func(i, j int) bool {
+		return depsUpgraded[i].Coordinate < depsUpgraded[j].Coordinate
+	})
+	depsDowngraded := findDowngradedDeps(d1, d2)
+	sort.Slice(depsDowngraded, func(i, j int) bool {
+		return depsDowngraded[i].Coordinate < depsDowngraded[j].Coordinate
+	})
+	depsUnchanged := findUnchangedDeps(d1, d2)
+	sort.Slice(depsUnchanged, func(i, j int) bool {
+		return depsUnchanged[i].Coordinate < depsUnchanged[j].Coordinate
+	})
+		}}
+		@SubSection(fmt.Sprintf("New (%d)", len(depsNew)), 1) {
+			// @InfoItem("Total", len(depsNew))
+			for _, d := range depsNew {
+				@DependencyItemExt(d, "+")
+			}
+		}
+		@SubSection(fmt.Sprintf("Removed (%d)", len(depsRemoved)), 1) {
+			// @InfoItem("Total", len(depsRemoved))
+			for _, d := range depsRemoved {
+				@DependencyItemExt(d, "-")
+			}
+		}
+		@SubSection(fmt.Sprintf("Upgraded (%d)", len(depsUpgraded)), 1) {
+			// @InfoItem("Total", len(depsUpgraded))
+			for _, d := range depsUpgraded {
+				@DependencyItemExt(d, "^")
+			}
+		}
+		@SubSection(fmt.Sprintf("Downgraded (%d)", len(depsDowngraded)), 1) {
+			// @InfoItem("Total", len(depsDowngraded))
+			for _, d := range depsDowngraded {
+				@DependencyItemExt(d, "v")
+			}
+		}
+		@SubSection(fmt.Sprintf("Unchanged (%d)", len(depsUnchanged)), 1) {
+			// @InfoItem("Total", len(depsUnchanged))
+			for _, d := range depsUnchanged {
+				@DependencyItemExt(d, "")
+			}
+		}
+	}
+}
+
+type Dep struct {
+	Coordinate string
+	Version    string
+}
+
+func (d Dep) EqCoord(other Dep) bool {
+	return d.Coordinate == other.Coordinate
+}
+
+func (d Dep) String() string {
+	return fmt.Sprintf("%s:%s", d.Coordinate, d.Version)
+}
+
+func (d Dep) IsLater(other Dep) bool {
+	v1 := semver.MustParse(d.Version)
+	v2 := semver.MustParse(other.Version)
+	return v1.GreaterThan(v2)
+}
+
+func parseDep(s string) Dep {
+	parts := strings.Split(s, ":")
+	return Dep{
+		Coordinate: parts[0] + ":" + parts[1],
+		Version:    parts[2],
+	}
+}
+
+func findNewDeps(d1, d2 []Dep) []Dep {
+	depsNew := make([]Dep, 0, len(d2))
+	for _, d := range d2 {
+		_, ok := lo.Find(d1, func(it Dep) bool {
+			return d.EqCoord(it)
+		})
+		if !ok {
+			depsNew = append(depsNew, d)
+		}
+	}
+	return depsNew
+}
+
+func findRemovedDeps(d1, d2 []Dep) []Dep {
+	depsRemoved := make([]Dep, 0, len(d1))
+	for _, d := range d1 {
+		_, ok := lo.Find(d2, func(it Dep) bool {
+			return d.EqCoord(it)
+		})
+		if !ok {
+			depsRemoved = append(depsRemoved, d)
+		}
+	}
+	return depsRemoved
+}
+
+func findUpgradedDeps(d1, d2 []Dep) []Dep {
+	depsUpgraded := make([]Dep, 0, len(d2))
+	for _, d := range d2 {
+		it, ok := lo.Find(d1, func(it Dep) bool {
+			return d.EqCoord(it)
+		})
+		if ok {
+			if d.IsLater(it) {
+				depsUpgraded = append(depsUpgraded, Dep{
+					Coordinate: d.Coordinate,
+					Version:    fmt.Sprintf("%s → %s", it.Version, d.Version),
+				})
+			}
+		}
+	}
+	return depsUpgraded
+}
+
+func findDowngradedDeps(d1, d2 []Dep) []Dep {
+	depsDowngraded := make([]Dep, 0, len(d1))
+	for _, d := range d1 {
+		it, ok := lo.Find(d2, func(it Dep) bool {
+			return d.EqCoord(it)
+		})
+		if ok {
+			if d.IsLater(it) {
+				depsDowngraded = append(depsDowngraded, Dep{
+					Coordinate: it.Coordinate,
+					Version:    fmt.Sprintf("%s → %s", d.Version, it.Version),
+				})
+			}
+		}
+	}
+	return depsDowngraded
+}
+
+func findUnchangedDeps(d1, d2 []Dep) []Dep {
+	depsUnchanged := make([]Dep, 0, len(d1))
+	for _, d := range d1 {
+		it, ok := lo.Find(d2, func(it Dep) bool {
+			return d.EqCoord(it)
+		})
+		if ok {
+			if d.Version == it.Version {
+				depsUnchanged = append(depsUnchanged, d)
+			}
+		}
+	}
+	return depsUnchanged
+}
+
+templ DependencyItemExt(dependency Dep, style string) {
+	{{
+		depsUrl := fmt.Sprintf("https://deps.dev/maven/%s/%s/", dependency.Coordinate, dependency.Version)
+
+		color := "bg-gray-100 text-gray-600 border-gray-200"
+		switch style {
+		case "+":
+			color = "bg-green-100 text-green-800 border-green-200"
+		case "-":
+			color = "bg-red-100 text-red-800 border-red-200"
+		case "^":
+			color = "bg-blue-100 text-blue-800 border-blue-200"
+		case "v":
+			color = "bg-orange-100 text-orange-800 border-orange-200"
+		}
+	}}
+	<div class={ "flex items-center gap-3 p-3 rounded-lg border", color }>
+		switch style {
+			case "+":
+				@icons.Plus(4)
+			case "-":
+				@icons.Minus(4)
+			case "^":
+				@icons.ArrowUp(4)
+			case "v":
+				@icons.ArrowDown(4)
+			default:
+				@icons.Equal(4)
+		}
+		<div class="flex-1">
+			<div class="font-medium text-sm flex items-center gap-2">
+				{ dependency.Coordinate }
+				<a
+					class="hover:text-orange-500"
+					target="_blank"
+					referrerPolicy="no-referrer"
+					href={ depsUrl }
+				>
+					@icons.PackageSearch(4)
+				</a>
+			</div>
+			<div class="text-xs opacity-75">
+				{ dependency.Version }
+			</div>
+		</div>
+	</div>
+}
+
+func str(value any) string {
+	switch v := value.(type) {
+	case uint:
+		return fmt.Sprintf("%d", v)
+	case int:
+		return fmt.Sprintf("%d", v)
+	}
+
+	return fmt.Sprintf("%s", value)
+}
+
+func diff(v1 any, v2 any) string {
+	s1 := str(v1)
+	s2 := str(v2)
+
+	if s1 == s2 {
+		return s2
+	} else {
+		return fmt.Sprintf("%s → %s", s1, s2)
+	}
+}

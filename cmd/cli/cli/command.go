@@ -62,9 +62,15 @@ func CreateCliCommand() *cli.Command {
 					srv := &http.Server{Addr: ":8080"}
 					http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 						w.Header().Set("Content-Type", "text/html")
-						rp := lo.Must(compare.ReadReportFromFile("out/report.lampa.json"))
 
-						d := lo.Must(collect.GenerateHtmlReport(rp))
+						r1 := lo.Must(compare.ReadReportFromFile("out/jellyfin_prev.lampa.json"))
+						// d := lo.Must(collect.GenerateHtmlReport(r1))
+
+						r2 := lo.Must(compare.ReadReportFromFile("out/jellyfin_next.lampa.json"))
+						// d := lo.Must(collect.GenerateHtmlReport(r2))
+
+						d := lo.Must(compare.GenerateComparingHtmlReport(r1, r2))
+
 						w.Write([]byte(d))
 					})
 					fmt.Println("HTTP server started on :8080")

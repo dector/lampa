@@ -131,6 +131,73 @@ templ Equal(size int) {
 	</svg>
 }
 
+templ Plus(size int) {
+	<svg
+		width="24"
+		height="24"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class={ sizeClasses(size) }
+	>
+		<path d="M5 12h14"></path>
+		<path d="M12 5v14"></path>
+	</svg>
+}
+
+templ Minus(size int) {
+	<svg
+		width="24"
+		height="24"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class={ sizeClasses(size) }
+	>
+		<path d="M5 12h14"></path>
+	</svg>
+}
+
+templ ArrowUp(size int) {
+	<svg
+		width="24"
+		height="24"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class={ sizeClasses(size) }
+	>
+		<path d="m5 12 7-7 7 7"></path>
+		<path d="M12 19V5"></path>
+	</svg>
+}
+
+templ ArrowDown(size int) {
+	<svg
+		width="24"
+		height="24"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class={ sizeClasses(size) }
+	>
+		<path d="M12 5v14"></path>
+		<path d="m19 12-7 7-7-7"></path>
+	</svg>
+}
+
 templ PackageSearch(size int) {
 	<svg
 		xmlns="http://www.w3.org/2000/svg"

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"lampa/internal/report"
+	"lampa/internal/templates/html/compare"
 	"os"
 	"strings"
 
@@ -189,4 +190,13 @@ func readReport(file string) ([]Dependency, string, error) {
 	}
 
 	return dep, report.Context.Git.Commit, err
+}
+
+func GenerateComparingHtmlReport(r1 *report.Report, r2 *report.Report) (string, error) {
+	w := &strings.Builder{}
+	err := compare.CompareHtml(r1, r2).Render(context.Background(), w)
+	if err != nil {
+		return "", err
+	}
+	return w.String(), nil
 }
