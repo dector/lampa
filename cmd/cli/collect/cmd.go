@@ -150,6 +150,8 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 				BuildVariant: buildVariant,
 				PathToAapt:   pathToAppt,
 				PathToApk:    *pathToApk,
+
+				GenerationTime: time.Now(),
 			})
 		})
 	if err != nil {
@@ -179,12 +181,6 @@ func collectReport(args CollectReportArgs) (report.Report, error) {
 	result := report.Report{
 		Version: "0.0.1-SNAPSHOT",
 		Type:    "CollectionReport",
-		Tool: report.ToolSegment{
-			Name:        "lampa",
-			Repository:  "https://github.com/dector/lampa/",
-			Version:     G.Version,
-			BuildCommit: G.BuildCommit,
-		},
 	}
 
 	context, err := parseContext(args)
@@ -224,7 +220,15 @@ func collectReport(args CollectReportArgs) (report.Report, error) {
 }
 
 func parseContext(args CollectReportArgs) (report.ContextSegment, error) {
-	result := report.ContextSegment{}
+	result := report.ContextSegment{
+		Tool: report.ToolSegment{
+			Name:        "lampa",
+			Repository:  "https://github.com/dector/lampa/",
+			Version:     G.Version,
+			BuildCommit: G.BuildCommit,
+		},
+		GenerationTime: args.GenerationTime.UTC().Format(time.RFC3339),
+	}
 
 	_, err := exec.LookPath("git")
 	if err != nil {
@@ -288,6 +292,8 @@ type CollectReportArgs struct {
 
 	PathToAapt string
 	PathToApk  string
+
+	GenerationTime time.Time
 }
 
 func decodeProjectPath(cmd *cli.Command) (string, error) {

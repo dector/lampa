@@ -3,7 +3,7 @@ package report
 type Report struct {
 	Version string `json:"v"`
 	Type    string
-	Tool    ToolSegment
+
 	Context ContextSegment
 
 	Build BuildSegment
@@ -35,7 +35,10 @@ type BuildSegment struct {
 }
 
 type ContextSegment struct {
-	Git GitSegment
+	Tool ToolSegment
+	Git  GitSegment
+
+	GenerationTime string
 }
 
 type GitSegment struct {
