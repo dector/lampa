@@ -1501,7 +1501,9 @@ func DependencyItemExt(dependency Dep, style string) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 
-		depsUrl := fmt.Sprintf("https://deps.dev/maven/%s/%s/", dependency.Coordinate, dependency.Version)
+		parts := strings.SplitN(dependency.Version, "→", 2)
+		version := strings.TrimSpace(parts[len(parts)-1])
+		depsUrl := fmt.Sprintf("https://deps.dev/maven/%s/%s/", dependency.Coordinate, version)
 
 		color := "bg-gray-100 text-gray-600 border-gray-200"
 		switch style {

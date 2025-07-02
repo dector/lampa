@@ -35,6 +35,8 @@ func ActionCmdCompare(context context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	fmt.Printf("Comparing releases %s...%s\n", r1.Build.VersionName, r2.Build.VersionName)
+
 	html, err := GenerateComparingHtmlReport(r1, r2)
 	if err != nil {
 		return err
@@ -50,8 +52,6 @@ func ActionCmdCompare(context context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("Comparing releases %s...%s\n", r1.Build.VersionName, r2.Build.VersionName)
 
 	// newDeps := findNewDeps(dep1, dep2)
 	// removedDeps := findRemovedDeps(dep1, dep2)
