@@ -2,7 +2,6 @@ package report
 
 type Report struct {
 	Version string `json:"v"`
-	Type    string
 
 	Context ContextSegment
 

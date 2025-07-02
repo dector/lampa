@@ -215,8 +215,7 @@ func GenerateHtmlReport(r *report.Report) (string, error) {
 
 func collectReport(args CollectReportArgs) (report.Report, error) {
 	result := report.Report{
-		Version: "0.0.1-SNAPSHOT",
-		Type:    "CollectionReport",
+		Version: "stats/0.0.1-SNAPSHOT",
 	}
 
 	context, err := parseContext(args)

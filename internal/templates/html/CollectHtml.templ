@@ -92,7 +92,7 @@ templ CollectHtml(r *report.Report) {
 					@InfoItem("Name", r.Context.Tool.Name)
 					@InfoItem("Tool Version", r.Context.Tool.Version)
 					@InfoItem("Build Commit", r.Context.Tool.BuildCommit)
-					@InfoItem("Report Format Version", r.Version)
+					@InfoItem("Format Version", r.Version)
 					@InfoItem("Website", r.Context.Tool.Website)
 					@InfoItem("Sources", r.Context.Tool.Sources)
 				}
@@ -240,8 +240,19 @@ templ InfoItem(name string, value any) {
 					default:
 						s = fmt.Sprintf("%s", value)
 					}
+
+					isUrl := strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://")
 				}}
-				{ s }
+				if isUrl {
+					<a
+						class="hover:text-orange-500"
+						href={ s }
+						referrerpolicy="no-referrer"
+						target="_blank"
+					>{ s }</a>
+				} else {
+					{ s }
+				}
 			</div>
 		</div>
 	</div>
