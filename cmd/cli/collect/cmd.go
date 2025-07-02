@@ -62,7 +62,7 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if cmd.Bool("rewrite-report") {
-		out.PrintlnWarn("Existing report file will be overwritten (if it exists)")
+		out.PrintlnWarn("Existing report file(s) will be overwritten (if they exists)")
 	} else {
 		if _, err := os.Stat(reportFile); err == nil {
 			return fmt.Errorf("report file `%s` already exists", reportFile)
@@ -190,7 +190,13 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return fmt.Errorf("could not generate HTML report: %v", err)
 		}
-		if err := os.WriteFile(htmlReportFile, []byte(reportHtml), 0644); err != nil {
+		file, err := os.Create(htmlReportFile)
+		if err != nil {
+			return fmt.Errorf("could not create HTML report file: %v", err)
+		}
+		defer file.Close()
+
+		if _, err := file.Write([]byte(reportHtml)); err != nil {
 			return fmt.Errorf("could not write HTML report: %v", err)
 		}
 	}

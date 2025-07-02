@@ -121,7 +121,7 @@ func CollectHtml(r *report.Report) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</p></div></div> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " UTC</p></div></div> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -535,7 +535,7 @@ func Card(arg SectionCardArg) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(xData)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 122, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 123, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -652,7 +652,7 @@ func CardTitle(classes string, arg SectionCardArg) templ.Component {
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(onClick)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 150, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 151, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -834,7 +834,7 @@ func SectionCard(arg SectionCardArg) templ.Component {
 					var templ_7745c5c3_Var29 string
 					templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(arg.Name)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 191, Col: 14}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 192, Col: 14}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 					if templ_7745c5c3_Err != nil {
@@ -954,7 +954,7 @@ func SubSection(name string, columns int) templ.Component {
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 210, Col: 10}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 211, Col: 10}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
@@ -1037,7 +1037,7 @@ func InfoItem(name string, value any) templ.Component {
 		var templ_7745c5c3_Var37 string
 		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 229, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 230, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 		if templ_7745c5c3_Err != nil {
@@ -1082,7 +1082,7 @@ func InfoItem(name string, value any) templ.Component {
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(s)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 243, Col: 7}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 244, Col: 7}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
@@ -1246,7 +1246,7 @@ func DependencyItem(dependency string) templ.Component {
 		var templ_7745c5c3_Var47 string
 		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(group)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 292, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 293, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 		if templ_7745c5c3_Err != nil {
@@ -1259,7 +1259,7 @@ func DependencyItem(dependency string) templ.Component {
 		var templ_7745c5c3_Var48 string
 		templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(artefact)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 292, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 293, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 		if templ_7745c5c3_Err != nil {
@@ -1272,7 +1272,7 @@ func DependencyItem(dependency string) templ.Component {
 		var templ_7745c5c3_Var49 templ.SafeURL
 		templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinURLErrs(depsUrl)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 297, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 298, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 		if templ_7745c5c3_Err != nil {
@@ -1293,7 +1293,7 @@ func DependencyItem(dependency string) templ.Component {
 		var templ_7745c5c3_Var50 string
 		templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(version)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 312, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/CollectHtml.templ`, Line: 313, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 		if templ_7745c5c3_Err != nil {

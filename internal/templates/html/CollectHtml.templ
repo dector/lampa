@@ -45,6 +45,7 @@ templ CollectHtml(r *report.Report) {
 						on
 						@icons.Calendar(4)
 						{ formatGenerationTime(r.Context.GenerationTime) }
+						UTC
 					</p>
 				</div>
 				// <div class="text-gray-300">with { r.Context.Tool.Name } { r.Context.Tool.Version } ({ r.Context.Tool.BuildCommit })</div>
