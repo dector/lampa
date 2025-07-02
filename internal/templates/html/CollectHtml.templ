@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"lampa/internal/report"
 	"lampa/internal/templates/icons"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -52,39 +54,40 @@ templ CollectHtml(r *report.Report) {
 				Name: "Build",
 				Icon: "package",
 			}) {
-				@SubSection("Application") {
+				@SubSection("Application", 2) {
 					@InfoItem("Application Id", r.Build.ApplicationId)
 					@InfoItem("Build Variant", r.Build.BuildVariant)
 					@InfoItem("Version Name", r.Build.VersionName)
 					@InfoItem("Version Code", r.Build.VersionCode)
 				}
 				@Divider()
-				@SubSection("SDK") {
+				@SubSection("SDK", 2) {
 					@InfoItem("Min SDK", r.Build.MinSdkVersion)
 					@InfoItem("Target SDK", r.Build.TargetSdkVersion)
 					@InfoItem("Compile SDK", r.Build.CompileSdkVersion)
 				}
 				@Divider()
-				@SubSection("Git") {
+				@SubSection("Git", 2) {
 					@InfoItem("Branch", r.Context.Git.Branch)
 					@InfoItem("Tag", r.Context.Git.Tag)
 					@InfoItem("Commit", r.Context.Git.Commit)
 					@InfoItem("Commits after Tag", r.Context.Git.CommitsAfterTag)
 				}
 				@Divider()
-				@SubSection("File") {
+				@SubSection("File", 2) {
 					@InfoItem("Name", r.Build.ApkName)
 					@InfoItem("Size", formatFileSize(r.Build.ApkSize))
 					@InfoItem("SHA1", r.Build.ApkSha1)
 				}
 			}
+			@DependenciesSection(r)
 			@SectionCard(SectionCardArg{
 				Name:          "Tool",
 				Icon:          "lamp",
 				IsCollapsible: true,
 				IsCollapsed:   true,
 			}) {
-				@SubSection("") {
+				@SubSection("", 2) {
 					@InfoItem("Name", r.Context.Tool.Name)
 					@InfoItem("Tool Version", r.Context.Tool.Version)
 					@InfoItem("Build Commit", r.Context.Tool.BuildCommit)
@@ -131,14 +134,14 @@ templ CardHeader() {
 templ CardTitle(classes string, arg SectionCardArg) {
 	{{
 		expansionClasses := ""
-		if arg.IsCollapsible {
-			expansionClasses = "cursor-pointer"
-		}
+		// if arg.IsCollapsible {
+		expansionClasses = "cursor-pointer"
+		// }
 
 		onClick := ""
-		if arg.IsCollapsible {
-			onClick = `collapsed = !collapsed`
-		}
+		// if arg.IsCollapsible {
+		onClick = `collapsed = !collapsed`
+		// }
 	}}
 	<h3
 		class={ "text-2xl font-semibold leading-none tracking-tight",
@@ -173,6 +176,8 @@ templ CardIcon(name string, size int) {
 			@icons.Package(size)
 		case "lamp":
 			@icons.Lamp(size)
+		case "blocks":
+			@icons.Blocks(size)
 		default:
 			@icons.Hash(size)
 	}
@@ -196,7 +201,7 @@ templ Divider() {
 	<div class="h-[1px] shrink-0 bg-gray-300 mx-2"></div>
 }
 
-templ SubSection(name string) {
+templ SubSection(name string, columns int) {
 	<div>
 		if name != "" {
 			<h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -205,7 +210,10 @@ templ SubSection(name string) {
 				{ name }
 			</h3>
 		}
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+		{{
+			colsClasses := fmt.Sprintf("grid-cols-1 md:grid-cols-%d", columns)
+		}}
+		<div class={ "grid gap-6", colsClasses }>
 			// <div class="flex flex-col space-y-4">
 			{ children... }
 		</div>
@@ -245,4 +253,64 @@ func formatFileSize(sizeBytes string) string {
 	}
 
 	return fmt.Sprintf("%.2f MB", float64(size)/(1024*1024))
+}
+
+templ DependenciesSection(r *report.Report) {
+	@SectionCard(SectionCardArg{
+		Name:        "Dependencies",
+		Icon:        "blocks",
+		IsCollapsed: true,
+	}) {
+		@SubSection("Compile-Time", 1) {
+			{{
+				deps := r.Build.CompileDependencies
+				sort.Strings(deps)
+			}}
+			@InfoItem("Total", len(deps))
+			for _, d := range deps {
+				@DependencyItem(d)
+			}
+		}
+	}
+}
+
+templ DependencyItem(dependency string) {
+	{{
+		p := strings.Split(dependency, ":")
+		group := p[0]
+		artefact := p[1]
+		version := p[2]
+
+		depsUrl := fmt.Sprintf("https://deps.dev/maven/%s:%s/%s/", group, artefact, version)
+
+		color := "bg-gray-100 text-gray-600 border-gray-200"
+	}}
+	<div class={ "flex items-center gap-3 p-3 rounded-lg border", color }>
+		@icons.Equal(4)
+		<div class="flex-1">
+			<div class="font-medium text-sm flex items-center gap-2">
+				{ group }:{ artefact }
+				<a
+					class="hover:text-orange-500"
+					target="_blank"
+					referrerPolicy="no-referrer"
+					href={ depsUrl }
+				>
+					@icons.PackageSearch(4)
+				</a>
+			</div>
+			// if dependency.FromVersion != "" {
+			// 	<div class="text-xs opacity-75">
+			// 		{ dependency.FromVersion } → { dependency.ToVersion }
+			// 	</div>
+			// } else if dependency.ToVersion != "" {
+			// 	<div class="text-xs opacity-75">
+			// 		{ dependency.ToVersion }
+			// 	</div>
+			// }
+			<div class="text-xs opacity-75">
+				{ version }
+			</div>
+		</div>
+	</div>
 }
