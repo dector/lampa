@@ -14,7 +14,7 @@ import (
 
 func ActionCmdCompare(context context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 3 {
-		return fmt.Errorf("usage: lampa report1.json report2.json out.html", cmd.NArg())
+		return fmt.Errorf("usage: lampa report1.json report2.json out.html")
 	}
 
 	file1, err := checkReportFile(cmd.Args().Get(0))

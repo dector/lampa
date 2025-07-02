@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/lampa-logo.webp" alt="Lampa logo">
+  <img width="500" height="500" src="docs/lampa-logo.webp" alt="Lampa logo">
 </p>
 
 # Lampa
