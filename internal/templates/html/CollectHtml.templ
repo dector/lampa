@@ -9,7 +9,10 @@ import (
 )
 
 templ CollectHtml(r *report.Report) {
-	@HtmlPage() {
+	{{
+		title := fmt.Sprintf("%s %s+%s :: Lampa Report", r.Build.AppName, r.Build.VersionName, r.Build.VersionCode)
+	}}
+	@HtmlPage(title) {
 		@layout() {
 			// 	<div>with { r.Context.Tool.Name } { r.Context.Tool.Version } ({ r.Context.Tool.BuildCommit })</div>
 			// HEADER
