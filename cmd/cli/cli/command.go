@@ -7,7 +7,9 @@ import (
 	"lampa/cmd/cli/compare"
 	. "lampa/internal/globals"
 	"lampa/internal/out"
+	"net/http"
 
+	"github.com/samber/lo"
 	"github.com/urfave/cli/v3"
 )
 
@@ -27,14 +29,19 @@ func CreateCliCommand() *cli.Command {
 						Usage: "specify report directory",
 					},
 					&cli.StringFlag{
-						Name:        "variant",
-						Usage:       "build variant to use",
-						DefaultText: "release",
+						Name:  "variant",
+						Usage: "build variant to use",
+						Value: "release",
 					},
 					&cli.StringFlag{
-						Name:        "with-name",
-						Usage:       "report file name (without extension)",
-						DefaultText: "report",
+						Name:  "with-name",
+						Usage: "report file name (without extension)",
+						Value: "report",
+					},
+					&cli.BoolFlag{
+						Name:  "with-html",
+						Usage: "generate HTML report as well",
+						Value: false,
 					},
 
 					&cli.BoolFlag{
@@ -47,6 +54,27 @@ func CreateCliCommand() *cli.Command {
 			{
 				Name:   "compare",
 				Action: compare.ActionCmdCompare,
+			},
+			// TODO hide in production
+			{
+				Name: "testhtml",
+				Action: func(ctx context.Context, c *cli.Command) error {
+					srv := &http.Server{Addr: ":8080"}
+					http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+						w.Header().Set("Content-Type", "text/html")
+						rp := lo.Must(compare.ReadReportFromFile("out/report.lampa.json"))
+
+						d := lo.Must(collect.GenerateHtmlReport(rp))
+						w.Write([]byte(d))
+					})
+					fmt.Println("HTTP server started on :8080")
+					err := srv.ListenAndServe()
+					if err != nil && err != http.ErrServerClosed {
+						fmt.Printf("HTTP server error: %v\n", err)
+						return err
+					}
+					return nil
+				},
 			},
 			{
 				Name: "version",

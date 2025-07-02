@@ -11,7 +11,8 @@ type Report struct {
 
 type ToolSegment struct {
 	Name        string
-	Repository  string
+	Website     string
+	Sources     string
 	Version     string
 	BuildCommit string
 }
@@ -19,7 +20,9 @@ type ToolSegment struct {
 type BuildSegment struct {
 	ApkName string
 	ApkSha1 string
+	ApkSize string
 
+	AppName       string
 	ApplicationId string
 	VersionName   string
 	VersionCode   string

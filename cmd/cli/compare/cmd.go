@@ -163,18 +163,27 @@ func checkReportFile(path string) (string, error) {
 	return path, nil
 }
 
-func readReport(file string) ([]Dependency, string, error) {
+func ReadReportFromFile(file string) (*report.Report, error) {
 	data, err := os.ReadFile(file)
 	if err != nil {
-		return nil, "", fmt.Errorf("could not read %s: %v", file, err)
+		return nil, fmt.Errorf("could not read %s: %v", file, err)
 	}
 
 	var report report.Report
 	if err := json.Unmarshal(data, &report); err != nil {
-		return nil, "", fmt.Errorf("could not parse %s as report: %v", file, err)
+		return nil, fmt.Errorf("could not parse %s as report: %v", file, err)
 	}
 
-	dep, err := parseDependencies(report)
+	return &report, nil
+}
+
+func readReport(file string) ([]Dependency, string, error) {
+	report, err := ReadReportFromFile(file)
+	if err != nil {
+		return nil, "", err
+	}
+
+	dep, err := parseDependencies(*report)
 	if err != nil {
 		return nil, "", fmt.Errorf("could not parse %s as report.Report: %v", file, err)
 	}

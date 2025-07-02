@@ -1,0 +1,245 @@
+package pages
+
+import (
+	"fmt"
+	"lampa/internal/report"
+	"lampa/internal/templates/icons"
+	"strconv"
+	"time"
+)
+
+templ CollectHtml(r *report.Report) {
+	@HtmlPage() {
+		@layout() {
+			// 	<div>with { r.Context.Tool.Name } { r.Context.Tool.Version } ({ r.Context.Tool.BuildCommit })</div>
+			// HEADER
+			<div class="text-center space-y-2">
+				// <p class="text-xl">Lampa report for</p>
+				<h1 class="text-4xl tracking-wider text-gray-900 mt-8">
+					<span class="font-bold">{ r.Build.AppName }</span>
+					// <span class="text-2xl">
+					// 	{ r.Build.VersionName }
+					// 	<span class="font-thin">({ r.Build.VersionCode })</span>
+					// </span>
+					<p class="text-lg text-gray-600">
+						Version { r.Build.VersionName }
+						({ r.Build.VersionCode })
+					</p>
+					// <div class="text-3xl">
+					// 	{ r.Build.VersionName }
+					// 	<span class="">({ r.Build.VersionCode })</span>
+					// </div>
+				</h1>
+				// <p class="text-lg text-gray-600">Version { r.Build.VersionName } ({ r.Build.VersionCode })</p>
+				// <p class="text-lg text-gray-600">Lampa report</p>
+				<div class="flex flex-col items-center justify-center gap-1 text-sm text-gray-500 my-8">
+					<p>
+						Lampa report generated
+					</p>
+					<p class="flex gap-1 items-center justify-center">
+						on
+						@icons.Calendar(4)
+						{ formatGenerationTime(r.Context.GenerationTime) }
+					</p>
+				</div>
+				// <div class="text-gray-300">with { r.Context.Tool.Name } { r.Context.Tool.Version } ({ r.Context.Tool.BuildCommit })</div>
+			</div>
+			// Build section
+			@SectionCard(SectionCardArg{
+				Name: "Build",
+				Icon: "package",
+			}) {
+				@SubSection("Application") {
+					@InfoItem("Application Id", r.Build.ApplicationId)
+					@InfoItem("Build Variant", r.Build.BuildVariant)
+					@InfoItem("Version Name", r.Build.VersionName)
+					@InfoItem("Version Code", r.Build.VersionCode)
+				}
+				@Divider()
+				@SubSection("SDK") {
+					@InfoItem("Min SDK", r.Build.MinSdkVersion)
+					@InfoItem("Target SDK", r.Build.TargetSdkVersion)
+					@InfoItem("Compile SDK", r.Build.CompileSdkVersion)
+				}
+				@Divider()
+				@SubSection("Git") {
+					@InfoItem("Branch", r.Context.Git.Branch)
+					@InfoItem("Tag", r.Context.Git.Tag)
+					@InfoItem("Commit", r.Context.Git.Commit)
+					@InfoItem("Commits after Tag", r.Context.Git.CommitsAfterTag)
+				}
+				@Divider()
+				@SubSection("File") {
+					@InfoItem("Name", r.Build.ApkName)
+					@InfoItem("Size", formatFileSize(r.Build.ApkSize))
+					@InfoItem("SHA1", r.Build.ApkSha1)
+				}
+			}
+			@SectionCard(SectionCardArg{
+				Name:          "Tool",
+				Icon:          "lamp",
+				IsCollapsible: true,
+				IsCollapsed:   true,
+			}) {
+				@SubSection("") {
+					@InfoItem("Name", r.Context.Tool.Name)
+					@InfoItem("Tool Version", r.Context.Tool.Version)
+					@InfoItem("Build Commit", r.Context.Tool.BuildCommit)
+					@InfoItem("Report Format Version", r.Version)
+					@InfoItem("Website", r.Context.Tool.Website)
+					@InfoItem("Sources", r.Context.Tool.Sources)
+				}
+			}
+		}
+	}
+}
+
+templ layout() {
+	<div class="min-h-screen bg-gray-100 py-8 px-4">
+		<div class="max-w-4xl mx-auto space-y-8">
+			{ children... }
+		</div>
+	</div>
+}
+
+func formatGenerationTime(s string) string {
+	t, _ := time.Parse(time.RFC3339, s)
+	return t.Format("January 2, 2006 at 15:04:05")
+}
+
+templ Card(arg SectionCardArg) {
+	{{
+		xData := fmt.Sprintf("{collapsed:%v}", arg.IsCollapsed)
+	}}
+	<div
+		class="rounded-lg border border-gray-100 bg-white text-card-foreground shadow-sm"
+		x-data={ xData }
+	>
+		{ children... }
+	</div>
+}
+
+templ CardHeader() {
+	<div class="flex flex-col space-y-1.5 p-6">
+		{ children... }
+	</div>
+}
+
+templ CardTitle(classes string, arg SectionCardArg) {
+	{{
+		expansionClasses := ""
+		if arg.IsCollapsible {
+			expansionClasses = "cursor-pointer"
+		}
+
+		onClick := ""
+		if arg.IsCollapsible {
+			onClick = `collapsed = !collapsed`
+		}
+	}}
+	<h3
+		class={ "text-2xl font-semibold leading-none tracking-tight",
+		classes,
+		expansionClasses }
+		x-on:click={ onClick }
+	>
+		{ children... }
+		<span class="text-xs font-normal tracking-normal text-gray-400 group-open:hidden" x-show="collapsed">Click to expand</span>
+	</h3>
+}
+
+templ CardContent() {
+	<div class="p-6 pt-0" x-show="!collapsed">
+		<div class="flex flex-col space-y-4">
+			{ children... }
+		</div>
+	</div>
+}
+
+type SectionCardArg struct {
+	Name string
+	Icon string
+
+	IsCollapsible bool
+	IsCollapsed   bool
+}
+
+templ CardIcon(name string, size int) {
+	switch name {
+		case "package":
+			@icons.Package(size)
+		case "lamp":
+			@icons.Lamp(size)
+		default:
+			@icons.Hash(size)
+	}
+}
+
+templ SectionCard(arg SectionCardArg) {
+	@Card(arg) {
+		@CardHeader() {
+			@CardTitle("flex items-center gap-2", arg) {
+				@CardIcon(arg.Icon, 5)
+				{ arg.Name }
+			}
+		}
+		@CardContent() {
+			{ children... }
+		}
+	}
+}
+
+templ Divider() {
+	<div class="h-[1px] shrink-0 bg-gray-300 mx-2"></div>
+}
+
+templ SubSection(name string) {
+	<div>
+		if name != "" {
+			<h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+				@icons.Hasher(5)
+				// <Icon class={`w-5 h-5 ${iconColor}`} />
+				{ name }
+			</h3>
+		}
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			// <div class="flex flex-col space-y-4">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ InfoItem(name string, value any) {
+	<div class="flex items-center gap-3">
+		<span class="text-gray-500">
+			@icons.Hash(4)
+		</span>
+		<div>
+			<div class="text-sm font-medium text-gray-900">{ name }</div>
+			// <div class={ `text-sm text-gray-600 ${isHash ? 'font-mono break-all text-xs' : ''}` }>
+			<div class={ "text-sm text-gray-600" }>
+				{{
+					s := ""
+					switch v := value.(type) {
+					case uint:
+						s = fmt.Sprintf("%d", v)
+					case int:
+						s = fmt.Sprintf("%d", v)
+					default:
+						s = fmt.Sprintf("%s", value)
+					}
+				}}
+				{ s }
+			</div>
+		</div>
+	</div>
+}
+
+func formatFileSize(sizeBytes string) string {
+	size, err := strconv.Atoi(sizeBytes)
+	if err != nil {
+		return "??"
+	}
+
+	return fmt.Sprintf("%.2f MB", float64(size)/(1024*1024))
+}

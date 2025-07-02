@@ -9,6 +9,7 @@ import (
 	"lampa/internal"
 	"lampa/internal/out"
 	"lampa/internal/report"
+	pages "lampa/internal/templates/html"
 	"log"
 	"os"
 	"os/exec"
@@ -47,19 +48,29 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 
 	fWithName := cmd.String("with-name")
 	if fWithName == "" {
-		fWithName = "lampa"
+		fWithName = "report"
 	}
-	reportFile := path.Join(to, fWithName+".report.json")
+	reportFile := path.Join(to, fWithName+".lampa.json")
+	htmlReportFile := path.Join(to, fWithName+".lampa.html")
 
 	fmt.Printf("Project directory: %s\n", from)
 	// fmt.Printf("Report directory: %s\n", to)
 	fmt.Printf("Report file: %s\n", reportFile)
+
+	if cmd.Bool("with-html") {
+		fmt.Printf("HTML report file: %s\n", htmlReportFile)
+	}
 
 	if cmd.Bool("rewrite-report") {
 		out.PrintlnWarn("Existing report file will be overwritten (if it exists)")
 	} else {
 		if _, err := os.Stat(reportFile); err == nil {
 			return fmt.Errorf("report file `%s` already exists", reportFile)
+		}
+		if cmd.Bool("with-html") {
+			if _, err := os.Stat(htmlReportFile); err == nil {
+				return fmt.Errorf("HTML report file `%s` already exists", htmlReportFile)
+			}
 		}
 	}
 
@@ -174,7 +185,26 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 	}
 	fmt.Printf("Report written to %s\n", reportFile)
 
+	if cmd.Bool("with-html") {
+		reportHtml, err := GenerateHtmlReport(report)
+		if err != nil {
+			return fmt.Errorf("could not generate HTML report: %v", err)
+		}
+		if err := os.WriteFile(htmlReportFile, []byte(reportHtml), 0644); err != nil {
+			return fmt.Errorf("could not write HTML report: %v", err)
+		}
+	}
+
 	return nil
+}
+
+func GenerateHtmlReport(r *report.Report) (string, error) {
+	w := &strings.Builder{}
+	err := pages.CollectHtml(r).Render(context.Background(), w)
+	if err != nil {
+		return "", err
+	}
+	return w.String(), nil
 }
 
 func collectReport(args CollectReportArgs) (report.Report, error) {
@@ -222,8 +252,9 @@ func collectReport(args CollectReportArgs) (report.Report, error) {
 func parseContext(args CollectReportArgs) (report.ContextSegment, error) {
 	result := report.ContextSegment{
 		Tool: report.ToolSegment{
-			Name:        "lampa",
-			Repository:  "https://github.com/dector/lampa/",
+			Name:        "Lampa",
+			Website:     "https://github.com/dector/lampa",
+			Sources:     "https://github.com/dector/lampa",
 			Version:     G.Version,
 			BuildCommit: G.BuildCommit,
 		},
@@ -388,6 +419,13 @@ func analyzeBuild(result *report.Report, args CollectReportArgs) error {
 		return err
 	}
 
+	info, err := os.Stat(args.PathToApk)
+	if err == nil {
+		result.Build.ApkSize = strconv.FormatInt(info.Size(), 10)
+	} else {
+		return fmt.Errorf("could not stat APK file: %v", err)
+	}
+
 	cmd := exec.Command(args.PathToAapt, "dump", "badging", args.PathToApk)
 	cmd.Dir = args.ProjectDir
 
@@ -412,6 +450,8 @@ func analyzeBuild(result *report.Report, args CollectReportArgs) error {
 			result.Build.MinSdkVersion = strings.Trim(v, "'")
 		case "targetSdkVersion":
 			result.Build.TargetSdkVersion = strings.Trim(v, "'")
+		case "application-label":
+			result.Build.AppName = strings.Trim(v, "'")
 		case "package":
 			{
 				parts := strings.Split(v, " ")

@@ -6,6 +6,15 @@ tasks:
       - go generate ./...
     silent: true
 
+  dev:html:
+    cmds:
+      - |
+        go tool templ generate --watch \
+          --open-browser=false \
+          --proxy="http://localhost:8080" --proxyport=3000 \
+          --cmd="go run cmd/cli/main.go testhtml"
+    silent: true
+
   run:
     deps:
       - _prepare
@@ -25,4 +34,14 @@ tasks:
       - _prepare
     cmds:
       - go run cmd/cli/main.go samples/nowindandroid-compile.txt prodReleaseCompileClasspath
+    silent: true
+
+  tidy:
+    cmds:
+      - go mod tidy
+    silent: true
+
+  gen:
+    cmds:
+      - go tool templ generate
     silent: true
