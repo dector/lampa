@@ -45,3 +45,10 @@ tasks:
     cmds:
       - go tool templ generate
     silent: true
+
+  build:
+    env:
+      CGO_ENABLED: 0
+    cmds:
+      - go build -o out/lampa cmd/cli/main.go
+    silent: true
