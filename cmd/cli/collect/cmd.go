@@ -1,6 +1,7 @@
 package collect
 
 import (
+	"archive/zip"
 	"context"
 	"crypto/sha1"
 	"encoding/json"
@@ -138,10 +139,10 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	// pathToAppt, err := detectAaptExecutable()
-	// if err != nil {
-	// 	return err
-	// }
+	pathToAppt, err := detectAaptExecutable()
+	if err != nil {
+		return err
+	}
 
 	// pathToApk, err := DynamicSpinner(SpinnerArgs{
 	// 	Msg:             "Building...",
@@ -212,8 +213,8 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 				BuildVariant: buildVariant,
 
 				PathToBundletool: pathToBundletool,
-				// PathToAapt:       pathToAppt,
-				PathToAab: *pathToAab,
+				PathToAapt:       pathToAppt,
+				PathToAab:        *pathToAab,
 				// PathToApk:        *pathToApk,
 
 				GenerationTime: time.Now(),
@@ -384,7 +385,7 @@ type CollectReportArgs struct {
 
 	PathToBundletool string
 	PathToAab        string
-	// PathToAapt       string
+	PathToAapt       string
 	// PathToApk        string
 
 	GenerationTime time.Time
@@ -545,11 +546,15 @@ func analyzeBuild(result *report.Report, args CollectReportArgs) error {
 	result.Build.ApplicationId = manifestData.Package
 	result.Build.VersionCode = manifestData.VersionCode
 	result.Build.VersionName = manifestData.VersionName
-	result.Build.AppName = manifestData.Application.Label
+	// result.Build.AppName = manifestData.Application.Label
 	result.Build.MinSdkVersion = manifestData.UsesSdk.MinSdkVersion
 	result.Build.TargetSdkVersion = manifestData.UsesSdk.TargetSdkVersion
 	result.Build.CompileSdkVersion = manifestData.BuildVersionCode
 
+	err = addDataFromApk(result, args)
+	if err != nil {
+		return err
+	}
 	// cmd := exec.Command(args.PathToAapt, "dump", "badging", args.PathToApk)
 	// cmd.Dir = args.ProjectDir
 
@@ -607,6 +612,99 @@ func analyzeBuild(result *report.Report, args CollectReportArgs) error {
 
 	return nil
 }
+
+func addDataFromApk(result *report.Report, args CollectReportArgs) error {
+	tempDir, err := os.MkdirTemp("", fmt.Sprintf("lampa-%x", sha1.Sum([]byte(args.ProjectDir))))
+	if err != nil {
+		return fmt.Errorf("failed to create temp dir for universal APK: %w", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	universalApkPath := filepath.Join(tempDir, "universal.apk")
+
+	// Use bundletool to build the universal APK from the AAB
+	cmd := exec.Command(
+		"java", "-jar", args.PathToBundletool, "build-apks",
+		"--bundle", args.PathToAab,
+		"--output", universalApkPath+".apks",
+		"--mode", "universal",
+		"--overwrite",
+	)
+	cmd.Dir = args.ProjectDir
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to build universal APK with bundletool: %v\nOutput:\n%s", err, string(output))
+	}
+
+	// Extract universal.apk from the .apks file (which is a zip)
+	apksFile, err := os.Open(universalApkPath + ".apks")
+	if err != nil {
+		return fmt.Errorf("failed to open .apks file: %w", err)
+	}
+	defer apksFile.Close()
+
+	stat, err := apksFile.Stat()
+	if err != nil {
+		return fmt.Errorf("failed to stat .apks file: %w", err)
+	}
+
+	zipReader, err := zip.NewReader(apksFile, stat.Size())
+	if err != nil {
+		return fmt.Errorf("failed to read .apks as zip: %w", err)
+	}
+
+	found := false
+	for _, f := range zipReader.File {
+		if f.Name == "universal.apk" {
+			outFile, err := os.Create(universalApkPath)
+			if err != nil {
+				return fmt.Errorf("failed to create universal.apk: %w", err)
+			}
+			rc, err := f.Open()
+			if err != nil {
+				outFile.Close()
+				return fmt.Errorf("failed to open universal.apk in zip: %w", err)
+			}
+			_, err = io.Copy(outFile, rc)
+			rc.Close()
+			outFile.Close()
+			if err != nil {
+				return fmt.Errorf("failed to extract universal.apk: %w", err)
+			}
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("universal.apk not found in .apks file")
+	}
+
+	// Use aapt2 to extract the application label (app name) from the APK
+	cmdAapt := exec.Command(args.PathToAapt, "dump", "badging", universalApkPath)
+	cmdAapt.Dir = args.ProjectDir
+	outputAapt, err := cmdAapt.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to run aapt2 on universal.apk: %v\nOutput:\n%s", err, string(outputAapt))
+	}
+
+	// Parse the output to find the application-label
+	lines := strings.Split(string(outputAapt), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "application-label:") {
+			// Format: application-label:'App Name'
+			idx := strings.Index(line, ":")
+			if idx != -1 {
+				label := strings.Trim(line[idx+1:], "'")
+				result.Build.AppName = label
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 func detectBundletoolExecutable() (string, error) {
 	envBundletool := os.Getenv("BUNDLETOOL_JAR")
 	if envBundletool == "" {
