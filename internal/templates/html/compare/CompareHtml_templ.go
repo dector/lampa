@@ -1380,6 +1380,11 @@ type Dep struct {
 	Version    string
 }
 
+func (d Dep) NonSemver() bool {
+	_, err := semver.NewVersion(d.Version)
+	return err != nil
+}
+
 func (d Dep) EqCoord(other Dep) bool {
 	return d.Coordinate == other.Coordinate
 }
@@ -1388,10 +1393,17 @@ func (d Dep) String() string {
 	return fmt.Sprintf("%s:%s", d.Coordinate, d.Version)
 }
 
-func (d Dep) IsLater(other Dep) bool {
-	v1 := semver.MustParse(d.Version)
-	v2 := semver.MustParse(other.Version)
-	return v1.GreaterThan(v2)
+// TODO handle hashes differently (in another section)
+func (d Dep) IsLater(other Dep) (bool, error) {
+	v1, err := semver.NewVersion(d.Version)
+	if err != nil {
+		return false, err
+	}
+	v2, err := semver.NewVersion(other.Version)
+	if err != nil {
+		return false, err
+	}
+	return v1.GreaterThan(v2), nil
 }
 
 func parseDep(s string) Dep {
@@ -1410,6 +1422,19 @@ func findNewDeps(d1, d2 []Dep) []Dep {
 		})
 		if !ok {
 			depsNew = append(depsNew, d)
+		} else {
+			// FIXME quick fix
+			// checking if it has hash version
+			other, _ := lo.Find(d1, func(it Dep) bool {
+				return d.EqCoord(it) &&
+					(it.NonSemver() || d.NonSemver())
+			})
+			if other.Coordinate != "" {
+				depsNew = append(depsNew, Dep{
+					Coordinate: d.Coordinate,
+					Version:    fmt.Sprintf("%s → %s", other.Version, d.Version),
+				})
+			}
 		}
 	}
 	return depsNew
@@ -1435,7 +1460,11 @@ func findUpgradedDeps(d1, d2 []Dep) []Dep {
 			return d.EqCoord(it)
 		})
 		if ok {
-			if d.IsLater(it) {
+			ok, err := d.IsLater(it)
+			if err != nil {
+				continue
+			}
+			if ok {
 				depsUpgraded = append(depsUpgraded, Dep{
 					Coordinate: d.Coordinate,
 					Version:    fmt.Sprintf("%s → %s", it.Version, d.Version),
@@ -1453,7 +1482,11 @@ func findDowngradedDeps(d1, d2 []Dep) []Dep {
 			return d.EqCoord(it)
 		})
 		if ok {
-			if d.IsLater(it) {
+			ok, err := d.IsLater(it)
+			if err != nil {
+				continue
+			}
+			if ok {
 				depsDowngraded = append(depsDowngraded, Dep{
 					Coordinate: it.Coordinate,
 					Version:    fmt.Sprintf("%s → %s", d.Version, it.Version),
@@ -1575,7 +1608,7 @@ func DependencyItemExt(dependency Dep, style string) templ.Component {
 		var templ_7745c5c3_Var55 string
 		templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(dependency.Coordinate)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 465, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 498, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 		if templ_7745c5c3_Err != nil {
@@ -1588,7 +1621,7 @@ func DependencyItemExt(dependency Dep, style string) templ.Component {
 		var templ_7745c5c3_Var56 templ.SafeURL
 		templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinURLErrs(depsUrl)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 470, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 503, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 		if templ_7745c5c3_Err != nil {
@@ -1609,7 +1642,7 @@ func DependencyItemExt(dependency Dep, style string) templ.Component {
 		var templ_7745c5c3_Var57 string
 		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinStringErrs(dependency.Version)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 476, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 509, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var57))
 		if templ_7745c5c3_Err != nil {
