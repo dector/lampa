@@ -1501,8 +1501,11 @@ func DependencyItemExt(dependency Dep, style string) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 
-		parts := strings.SplitN(dependency.Version, "→", 2)
-		version := strings.TrimSpace(parts[len(parts)-1])
+		version := dependency.Version
+		parts := strings.SplitN(version, "→", 2)
+		if len(parts) == 2 {
+			version = strings.TrimSpace(parts[1])
+		}
 		depsUrl := fmt.Sprintf("https://deps.dev/maven/%s/%s/", dependency.Coordinate, version)
 
 		color := "bg-gray-100 text-gray-600 border-gray-200"
@@ -1572,7 +1575,7 @@ func DependencyItemExt(dependency Dep, style string) templ.Component {
 		var templ_7745c5c3_Var55 string
 		templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(dependency.Coordinate)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 460, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 465, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 		if templ_7745c5c3_Err != nil {
@@ -1585,7 +1588,7 @@ func DependencyItemExt(dependency Dep, style string) templ.Component {
 		var templ_7745c5c3_Var56 templ.SafeURL
 		templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinURLErrs(depsUrl)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 465, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 470, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 		if templ_7745c5c3_Err != nil {
@@ -1606,7 +1609,7 @@ func DependencyItemExt(dependency Dep, style string) templ.Component {
 		var templ_7745c5c3_Var57 string
 		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinStringErrs(dependency.Version)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 471, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 476, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var57))
 		if templ_7745c5c3_Err != nil {

@@ -428,7 +428,12 @@ func findUnchangedDeps(d1, d2 []Dep) []Dep {
 
 templ DependencyItemExt(dependency Dep, style string) {
 	{{
-		depsUrl := fmt.Sprintf("https://deps.dev/maven/%s/%s/", dependency.Coordinate, dependency.Version)
+		version := dependency.Version
+		parts := strings.SplitN(version, "→", 2)
+		if len(parts) == 2 {
+			version = strings.TrimSpace(parts[1])
+		}
+		depsUrl := fmt.Sprintf("https://deps.dev/maven/%s/%s/", dependency.Coordinate, version)
 
 		color := "bg-gray-100 text-gray-600 border-gray-200"
 		switch style {
