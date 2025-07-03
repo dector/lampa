@@ -2,8 +2,8 @@ version: "3"
 
 tasks:
   _prepare:
-    cmds:
-      - go generate ./...
+    deps:
+      - gen
     silent: true
 
   dev:html:
@@ -44,16 +44,12 @@ tasks:
   gen:
     cmds:
       - go tool templ generate
-    silent: true
-  generate:
-    cmds:
       - go generate ./...
     silent: true
 
   build:
     deps:
       - gen
-      - generate
     env:
       CGO_ENABLED: 0
     cmds:

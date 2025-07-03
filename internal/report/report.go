@@ -17,9 +17,13 @@ type ToolSegment struct {
 }
 
 type BuildSegment struct {
-	ApkName string
-	ApkSha1 string
-	ApkSize string
+	AabName string
+	AabSha1 string
+	AabSize string
+
+	// ApkName string
+	// ApkSha1 string
+	// ApkSize string
 
 	AppName       string
 	ApplicationId string

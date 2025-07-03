@@ -76,9 +76,9 @@ templ CollectHtml(r *report.Report) {
 				}
 				@Divider()
 				@SubSection("File", 2) {
-					@InfoItem("Name", r.Build.ApkName)
-					@InfoItem("Size", formatFileSize(r.Build.ApkSize))
-					@InfoItem("SHA1", r.Build.ApkSha1)
+					@InfoItem("Name", r.Build.AabName)
+					@InfoItem("Size", formatFileSize(r.Build.AabSize))
+					@InfoItem("SHA1", r.Build.AabSha1)
 				}
 			}
 			@DependenciesSection(r)

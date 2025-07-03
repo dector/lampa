@@ -72,9 +72,9 @@ templ CompareHtml(r1 *report.Report, r2 *report.Report) {
 				}
 				@Divider()
 				@SubSection("File", 2) {
-					@InfoItem("Name", r2.Build.ApkName)
-					@InfoItem("Size", diff(formatFileSize(r1.Build.ApkSize), formatFileSize(r2.Build.ApkSize)))
-					@InfoItem("SHA1", r2.Build.ApkSha1)
+					@InfoItem("Name", r2.Build.AabName)
+					@InfoItem("Size", diff(formatFileSize(r1.Build.AabSize), formatFileSize(r2.Build.AabSize)))
+					@InfoItem("SHA1", r2.Build.AabSha1)
 				}
 			}
 			@DependenciesSection(r1, r2)

@@ -315,7 +315,7 @@ func CollectHtml(r *report.Report) templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = InfoItem("Name", r.Build.ApkName).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = InfoItem("Name", r.Build.AabName).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -323,7 +323,7 @@ func CollectHtml(r *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = InfoItem("Size", formatFileSize(r.Build.ApkSize)).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = InfoItem("Size", formatFileSize(r.Build.AabSize)).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -331,7 +331,7 @@ func CollectHtml(r *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = InfoItem("SHA1", r.Build.ApkSha1).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = InfoItem("SHA1", r.Build.AabSha1).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}

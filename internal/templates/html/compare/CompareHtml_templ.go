@@ -348,7 +348,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = InfoItem("Name", r2.Build.ApkName).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = InfoItem("Name", r2.Build.AabName).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -356,7 +356,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = InfoItem("Size", diff(formatFileSize(r1.Build.ApkSize), formatFileSize(r2.Build.ApkSize))).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = InfoItem("Size", diff(formatFileSize(r1.Build.AabSize), formatFileSize(r2.Build.AabSize))).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -364,7 +364,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = InfoItem("SHA1", r2.Build.ApkSha1).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = InfoItem("SHA1", r2.Build.AabSha1).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
