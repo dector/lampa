@@ -18,7 +18,11 @@ func main() {
 	cmd := CreateCliCommand()
 	err := cmd.Run(context.Background(), os.Args)
 	if err != nil {
-		out.PrintlnErr("\n%+v", err)
+		// if e, ok := err.(exit.Error); ok {
+		// 	err = e.Cause
+		// }
+
+		out.PrintlnErr("%+v", err)
 		errWithStack, ok := err.(interface{ StackTrace() any })
 		if ok {
 			out.PrintlnErr("%+v", errWithStack.StackTrace())

@@ -12,14 +12,14 @@ tasks:
         go tool templ generate --watch \
           --open-browser=false \
           --proxy="http://localhost:8080" --proxyport=3000 \
-          --cmd="go run cmd/cli/main.go testhtml"
+          --cmd="go run ./cmd/cli/ testhtml"
     silent: true
 
   run:
     deps:
       - _prepare
     cmds:
-      - go run cmd/cli/main.go {{.CLI_ARGS}}
+      - go run ./cmd/cli/ {{.CLI_ARGS}}
     silent: true
 
   test:
@@ -33,7 +33,7 @@ tasks:
     deps:
       - _prepare
     cmds:
-      - go run cmd/cli/main.go samples/nowindandroid-compile.txt prodReleaseCompileClasspath
+      - go run ./cmd/cli/ samples/nowindandroid-compile.txt prodReleaseCompileClasspath
     silent: true
 
   tidy:
@@ -53,5 +53,5 @@ tasks:
     env:
       CGO_ENABLED: 0
     cmds:
-      - go build -o out/lampa cmd/cli/main.go
+      - go build -o out/lampa ./cmd/cli/
     silent: true

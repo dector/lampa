@@ -11,7 +11,7 @@ var red = color.New(color.FgRed).SprintFunc()
 var yellow = color.New(color.FgYellow).SprintFunc()
 
 func PrintlnErr(s string, a ...any) {
-	msg := fmt.Sprintf("ERROR: %s\n", fmt.Sprintf(s, a...))
+	msg := fmt.Sprintf("\nERROR: %s\n", fmt.Sprintf(s, a...))
 	os.Stderr.WriteString(red(msg))
 }
 

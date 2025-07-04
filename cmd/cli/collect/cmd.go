@@ -8,6 +8,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"lampa/cmd/cli/args"
 	"lampa/internal"
 	"lampa/internal/out"
 	"lampa/internal/report"
@@ -30,6 +31,10 @@ import (
 	. "lampa/internal/globals"
 )
 
+const (
+	OptBuildVariant = "variant"
+)
+
 func CreateCliCommand() *cli.Command {
 	return &cli.Command{
 		Name: "collect",
@@ -43,7 +48,7 @@ func CreateCliCommand() *cli.Command {
 				Usage: "specify report directory",
 			},
 			&cli.StringFlag{
-				Name:  "variant",
+				Name:  OptBuildVariant,
 				Usage: "build variant to use",
 				Value: "release",
 			},
@@ -67,10 +72,48 @@ func CreateCliCommand() *cli.Command {
 	}
 }
 
+func parseLaunchArgs(cmd *cli.Command) LaunchArgs {
+	args := LaunchArgs{}
+
+	// Parse build variant
+	args.BuildVariant = strings.TrimSpace(cmd.String(OptBuildVariant))
+
+	return args
+}
+
+func validate(args LaunchArgs) error {
+	// Validate build variant
+	if args.BuildVariant == "" {
+		return fmt.Errorf("'%s' can't be empty", OptBuildVariant)
+
+		// TODO Wrapping is not playing well with cli/v3 package
+		// return exit.Wrap(
+		// 	fmt.Errorf("build variant argument is missing"),
+		// 	exit.UsageError,
+		// )
+	}
+
+	return nil
+}
+
+type LaunchArgs struct {
+	Global args.GlobalLaunchArgs
+
+	ProjectDir   string
+	OutputDir    string
+	BuildVariant string
+
+	Extras struct {
+		JsonReportFile string
+		HtmlReportFile string
+	}
+}
+
 func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
-	buildVariant := cmd.String("variant")
-	if buildVariant == "" {
-		buildVariant = "release"
+	args := parseLaunchArgs(cmd)
+	err := validate(args)
+	if err != nil {
+		return err
 	}
 
 	from, err := decodeProjectPath(cmd)
@@ -134,7 +177,7 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 		MsgAfterSuccess: "Building: Done.",
 		MsgAfterFail:    "Building: Failed.",
 	}, func() (string, error) {
-		task := "bundle" + cases.Title(language.BritishEnglish).String(buildVariant)
+		task := "bundle" + cases.Title(language.BritishEnglish).String(args.BuildVariant)
 		cmd := exec.Command(gradlewPath, "--no-daemon", "--console", "plain", "-q", task)
 		cmd.Dir = from
 		output, err := cmd.CombinedOutput()
@@ -142,7 +185,7 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 			return "", fmt.Errorf("failed to build app: %v\nOutput:\n%s", err, string(output))
 		}
 
-		bundleDir := path.Join(from, "app", "build", "outputs", "bundle", buildVariant)
+		bundleDir := path.Join(from, "app", "build", "outputs", "bundle", args.BuildVariant)
 
 		info, err := os.Stat(bundleDir)
 		if err != nil {
@@ -247,7 +290,7 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 			return collectReport(CollectReportArgs{
 				ProjectDir:   from,
 				ReportDir:    to,
-				BuildVariant: buildVariant,
+				BuildVariant: args.BuildVariant,
 
 				PathToBundletool: pathToBundletool,
 				PathToAapt:       pathToAppt,
