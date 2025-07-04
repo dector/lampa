@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	. "lampa/internal/globals"
@@ -14,6 +15,8 @@ func main() {
 	// log.Printf("os.Args: %v", os.Args)
 
 	G.Init()
+
+	printHeader()
 
 	cmd := CreateCliCommand()
 	err := cmd.Run(context.Background(), os.Args)
@@ -29,4 +32,20 @@ func main() {
 		}
 		os.Exit(exit.NotOK)
 	}
+}
+
+func printHeader() {
+	header := []string{
+		"██╗      █████╗ ███╗   ███╗██████╗  █████╗",
+		"██║     ██╔══██╗████╗ ████║██╔══██╗██╔══██╗",
+		"██║     ███████║██╔████╔██║██████╔╝███████║",
+		"██║     ██╔══██║██║╚██╔╝██║██╔═══╝ ██╔══██║",
+		"███████╗██║  ██║██║ ╚═╝ ██║██║     ██║  ██║",
+		"╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝     ╚═╝  ╚═╝",
+	}
+
+	for _, line := range header {
+		fmt.Println(line)
+	}
+	fmt.Println()
 }

@@ -8,11 +8,11 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"lampa/cmd/cli/args"
 	"lampa/internal"
 	"lampa/internal/out"
 	"lampa/internal/report"
 	pages "lampa/internal/templates/html"
+	"lampa/internal/utils"
 	"log"
 	"os"
 	"os/exec"
@@ -32,7 +32,13 @@ import (
 )
 
 const (
+	OptProjectDir   = "from"
+	OptReportsDir   = "to-dir"
 	OptBuildVariant = "variant"
+
+	OptRewriteReport = "rewrite-report"
+	OptWithName      = "with-name"
+	OptWithHtml      = "with-html"
 )
 
 func CreateCliCommand() *cli.Command {
@@ -40,12 +46,14 @@ func CreateCliCommand() *cli.Command {
 		Name: "collect",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "from",
-				Usage: "specify project directory",
+				Name:  OptProjectDir,
+				Usage: "project directory root",
+				Value: ".",
 			},
 			&cli.StringFlag{
-				Name:  "to",
-				Usage: "specify report directory",
+				Name:  OptReportsDir,
+				Usage: "report directory root",
+				Value: ".",
 			},
 			&cli.StringFlag{
 				Name:  OptBuildVariant,
@@ -53,38 +61,52 @@ func CreateCliCommand() *cli.Command {
 				Value: "release",
 			},
 			&cli.StringFlag{
-				Name:  "with-name",
+				Name:  OptWithName,
 				Usage: "report file name (without extension)",
-				Value: "report",
+				Value: "report.lampa",
 			},
 			&cli.BoolFlag{
-				Name:  "with-html",
+				Name:  OptWithHtml,
 				Usage: "generate HTML report as well",
 				Value: false,
 			},
 
 			&cli.BoolFlag{
-				Name:  "rewrite-report",
-				Usage: "allow to rewrite report file if it already exists",
+				Name:  OptRewriteReport,
+				Usage: "allow overriding report file if it exists",
 			},
 		},
 		Action: CmdActionCollect,
 	}
 }
 
-func parseLaunchArgs(cmd *cli.Command) LaunchArgs {
-	args := LaunchArgs{}
+func parseExecArgs(c *cli.Command) ExecArgs {
+	args := ExecArgs{}
 
-	// Parse build variant
-	args.BuildVariant = strings.TrimSpace(cmd.String(OptBuildVariant))
+	args.ProjectDir = c.String(OptProjectDir)
+	args.ProjectDir = utils.TryResolveFsPath(args.ProjectDir)
+
+	args.ReportsDir = c.String(OptReportsDir)
+
+	args.BuildVariant = c.String(OptBuildVariant)
+	args.BuildVariant = strings.TrimSpace(args.BuildVariant)
+
+	args.OverwriteReport = c.Bool(OptRewriteReport)
+	args.GenerateHtmlReport = c.Bool(OptWithHtml)
+
+	reportName := c.String(OptWithName)
+	args.JsonReportFile = path.Join(args.ReportsDir, reportName+".json")
+	args.JsonReportFile = utils.TryResolveFsPath(args.JsonReportFile)
+	args.HtmlReportFile = path.Join(args.ReportsDir, reportName+".html")
+	args.HtmlReportFile = utils.TryResolveFsPath(args.HtmlReportFile)
 
 	return args
 }
 
-func validate(args LaunchArgs) error {
-	// Validate build variant
+func validateExecArgs(args *ExecArgs) error {
+	// Build variant
 	if args.BuildVariant == "" {
-		return fmt.Errorf("'%s' can't be empty", OptBuildVariant)
+		return fmt.Errorf("'%s' cannot be empty", OptBuildVariant)
 
 		// TODO Wrapping is not playing well with cli/v3 package
 		// return exit.Wrap(
@@ -93,68 +115,70 @@ func validate(args LaunchArgs) error {
 		// )
 	}
 
+	// Project dir
+	info, err := os.Stat(args.ProjectDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("project directory `%s` does not exist: %v", args.ProjectDir, err)
+		}
+		return fmt.Errorf("failed to stat project directory `%s`: %v", args.ProjectDir, err)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("`%s` is not a directory", args.ProjectDir)
+	}
+
+	// Reports
+
 	return nil
 }
 
-type LaunchArgs struct {
-	Global args.GlobalLaunchArgs
+type ExecArgs struct {
+	ProjectDir string
+	ReportsDir string
 
-	ProjectDir   string
-	OutputDir    string
+	JsonReportFile string
+	HtmlReportFile string
+
 	BuildVariant string
 
-	Extras struct {
-		JsonReportFile string
-		HtmlReportFile string
-	}
+	OverwriteReport    bool
+	GenerateHtmlReport bool
 }
 
 func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
-	args := parseLaunchArgs(cmd)
-	err := validate(args)
+	args := parseExecArgs(cmd)
+	err := validateExecArgs(&args)
 	if err != nil {
 		return err
 	}
 
-	from, err := decodeProjectPath(cmd)
-	if err != nil {
-		return err
-	}
+	return execute(args)
+}
 
-	to, err := decodeTargetPath(cmd)
-	if err != nil {
-		return err
-	}
-
-	fWithName := cmd.String("with-name")
-	if fWithName == "" {
-		fWithName = "report"
-	}
-	reportFile := path.Join(to, fWithName+".lampa.json")
-	htmlReportFile := path.Join(to, fWithName+".lampa.html")
-
-	fmt.Printf("Project directory: %s\n", from)
+func execute(args ExecArgs) error {
+	fmt.Printf("Project directory: %s\n", args.ProjectDir)
 	// fmt.Printf("Report directory: %s\n", to)
-	fmt.Printf("Report file: %s\n", reportFile)
-
-	if cmd.Bool("with-html") {
-		fmt.Printf("HTML report file: %s\n", htmlReportFile)
+	fmt.Printf("Report file: %s\n", args.JsonReportFile)
+	if args.GenerateHtmlReport {
+		fmt.Printf("HTML report file: %s\n", args.HtmlReportFile)
 	}
 
-	if cmd.Bool("rewrite-report") {
+	reportFile := args.JsonReportFile
+	htmlReportFile := args.HtmlReportFile
+	if args.OverwriteReport {
 		out.PrintlnWarn("Existing report file(s) will be overwritten (if they exists)")
 	} else {
 		if _, err := os.Stat(reportFile); err == nil {
 			return fmt.Errorf("report file `%s` already exists", reportFile)
 		}
-		if cmd.Bool("with-html") {
+		if args.GenerateHtmlReport {
 			if _, err := os.Stat(htmlReportFile); err == nil {
 				return fmt.Errorf("HTML report file `%s` already exists", htmlReportFile)
 			}
 		}
 	}
 
-	gradlewPath := path.Join(from, "gradlew")
+	gradlewPath := path.Join(args.ProjectDir, "gradlew")
 	info, err := os.Stat(gradlewPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -179,13 +203,13 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 	}, func() (string, error) {
 		task := "bundle" + cases.Title(language.BritishEnglish).String(args.BuildVariant)
 		cmd := exec.Command(gradlewPath, "--no-daemon", "--console", "plain", "-q", task)
-		cmd.Dir = from
+		cmd.Dir = args.ProjectDir
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			return "", fmt.Errorf("failed to build app: %v\nOutput:\n%s", err, string(output))
 		}
 
-		bundleDir := path.Join(from, "app", "build", "outputs", "bundle", args.BuildVariant)
+		bundleDir := path.Join(args.ProjectDir, "app", "build", "outputs", "bundle", args.BuildVariant)
 
 		info, err := os.Stat(bundleDir)
 		if err != nil {
@@ -288,8 +312,8 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 			MsgAfterFail:    "Generating report: Failed.",
 		}, func() (report.Report, error) {
 			return collectReport(CollectReportArgs{
-				ProjectDir:   from,
-				ReportDir:    to,
+				ProjectDir:   args.ProjectDir,
+				ReportDir:    args.ReportsDir,
 				BuildVariant: args.BuildVariant,
 
 				PathToBundletool: pathToBundletool,
@@ -320,7 +344,7 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 	}
 	fmt.Printf("Report written to %s\n", reportFile)
 
-	if cmd.Bool("with-html") {
+	if args.GenerateHtmlReport {
 		reportHtml, err := GenerateHtmlReport(report)
 		if err != nil {
 			return fmt.Errorf("could not generate HTML report: %v", err)
@@ -469,56 +493,6 @@ type CollectReportArgs struct {
 	// PathToApk        string
 
 	GenerationTime time.Time
-}
-
-func decodeProjectPath(cmd *cli.Command) (string, error) {
-	path := cmd.String("from")
-	if path == "" {
-		return ".", nil
-	}
-
-	inf, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return "", fmt.Errorf("project directory `%s` does not exist", path)
-		} else {
-			return "", fmt.Errorf("internal error: %v", err)
-		}
-	}
-	if !inf.IsDir() {
-		return "", fmt.Errorf("error: `%s` is not a directory", path)
-	}
-
-	absolutePath, err := filepath.Abs(path)
-	if err != nil {
-		return path, nil
-	}
-	return absolutePath, nil
-}
-
-func decodeTargetPath(cmd *cli.Command) (string, error) {
-	path := cmd.String("to")
-	if path == "" {
-		return ".", nil
-	}
-
-	inf, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return "", fmt.Errorf("target directory `%s` does not exist", path)
-		} else {
-			return "", fmt.Errorf("internal error: %v", err)
-		}
-	}
-	if !inf.IsDir() {
-		return "", fmt.Errorf("`%s` is not a directory", path)
-	}
-
-	absolutePath, err := filepath.Abs(path)
-	if err != nil {
-		return path, nil
-	}
-	return absolutePath, nil
 }
 
 type SpinnerArgs struct {
