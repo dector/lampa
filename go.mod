@@ -8,6 +8,7 @@ require (
 	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.18.0
 	github.com/samber/lo v1.51.0
+	github.com/square/exit v1.3.0
 	github.com/urfave/cli/v3 v3.3.8
 	golang.org/x/text v0.24.0
 )

@@ -12,6 +12,13 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+func CreateCliCommand() *cli.Command {
+	return &cli.Command{
+		Name:   "compare",
+		Action: ActionCmdCompare,
+	}
+}
+
 func ActionCmdCompare(context context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 3 {
 		return fmt.Errorf("usage: lampa report1.json report2.json out.html")

@@ -4,9 +4,10 @@ import (
 	"context"
 	"os"
 
-	"lampa/cmd/cli/cli"
 	. "lampa/internal/globals"
 	"lampa/internal/out"
+
+	"github.com/square/exit"
 )
 
 func main() {
@@ -14,12 +15,14 @@ func main() {
 
 	G.Init()
 
-	cmd := cli.CreateCliCommand()
-	if err := cmd.Run(context.Background(), os.Args); err != nil {
+	cmd := CreateCliCommand()
+	err := cmd.Run(context.Background(), os.Args)
+	if err != nil {
 		out.PrintlnErr("\n%+v", err)
-		if errWithStack, ok := err.(interface{ StackTrace() any }); ok {
+		errWithStack, ok := err.(interface{ StackTrace() any })
+		if ok {
 			out.PrintlnErr("%+v", errWithStack.StackTrace())
 		}
-		os.Exit(1)
+		os.Exit(exit.NotOK)
 	}
 }

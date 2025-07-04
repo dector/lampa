@@ -30,6 +30,43 @@ import (
 	. "lampa/internal/globals"
 )
 
+func CreateCliCommand() *cli.Command {
+	return &cli.Command{
+		Name: "collect",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "from",
+				Usage: "specify project directory",
+			},
+			&cli.StringFlag{
+				Name:  "to",
+				Usage: "specify report directory",
+			},
+			&cli.StringFlag{
+				Name:  "variant",
+				Usage: "build variant to use",
+				Value: "release",
+			},
+			&cli.StringFlag{
+				Name:  "with-name",
+				Usage: "report file name (without extension)",
+				Value: "report",
+			},
+			&cli.BoolFlag{
+				Name:  "with-html",
+				Usage: "generate HTML report as well",
+				Value: false,
+			},
+
+			&cli.BoolFlag{
+				Name:  "rewrite-report",
+				Usage: "allow to rewrite report file if it already exists",
+			},
+		},
+		Action: CmdActionCollect,
+	}
+}
+
 func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 	buildVariant := cmd.String("variant")
 	if buildVariant == "" {
