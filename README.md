@@ -26,7 +26,20 @@ added to the build.
 
 ## Getting Started
 
+### Install
+
 Download latest version from [Releases page](https://github.com/dector/lampa/releases/latest).
+
+**or**
+
+for Linux/MacOS use Homebrew:
+
+``` shell
+brew tap dector/lampa https://github.com/dector/lampa
+brew install dector/lampa
+```
+
+### Runtime dependencies
 
 DX will be improved in the future but currently you need to:
 
