@@ -18,6 +18,13 @@ func main() {
 
 	G.Init()
 
+	if len(os.Args) == 2 {
+		cmd := os.Args[1]
+		if cmd == "version" || cmd == "--version" {
+			fmt.Printf("%s+%s\n", G.Version, G.BuildCommit)
+			os.Exit(exit.OK)
+		}
+	}
 	printHeader()
 
 	cmd := CreateCliCommand()
@@ -47,10 +54,11 @@ func printHeader() {
 		"╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝     ╚═╝  ╚═╝",
 	}
 
+	fmt.Println()
 	for _, line := range header {
 		fmt.Println(line)
 	}
-	fmt.Printf("%sv%s\n\n", spacer(header, version), version)
+	fmt.Printf("%sv%s\n", spacer(header, version), version)
 	fmt.Println()
 }
 

@@ -15,6 +15,7 @@ import (
 func CreateCliCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "compare",
+		Usage:  "generate comperative report between versions",
 		Action: ActionCmdCompare,
 	}
 }

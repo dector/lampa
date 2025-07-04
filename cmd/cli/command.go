@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"lampa/cmd/cli/collect"
 	"lampa/cmd/cli/compare"
-	. "lampa/internal/globals"
 	"lampa/internal/out"
 	"net/http"
 
@@ -17,6 +16,8 @@ import (
 func CreateCliCommand() *cli.Command {
 	cmd := &cli.Command{
 		Name: "lampa",
+		// Version: G.Version,
+		Usage: "Android releases analyzer",
 		Commands: []*cli.Command{
 			collect.CreateCliCommand(),
 			compare.CreateCliCommand(),
@@ -30,11 +31,9 @@ func CreateCliCommand() *cli.Command {
 
 func CreateVersionCommand() *cli.Command {
 	return &cli.Command{
-		Name: "version",
-		Action: func(ctx context.Context, c *cli.Command) error {
-			fmt.Println(G.Version)
-			return nil
-		},
+		Name:    "version",
+		Aliases: []string{"--version"},
+		Usage:   "show version and exit",
 	}
 }
 

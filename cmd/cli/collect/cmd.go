@@ -50,7 +50,8 @@ const (
 
 func CreateCliCommand() *cli.Command {
 	return &cli.Command{
-		Name: "collect",
+		Name:  "collect",
+		Usage: "generate project report",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  OptProjectDir,
