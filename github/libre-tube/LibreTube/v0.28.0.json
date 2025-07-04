@@ -1,0 +1,682 @@
+{
+  "v": "stats/0.0.1",
+  "Context": {
+    "Tool": {
+      "Name": "Lampa",
+      "Website": "https://github.com/dector/lampa",
+      "Sources": "https://github.com/dector/lampa",
+      "Version": "0.1.0-0.dev",
+      "BuildCommit": "0cdea49145b976958e6f27e14c19d5af71e031f6"
+    },
+    "Git": {
+      "Commit": "4445df6ede6cf0ae32e4477dc4793d0b40039ea3",
+      "Branch": "",
+      "Tag": "v0.28.0",
+      "CommitsAfterTag": 0,
+      "IsDirty": false
+    },
+    "GenerationTime": "2025-07-04T20:58:04Z"
+  },
+  "Build": {
+    "AabName": "app-release.aab",
+    "AabSha1": "31ff281e3b9849db40b8b81025b67109e4ddeab7",
+    "AabSize": "11619373",
+    "AppName": "LibreTube",
+    "ApplicationId": "com.github.libretube",
+    "VersionName": "0.28.0",
+    "VersionCode": "61",
+    "BuildVariant": "release",
+    "MinSdkVersion": "26",
+    "TargetSdkVersion": "34",
+    "CompileSdkVersion": "34",
+    "Dependencies": {
+      "Compile": [
+        {
+          "Group": "androidx.activity",
+          "Name": "activity",
+          "Version": "1.9.3"
+        },
+        {
+          "Group": "androidx.activity",
+          "Name": "activity-ktx",
+          "Version": "1.9.3"
+        },
+        {
+          "Group": "androidx.annotation",
+          "Name": "annotation",
+          "Version": "1.9.1"
+        },
+        {
+          "Group": "androidx.annotation",
+          "Name": "annotation-experimental",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.annotation",
+          "Name": "annotation-jvm",
+          "Version": "1.9.1"
+        },
+        {
+          "Group": "androidx.appcompat",
+          "Name": "appcompat",
+          "Version": "1.7.0"
+        },
+        {
+          "Group": "androidx.appcompat",
+          "Name": "appcompat-resources",
+          "Version": "1.7.0"
+        },
+        {
+          "Group": "androidx.arch.core",
+          "Name": "core-common",
+          "Version": "2.2.0"
+        },
+        {
+          "Group": "androidx.arch.core",
+          "Name": "core-runtime",
+          "Version": "2.2.0"
+        },
+        {
+          "Group": "androidx.cardview",
+          "Name": "cardview",
+          "Version": "1.0.0"
+        },
+        {
+          "Group": "androidx.collection",
+          "Name": "collection",
+          "Version": "1.5.0"
+        },
+        {
+          "Group": "androidx.collection",
+          "Name": "collection-jvm",
+          "Version": "1.5.0"
+        },
+        {
+          "Group": "androidx.collection",
+          "Name": "collection-ktx",
+          "Version": "1.5.0"
+        },
+        {
+          "Group": "androidx.constraintlayout",
+          "Name": "constraintlayout",
+          "Version": "2.2.1"
+        },
+        {
+          "Group": "androidx.coordinatorlayout",
+          "Name": "coordinatorlayout",
+          "Version": "1.1.0"
+        },
+        {
+          "Group": "androidx.core",
+          "Name": "core",
+          "Version": "1.13.1"
+        },
+        {
+          "Group": "androidx.core",
+          "Name": "core-ktx",
+          "Version": "1.13.1"
+        },
+        {
+          "Group": "androidx.core",
+          "Name": "core-splashscreen",
+          "Version": "1.0.1"
+        },
+        {
+          "Group": "androidx.cursoradapter",
+          "Name": "cursoradapter",
+          "Version": "1.0.0"
+        },
+        {
+          "Group": "androidx.customview",
+          "Name": "customview",
+          "Version": "1.1.0"
+        },
+        {
+          "Group": "androidx.databinding",
+          "Name": "viewbinding",
+          "Version": "8.6.1"
+        },
+        {
+          "Group": "androidx.documentfile",
+          "Name": "documentfile",
+          "Version": "1.0.0"
+        },
+        {
+          "Group": "androidx.drawerlayout",
+          "Name": "drawerlayout",
+          "Version": "1.1.1"
+        },
+        {
+          "Group": "androidx.dynamicanimation",
+          "Name": "dynamicanimation",
+          "Version": "1.0.0"
+        },
+        {
+          "Group": "androidx.fragment",
+          "Name": "fragment",
+          "Version": "1.8.6"
+        },
+        {
+          "Group": "androidx.fragment",
+          "Name": "fragment-ktx",
+          "Version": "1.8.6"
+        },
+        {
+          "Group": "androidx.interpolator",
+          "Name": "interpolator",
+          "Version": "1.0.0"
+        },
+        {
+          "Group": "androidx.legacy",
+          "Name": "legacy-support-core-utils",
+          "Version": "1.0.0"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-common",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-livedata",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-livedata-core",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-livedata-core-ktx",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-livedata-ktx",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-runtime",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-runtime-android",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-runtime-ktx",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-runtime-ktx-android",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-service",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-viewmodel",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-viewmodel-android",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-viewmodel-ktx",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.lifecycle",
+          "Name": "lifecycle-viewmodel-savedstate",
+          "Version": "2.8.7"
+        },
+        {
+          "Group": "androidx.loader",
+          "Name": "loader",
+          "Version": "1.0.0"
+        },
+        {
+          "Group": "androidx.localbroadcastmanager",
+          "Name": "localbroadcastmanager",
+          "Version": "1.0.0"
+        },
+        {
+          "Group": "androidx.media",
+          "Name": "media",
+          "Version": "1.7.0"
+        },
+        {
+          "Group": "androidx.media3",
+          "Name": "media3-common",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.media3",
+          "Name": "media3-container",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.media3",
+          "Name": "media3-database",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.media3",
+          "Name": "media3-datasource",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.media3",
+          "Name": "media3-decoder",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.media3",
+          "Name": "media3-exoplayer",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.media3",
+          "Name": "media3-exoplayer-dash",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.media3",
+          "Name": "media3-exoplayer-hls",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.media3",
+          "Name": "media3-extractor",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.media3",
+          "Name": "media3-session",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.media3",
+          "Name": "media3-ui",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.navigation",
+          "Name": "navigation-common",
+          "Version": "2.8.9"
+        },
+        {
+          "Group": "androidx.navigation",
+          "Name": "navigation-common-ktx",
+          "Version": "2.8.9"
+        },
+        {
+          "Group": "androidx.navigation",
+          "Name": "navigation-fragment",
+          "Version": "2.8.9"
+        },
+        {
+          "Group": "androidx.navigation",
+          "Name": "navigation-fragment-ktx",
+          "Version": "2.8.9"
+        },
+        {
+          "Group": "androidx.navigation",
+          "Name": "navigation-runtime",
+          "Version": "2.8.9"
+        },
+        {
+          "Group": "androidx.navigation",
+          "Name": "navigation-runtime-ktx",
+          "Version": "2.8.9"
+        },
+        {
+          "Group": "androidx.navigation",
+          "Name": "navigation-ui",
+          "Version": "2.8.9"
+        },
+        {
+          "Group": "androidx.navigation",
+          "Name": "navigation-ui-ktx",
+          "Version": "2.8.9"
+        },
+        {
+          "Group": "androidx.paging",
+          "Name": "paging-common",
+          "Version": "3.3.6"
+        },
+        {
+          "Group": "androidx.paging",
+          "Name": "paging-common-ktx",
+          "Version": "3.3.6"
+        },
+        {
+          "Group": "androidx.paging",
+          "Name": "paging-runtime",
+          "Version": "3.3.6"
+        },
+        {
+          "Group": "androidx.paging",
+          "Name": "paging-runtime-ktx",
+          "Version": "3.3.6"
+        },
+        {
+          "Group": "androidx.preference",
+          "Name": "preference",
+          "Version": "1.2.1"
+        },
+        {
+          "Group": "androidx.preference",
+          "Name": "preference-ktx",
+          "Version": "1.2.1"
+        },
+        {
+          "Group": "androidx.print",
+          "Name": "print",
+          "Version": "1.0.0"
+        },
+        {
+          "Group": "androidx.profileinstaller",
+          "Name": "profileinstaller",
+          "Version": "1.4.1"
+        },
+        {
+          "Group": "androidx.recyclerview",
+          "Name": "recyclerview",
+          "Version": "1.3.0"
+        },
+        {
+          "Group": "androidx.resourceinspection",
+          "Name": "resourceinspection-annotation",
+          "Version": "1.0.1"
+        },
+        {
+          "Group": "androidx.room",
+          "Name": "room-common",
+          "Version": "2.6.1"
+        },
+        {
+          "Group": "androidx.room",
+          "Name": "room-ktx",
+          "Version": "2.6.1"
+        },
+        {
+          "Group": "androidx.room",
+          "Name": "room-runtime",
+          "Version": "2.6.1"
+        },
+        {
+          "Group": "androidx.savedstate",
+          "Name": "savedstate",
+          "Version": "1.2.1"
+        },
+        {
+          "Group": "androidx.savedstate",
+          "Name": "savedstate-ktx",
+          "Version": "1.2.1"
+        },
+        {
+          "Group": "androidx.slidingpanelayout",
+          "Name": "slidingpanelayout",
+          "Version": "1.2.0"
+        },
+        {
+          "Group": "androidx.sqlite",
+          "Name": "sqlite",
+          "Version": "2.4.0"
+        },
+        {
+          "Group": "androidx.sqlite",
+          "Name": "sqlite-framework",
+          "Version": "2.4.0"
+        },
+        {
+          "Group": "androidx.startup",
+          "Name": "startup-runtime",
+          "Version": "1.1.1"
+        },
+        {
+          "Group": "androidx.swiperefreshlayout",
+          "Name": "swiperefreshlayout",
+          "Version": "1.1.0"
+        },
+        {
+          "Group": "androidx.transition",
+          "Name": "transition",
+          "Version": "1.5.0"
+        },
+        {
+          "Group": "androidx.vectordrawable",
+          "Name": "vectordrawable",
+          "Version": "1.1.0"
+        },
+        {
+          "Group": "androidx.vectordrawable",
+          "Name": "vectordrawable-animated",
+          "Version": "1.1.0"
+        },
+        {
+          "Group": "androidx.versionedparcelable",
+          "Name": "versionedparcelable",
+          "Version": "1.1.1"
+        },
+        {
+          "Group": "androidx.viewpager",
+          "Name": "viewpager",
+          "Version": "1.0.0"
+        },
+        {
+          "Group": "androidx.viewpager2",
+          "Name": "viewpager2",
+          "Version": "1.0.0"
+        },
+        {
+          "Group": "androidx.work",
+          "Name": "work-runtime",
+          "Version": "2.9.1"
+        },
+        {
+          "Group": "androidx.work",
+          "Name": "work-runtime-ktx",
+          "Version": "2.9.1"
+        },
+        {
+          "Group": "com.github.libre-tube",
+          "Name": "NewPipeExtractor",
+          "Version": "bc9a5a220e"
+        },
+        {
+          "Group": "com.github.libre-tube.NewPipeExtractor",
+          "Name": "NewPipeExtractor",
+          "Version": "bc9a5a220e"
+        },
+        {
+          "Group": "com.github.libre-tube.NewPipeExtractor",
+          "Name": "extractor",
+          "Version": "bc9a5a220e"
+        },
+        {
+          "Group": "com.github.libre-tube.NewPipeExtractor",
+          "Name": "timeago-parser",
+          "Version": "bc9a5a220e"
+        },
+        {
+          "Group": "com.google.android.material",
+          "Name": "material",
+          "Version": "1.12.0"
+        },
+        {
+          "Group": "com.google.guava",
+          "Name": "failureaccess",
+          "Version": "1.0.2"
+        },
+        {
+          "Group": "com.google.guava",
+          "Name": "guava",
+          "Version": "33.0.0-android"
+        },
+        {
+          "Group": "com.google.guava",
+          "Name": "listenablefuture",
+          "Version": "9999.0-empty-to-avoid-conflict-with-guava"
+        },
+        {
+          "Group": "com.squareup.okhttp3",
+          "Name": "logging-interceptor",
+          "Version": "4.12.0"
+        },
+        {
+          "Group": "com.squareup.okhttp3",
+          "Name": "okhttp",
+          "Version": "4.12.0"
+        },
+        {
+          "Group": "com.squareup.okio",
+          "Name": "okio",
+          "Version": "3.9.1"
+        },
+        {
+          "Group": "com.squareup.retrofit2",
+          "Name": "converter-kotlinx-serialization",
+          "Version": "2.11.0"
+        },
+        {
+          "Group": "com.squareup.retrofit2",
+          "Name": "retrofit",
+          "Version": "2.11.0"
+        },
+        {
+          "Group": "io.coil-kt.coil3",
+          "Name": "coil",
+          "Version": "3.0.4"
+        },
+        {
+          "Group": "io.coil-kt.coil3",
+          "Name": "coil-android",
+          "Version": "3.0.4"
+        },
+        {
+          "Group": "io.coil-kt.coil3",
+          "Name": "coil-core",
+          "Version": "3.0.4"
+        },
+        {
+          "Group": "io.coil-kt.coil3",
+          "Name": "coil-network-core",
+          "Version": "3.0.4"
+        },
+        {
+          "Group": "io.coil-kt.coil3",
+          "Name": "coil-network-okhttp",
+          "Version": "3.0.4"
+        },
+        {
+          "Group": "io.coil-kt.coil3",
+          "Name": "coil-network-okhttp-jvm",
+          "Version": "3.0.4"
+        },
+        {
+          "Group": "org.jetbrains",
+          "Name": "annotations",
+          "Version": "23.0.0"
+        },
+        {
+          "Group": "org.jetbrains.kotlin",
+          "Name": "kotlin-android-extensions-runtime",
+          "Version": "1.9.25"
+        },
+        {
+          "Group": "org.jetbrains.kotlin",
+          "Name": "kotlin-parcelize-runtime",
+          "Version": "1.9.25"
+        },
+        {
+          "Group": "org.jetbrains.kotlin",
+          "Name": "kotlin-stdlib",
+          "Version": "2.0.21"
+        },
+        {
+          "Group": "org.jetbrains.kotlin",
+          "Name": "kotlin-stdlib-common",
+          "Version": "2.0.21"
+        },
+        {
+          "Group": "org.jetbrains.kotlin",
+          "Name": "kotlin-stdlib-jdk7",
+          "Version": "1.8.22"
+        },
+        {
+          "Group": "org.jetbrains.kotlin",
+          "Name": "kotlin-stdlib-jdk8",
+          "Version": "1.8.22"
+        },
+        {
+          "Group": "org.jetbrains.kotlinx",
+          "Name": "kotlinx-coroutines-android",
+          "Version": "1.9.0"
+        },
+        {
+          "Group": "org.jetbrains.kotlinx",
+          "Name": "kotlinx-coroutines-bom",
+          "Version": "1.9.0"
+        },
+        {
+          "Group": "org.jetbrains.kotlinx",
+          "Name": "kotlinx-coroutines-core",
+          "Version": "1.9.0"
+        },
+        {
+          "Group": "org.jetbrains.kotlinx",
+          "Name": "kotlinx-coroutines-core-jvm",
+          "Version": "1.9.0"
+        },
+        {
+          "Group": "org.jetbrains.kotlinx",
+          "Name": "kotlinx-datetime",
+          "Version": "0.6.2"
+        },
+        {
+          "Group": "org.jetbrains.kotlinx",
+          "Name": "kotlinx-datetime-jvm",
+          "Version": "0.6.2"
+        },
+        {
+          "Group": "org.jetbrains.kotlinx",
+          "Name": "kotlinx-serialization-bom",
+          "Version": "1.6.3"
+        },
+        {
+          "Group": "org.jetbrains.kotlinx",
+          "Name": "kotlinx-serialization-core",
+          "Version": "1.6.3"
+        },
+        {
+          "Group": "org.jetbrains.kotlinx",
+          "Name": "kotlinx-serialization-core-jvm",
+          "Version": "1.6.3"
+        },
+        {
+          "Group": "org.jetbrains.kotlinx",
+          "Name": "kotlinx-serialization-json",
+          "Version": "1.6.3"
+        },
+        {
+          "Group": "org.jetbrains.kotlinx",
+          "Name": "kotlinx-serialization-json-jvm",
+          "Version": "1.6.3"
+        }
+      ]
+    }
+  }
+}
