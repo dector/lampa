@@ -43,6 +43,7 @@ tasks:
 
   gen:
     cmds:
+      - mkdir -p internal/globals/gen
       - go tool templ generate
       - go generate ./...
     silent: true
