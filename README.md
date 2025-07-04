@@ -26,15 +26,82 @@ added to the build.
 
 ## Getting Started
 
-_Description TBD._
+Download latest version from [Releases page](https://github.com/dector/lampa/releases/latest).
+
+DX will be improved in the future but currently you need to:
+
+  - Have [Java](https://adoptium.net) installed.
+  - Have [Android SDK](https://developer.android.com/studio) installed - for now we need `aapt2` but I have plans to change it in the future.
+  - Have [Bundletool](https://github.com/google/bundletool/releases/latest) installed.
 
 ## How To Use
 
-_Description TBD._
+All commands are executed inside the root folder of Android project
+(unless you explicitly specify path to project).
+
+Remember that you can always use `lampa help` if you forget something.
+
+### Generate JSON report for current version
+
+You will need to use this report for comparative HTML report.
+
+``` shell
+export BUNDLETOOL_JAR="~/Apps/bundletool-all-1.18.1.jar"
+export ANDROID_SDK_ROOT="~/Apps/AndroidSDK"
+
+lampa collect
+```
+
+If program finished successfully - you can find report file
+`report.lampa.json` in the project folder.
+
+Be aware that by-default program is not rewriting report if it exists.
+But you can opt-in for such behavior explicitly by adding `--overwrite` flag:
+
+``` shell
+lampa collect --overwrite
+```
+
+Other useful flags are:
+
+  - `--project <project-dir>` - specify path to project root explicitly.
+  - `--to-dir <out-dir>` - change the location of the report(s).
+  - `--variant <gradle-variant>` - specify custom build variant that you use in Gradle. Might be useful if you have flavors etc.
+  - `--format html`/`--format json,html` - if you need only HTML report or both.
+  - `--file-name <report-file-name>` - if you need to customize generated report filename (without extension).
+
+### Generate only HTML report for current version
+
+``` shell
+export BUNDLETOOL_JAR="~/Apps/bundletool-all-1.18.1.jar"
+export ANDROID_SDK_ROOT="~/Apps/AndroidSDK"
+
+lampa collect --format html
+```
+
+### Generate comparative HTML report for two releases
+
+First, you need to generate JSON report for release 1 (e.g. `1.json`).
+Then, you need to generate JSON report for release 2 (e.g. `2.json`).
+
+After, you need to generate comparative report with `lampa compare`.
+
+For example:
+
+``` shell
+git checkout v0.28.0
+lampa collect --to-dir build --file-name v0.28.0
+
+git checkout v0.28.1
+lampa collect --to-dir build --file-name v0.28.1
+
+lampa compare build/v0.28.0.json build/v0.28.1.json build/diff.html
+```
 
 ## Contributing
 
-_Description TBD._
+I will add this section latest. For now feel free to contact me directly or
+open new [discussion](https://github.com/dector/lampa/discussions).
 
 ## License
 
