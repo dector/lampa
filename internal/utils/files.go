@@ -19,3 +19,19 @@ func TryResolveFsPath(s string) string {
 
 	return s
 }
+
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func IsDir(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return info.IsDir()
+}

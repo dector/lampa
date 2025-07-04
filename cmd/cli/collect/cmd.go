@@ -32,6 +32,11 @@ import (
 )
 
 const (
+	EnvAndroidSdkRoot = "ANDROID_SDK_ROOT"
+	EnvBundletoolJar  = "BUNDLETOOL_JAR"
+)
+
+const (
 	OptProjectDir   = "from"
 	OptReportsDir   = "to-dir"
 	OptBuildVariant = "variant"
@@ -100,6 +105,11 @@ func parseExecArgs(c *cli.Command) ExecArgs {
 	args.HtmlReportFile = path.Join(args.ReportsDir, reportName+".html")
 	args.HtmlReportFile = utils.TryResolveFsPath(args.HtmlReportFile)
 
+	args.GradlewPath = path.Join(args.ProjectDir, "gradlew")
+
+	args.AndroidSdkPath = utils.TryResolveFsPath(os.Getenv(EnvAndroidSdkRoot))
+	args.BundletoolPath = utils.TryResolveFsPath(os.Getenv(EnvBundletoolJar))
+
 	return args
 }
 
@@ -128,6 +138,65 @@ func validateExecArgs(args *ExecArgs) error {
 	}
 
 	// Reports
+	if utils.FileExists(args.JsonReportFile) {
+		if args.OverwriteReport {
+			if utils.IsDir(args.JsonReportFile) {
+				return fmt.Errorf("report file `%s` is a directory", args.JsonReportFile)
+			}
+		} else {
+			return fmt.Errorf("report file `%s` already exists", args.JsonReportFile)
+		}
+	}
+	if args.GenerateHtmlReport {
+		if utils.FileExists(args.HtmlReportFile) {
+			if args.OverwriteReport {
+				if utils.IsDir(args.HtmlReportFile) {
+					return fmt.Errorf("HTML report file `%s` is a directory", args.HtmlReportFile)
+				}
+			} else {
+				return fmt.Errorf("HTML report file `%s` already exists", args.HtmlReportFile)
+			}
+		}
+	}
+
+	// Bundletool
+	if args.BundletoolPath == "" {
+		return fmt.Errorf("%s environment variable is not set", EnvBundletoolJar)
+	}
+	if !utils.FileExists(args.BundletoolPath) {
+		return fmt.Errorf("bundletool jar file `%s` does not exist", args.BundletoolPath)
+	}
+	if utils.IsDir(args.BundletoolPath) {
+		return fmt.Errorf("bundletool jar file `%s` is a directory", args.BundletoolPath)
+	}
+
+	// Aapt
+	if args.AndroidSdkPath == "" {
+		return fmt.Errorf("%s environment variable is not set", EnvAndroidSdkRoot)
+	}
+	if !utils.FileExists(args.AndroidSdkPath) {
+		return fmt.Errorf("Android SDK path `%s` does not exist", args.AndroidSdkPath)
+	}
+	if !utils.IsDir(args.AndroidSdkPath) {
+		return fmt.Errorf("Android SDK path `%s` is not a directory", args.AndroidSdkPath)
+	}
+	args.AaptPath, err = findAaptExecutable(args.AndroidSdkPath)
+	if err != nil {
+		return err
+	}
+
+	// Gradlew
+	info, err = os.Stat(args.GradlewPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("%s does not exist", args.GradlewPath)
+		} else {
+			return fmt.Errorf("could not stat %s: %v", args.GradlewPath, err)
+		}
+	}
+	if info.IsDir() {
+		return fmt.Errorf("%s exists but is a directory, not a file", args.GradlewPath)
+	}
 
 	return nil
 }
@@ -143,6 +212,11 @@ type ExecArgs struct {
 
 	OverwriteReport    bool
 	GenerateHtmlReport bool
+
+	BundletoolPath string
+	AndroidSdkPath string
+	AaptPath       string
+	GradlewPath    string
 }
 
 func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
@@ -156,94 +230,46 @@ func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
 }
 
 func execute(args ExecArgs) error {
+	// Print run info
 	fmt.Printf("Project directory: %s\n", args.ProjectDir)
 	// fmt.Printf("Report directory: %s\n", to)
 	fmt.Printf("Report file: %s\n", args.JsonReportFile)
 	if args.GenerateHtmlReport {
 		fmt.Printf("HTML report file: %s\n", args.HtmlReportFile)
 	}
+	fmt.Println()
 
-	reportFile := args.JsonReportFile
-	htmlReportFile := args.HtmlReportFile
+	// Print warnings
+	hasWarningSection := false
 	if args.OverwriteReport {
-		out.PrintlnWarn("Existing report file(s) will be overwritten (if they exists)")
-	} else {
-		if _, err := os.Stat(reportFile); err == nil {
-			return fmt.Errorf("report file `%s` already exists", reportFile)
+		if utils.FileExists(args.JsonReportFile) {
+			hasWarningSection = true
+			out.PrintlnWarn("Existing report file will be overwritten")
 		}
 		if args.GenerateHtmlReport {
-			if _, err := os.Stat(htmlReportFile); err == nil {
-				return fmt.Errorf("HTML report file `%s` already exists", htmlReportFile)
+			if utils.FileExists(args.HtmlReportFile) {
+				hasWarningSection = true
+				out.PrintlnWarn("Existing HTML report file will be overwritten")
 			}
 		}
 	}
-
-	gradlewPath := path.Join(args.ProjectDir, "gradlew")
-	info, err := os.Stat(gradlewPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return fmt.Errorf("%s does not exist", gradlewPath)
-		} else {
-			return fmt.Errorf("could not stat %s: %v", gradlewPath, err)
-		}
-	}
-	if info.IsDir() {
-		return fmt.Errorf("%s exists but is a directory, not a file", gradlewPath)
+	if hasWarningSection {
+		fmt.Println()
 	}
 
-	pathToBundletool, err := detectBundletoolExecutable()
-	if err != nil {
-		return err
-	}
-
-	pathToAab, err := DynamicSpinner(SpinnerArgs{
+	_, err := DynamicSpinner(SpinnerArgs{
 		Msg:             "Building...",
 		MsgAfterSuccess: "Building: Done.",
 		MsgAfterFail:    "Building: Failed.",
 	}, func() (string, error) {
 		task := "bundle" + cases.Title(language.BritishEnglish).String(args.BuildVariant)
-		cmd := exec.Command(gradlewPath, "--no-daemon", "--console", "plain", "-q", task)
-		cmd.Dir = args.ProjectDir
-		output, err := cmd.CombinedOutput()
+		output, err := executeGradleTask(args, task)
 		if err != nil {
 			return "", fmt.Errorf("failed to build app: %v\nOutput:\n%s", err, string(output))
 		}
 
-		bundleDir := path.Join(args.ProjectDir, "app", "build", "outputs", "bundle", args.BuildVariant)
-
-		info, err := os.Stat(bundleDir)
-		if err != nil {
-			if os.IsNotExist(err) {
-				return "", fmt.Errorf("AAB directory `%s` does not exist", bundleDir)
-			}
-			return "", fmt.Errorf("error accessing AAB directory `%s`: %v", bundleDir, err)
-		}
-		if !info.IsDir() {
-			return "", fmt.Errorf("AAB directory `%s` is not a directory", bundleDir)
-		}
-
-		files, err := os.ReadDir(bundleDir)
-		if err != nil {
-			return "", fmt.Errorf("could not read AAB directory `%s`: %v", bundleDir, err)
-		}
-		var aabFilePath string
-		for _, file := range files {
-			if !file.IsDir() && strings.HasSuffix(file.Name(), ".aab") {
-				aabFilePath = path.Join(bundleDir, file.Name())
-				break
-			}
-		}
-		if aabFilePath == "" {
-			return "", fmt.Errorf("no AAB file found in `%s`", bundleDir)
-		}
-
-		return aabFilePath, nil
+		return "", nil
 	})
-	if err != nil {
-		return err
-	}
-
-	pathToAppt, err := detectAaptExecutable()
 	if err != nil {
 		return err
 	}
@@ -305,30 +331,63 @@ func execute(args ExecArgs) error {
 	// 	return err
 	// }
 
+	err = StepReport(args)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func StepReport(args ExecArgs) error {
+	pathToAab, err := findAabFile(args)
+	if err != nil {
+		return err
+	}
 	report, err := DynamicSpinner(
 		SpinnerArgs{
 			Msg:             "Generating report...",
 			MsgAfterSuccess: "Generating report: Done.",
 			MsgAfterFail:    "Generating report: Failed.",
 		}, func() (report.Report, error) {
-			return collectReport(CollectReportArgs{
-				ProjectDir:   args.ProjectDir,
-				ReportDir:    args.ReportsDir,
-				BuildVariant: args.BuildVariant,
+			return collectReport(args, pathToAab)
+			// return collectReport(CollectReportArgs{
+			// 	ProjectDir:   args.ProjectDir,
+			// 	ReportDir:    args.ReportsDir,
+			// 	BuildVariant: args.BuildVariant,
 
-				PathToBundletool: pathToBundletool,
-				PathToAapt:       pathToAppt,
-				PathToAab:        *pathToAab,
-				// PathToApk:        *pathToApk,
+			// 	PathToBundletool: args.BundletoolPath,
+			// 	PathToAapt:       args.ApptPath,
+			// 	PathToAab:        pathToAab,
+			// 	// PathToApk:        *pathToApk,
 
-				GenerationTime: time.Now(),
-			})
+			// })
 		})
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(reportFile)
+	// Json Report
+	err = WriteJsonReportToFile(report, args)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("\nReport written to %s\n", args.JsonReportFile)
+
+	// Html Report
+	if args.GenerateHtmlReport {
+		err = WriteHtmlReportToFile(report, args)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Report written to %s\n", args.HtmlReportFile)
+	}
+
+	return nil
+}
+
+func WriteJsonReportToFile(report *report.Report, args ExecArgs) error {
+	file, err := os.Create(args.JsonReportFile)
 	if err != nil {
 		return fmt.Errorf("could not create report file: %v", err)
 	}
@@ -342,24 +401,23 @@ func execute(args ExecArgs) error {
 	if _, err := file.Write(reportJson); err != nil {
 		return fmt.Errorf("could not write report: %v", err)
 	}
-	fmt.Printf("Report written to %s\n", reportFile)
 
-	if args.GenerateHtmlReport {
-		reportHtml, err := GenerateHtmlReport(report)
-		if err != nil {
-			return fmt.Errorf("could not generate HTML report: %v", err)
-		}
-		file, err := os.Create(htmlReportFile)
-		if err != nil {
-			return fmt.Errorf("could not create HTML report file: %v", err)
-		}
-		defer file.Close()
+	return nil
+}
 
-		if _, err := file.Write([]byte(reportHtml)); err != nil {
-			return fmt.Errorf("could not write HTML report: %v", err)
-		}
+func WriteHtmlReportToFile(report *report.Report, args ExecArgs) error {
+	reportHtml, err := GenerateHtmlReport(report)
+	if err != nil {
+		return fmt.Errorf("could not generate HTML report: %v", err)
+	}
+	file, err := os.Create(args.HtmlReportFile)
+	if err != nil {
+		return fmt.Errorf("could not create HTML report file: %v", err)
+	}
+	defer file.Close()
 
-		fmt.Printf("Report written to %s\n", htmlReportFile)
+	if _, err := file.Write([]byte(reportHtml)); err != nil {
+		return fmt.Errorf("could not write HTML report: %v", err)
 	}
 
 	return nil
@@ -374,7 +432,7 @@ func GenerateHtmlReport(r *report.Report) (string, error) {
 	return w.String(), nil
 }
 
-func collectReport(args CollectReportArgs) (report.Report, error) {
+func collectReport(args ExecArgs, pathToAab string) (report.Report, error) {
 	result := report.Report{
 		Version: "stats/0.0.1-SNAPSHOT",
 	}
@@ -387,15 +445,12 @@ func collectReport(args CollectReportArgs) (report.Report, error) {
 
 	configurationName := args.BuildVariant + "CompileClasspath"
 
-	err = analyzeBuild(&result, args)
+	err = analyzeBuild(&result, args, pathToAab)
 	if err != nil {
 		return report.Report{}, err
 	}
 
-	gradlewPath := path.Join(args.ProjectDir, "gradlew")
-	cmd := exec.Command(gradlewPath, "--no-daemon", "--console", "plain", "-q", "app:dependencies", "--configuration", configurationName)
-	cmd.Dir = args.ProjectDir
-	output, err := cmd.CombinedOutput()
+	output, err := executeGradleTask(args, "app:dependencies", "--configuration", configurationName)
 	if err != nil {
 		return report.Report{}, fmt.Errorf("failed to execute gradlew: %v\nOutput:\n%s", err, string(output))
 	}
@@ -415,7 +470,7 @@ func collectReport(args CollectReportArgs) (report.Report, error) {
 	return result, nil
 }
 
-func parseContext(args CollectReportArgs) (report.ContextSegment, error) {
+func parseContext(args ExecArgs) (report.ContextSegment, error) {
 	result := report.ContextSegment{
 		Tool: report.ToolSegment{
 			Name:        "Lampa",
@@ -424,7 +479,7 @@ func parseContext(args CollectReportArgs) (report.ContextSegment, error) {
 			Version:     G.Version,
 			BuildCommit: G.BuildCommit,
 		},
-		GenerationTime: args.GenerationTime.UTC().Format(time.RFC3339),
+		GenerationTime: time.Now().UTC().Format(time.RFC3339),
 	}
 
 	_, err := exec.LookPath("git")
@@ -482,19 +537,6 @@ func parseContext(args CollectReportArgs) (report.ContextSegment, error) {
 	return result, nil
 }
 
-type CollectReportArgs struct {
-	ProjectDir   string
-	ReportDir    string
-	BuildVariant string
-
-	PathToBundletool string
-	PathToAab        string
-	PathToAapt       string
-	// PathToApk        string
-
-	GenerationTime time.Time
-}
-
 type SpinnerArgs struct {
 	Msg             string
 	MsgAfterSuccess string
@@ -522,9 +564,9 @@ func DynamicSpinner[T any](args SpinnerArgs, action func() (T, error)) (*T, erro
 	return &data, err
 }
 
-func analyzeBuild(result *report.Report, args CollectReportArgs) error {
+func analyzeBuild(result *report.Report, args ExecArgs, pathToAab string) error {
 	result.Build.BuildVariant = args.BuildVariant
-	result.Build.AabName = filepath.Base(args.PathToAab)
+	result.Build.AabName = filepath.Base(pathToAab)
 	// result.Build.ApkName = filepath.Base(args.PathToApk)
 
 	// file, err := os.Open(args.PathToApk)
@@ -545,7 +587,7 @@ func analyzeBuild(result *report.Report, args CollectReportArgs) error {
 	// 	return fmt.Errorf("could not stat APK file: %v", err)
 	// }
 
-	fileAab, err := os.Open(args.PathToAab)
+	fileAab, err := os.Open(pathToAab)
 	if err == nil {
 		defer fileAab.Close()
 		hasher := sha1.New()
@@ -556,7 +598,7 @@ func analyzeBuild(result *report.Report, args CollectReportArgs) error {
 		return err
 	}
 
-	infoAab, err := os.Stat(args.PathToAab)
+	infoAab, err := os.Stat(pathToAab)
 	if err != nil {
 		return fmt.Errorf("could not stat AAB file: %v", err)
 	}
@@ -568,7 +610,7 @@ func analyzeBuild(result *report.Report, args CollectReportArgs) error {
 	// Get other data from APK
 
 	// Analyze AAB manifest using bundletool
-	cmd := exec.Command("java", "-jar", args.PathToBundletool, "dump", "manifest", "--bundle", args.PathToAab)
+	cmd := exec.Command("java", "-jar", args.BundletoolPath, "dump", "manifest", "--bundle", pathToAab)
 	cmd.Dir = args.ProjectDir
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -605,7 +647,7 @@ func analyzeBuild(result *report.Report, args CollectReportArgs) error {
 	result.Build.TargetSdkVersion = manifestData.UsesSdk.TargetSdkVersion
 	result.Build.CompileSdkVersion = manifestData.BuildVersionCode
 
-	err = addDataFromApk(result, args)
+	err = addDataFromApk(result, args, pathToAab)
 	if err != nil {
 		return err
 	}
@@ -667,7 +709,7 @@ func analyzeBuild(result *report.Report, args CollectReportArgs) error {
 	return nil
 }
 
-func addDataFromApk(result *report.Report, args CollectReportArgs) error {
+func addDataFromApk(result *report.Report, args ExecArgs, pathToAab string) error {
 	tempDir, err := os.MkdirTemp("", fmt.Sprintf("lampa-%x", sha1.Sum([]byte(args.ProjectDir))))
 	if err != nil {
 		return fmt.Errorf("failed to create temp dir for universal APK: %w", err)
@@ -678,8 +720,8 @@ func addDataFromApk(result *report.Report, args CollectReportArgs) error {
 
 	// Use bundletool to build the universal APK from the AAB
 	cmd := exec.Command(
-		"java", "-jar", args.PathToBundletool, "build-apks",
-		"--bundle", args.PathToAab,
+		"java", "-jar", args.BundletoolPath, "build-apks",
+		"--bundle", pathToAab,
 		"--output", universalApkPath+".apks",
 		"--mode", "universal",
 		"--overwrite",
@@ -734,7 +776,7 @@ func addDataFromApk(result *report.Report, args CollectReportArgs) error {
 	}
 
 	// Use aapt2 to extract the application label (app name) from the APK
-	cmdAapt := exec.Command(args.PathToAapt, "dump", "badging", universalApkPath)
+	cmdAapt := exec.Command(args.AaptPath, "dump", "badging", universalApkPath)
 	cmdAapt.Dir = args.ProjectDir
 	outputAapt, err := cmdAapt.CombinedOutput()
 	if err != nil {
@@ -759,53 +801,75 @@ func addDataFromApk(result *report.Report, args CollectReportArgs) error {
 	return nil
 }
 
-func detectBundletoolExecutable() (string, error) {
-	envBundletool := os.Getenv("BUNDLETOOL_JAR")
-	if envBundletool == "" {
-		return "", fmt.Errorf("BUNDLETOOL_JAR environment variable is not set")
-	}
-	envBundletool = strings.ReplaceAll(envBundletool, "~", os.Getenv("HOME"))
-	envBundletool, err := filepath.Abs(envBundletool)
-	if err != nil {
-		return "", fmt.Errorf("failed to get absolute path of BUNDLETOOL_JAR: %w", err)
-	}
-	if _, err := os.Stat(envBundletool); err != nil {
-		return "", fmt.Errorf("bundletool jar file `%s` does not exist: %v", envBundletool, err)
-	}
-	return envBundletool, nil
-}
+func findAaptExecutable(sdkRoot string) (string, error) {
+	aaptPath := filepath.Join(sdkRoot, "build-tools")
+	entries, err := os.ReadDir(aaptPath)
 
-func detectAaptExecutable() (string, error) {
-	envSdkRoot := os.Getenv("ANDROID_SDK_ROOT")
-	if envSdkRoot == "" {
-		return "", fmt.Errorf("ANDROID_SDK_ROOT environment variable is not set")
-	}
-	envSdkRoot = strings.ReplaceAll(envSdkRoot, "~", os.Getenv("HOME"))
-	envSdkRoot, err := filepath.Abs(envSdkRoot)
-	if err != nil {
-		return "", fmt.Errorf("failed to get absolute path of ANDROID_SDK_ROOT: %w", err)
-	}
-	if sdkRoot := envSdkRoot; sdkRoot != "" {
-		aaptPath := filepath.Join(sdkRoot, "build-tools")
-		entries, err := os.ReadDir(aaptPath)
-		if err == nil {
-			// Find the latest build-tools version
-			var latest string
-			for _, entry := range entries {
-				if entry.IsDir() {
-					// TODO improve
-					if latest == "" || entry.Name() > latest {
-						latest = entry.Name()
-					}
-				}
-			}
-			if latest != "" {
-				aaptFullPath := filepath.Join(aaptPath, latest, "aapt2")
-				if _, err := os.Stat(aaptFullPath); err == nil {
-					return aaptFullPath, nil
+	if err == nil {
+		// Find the latest build-tools version
+		var latest string
+		for _, entry := range entries {
+			if entry.IsDir() {
+				// TODO improve
+				if latest == "" || entry.Name() > latest {
+					latest = entry.Name()
 				}
 			}
 		}
+		if latest != "" {
+			aaptFullPath := filepath.Join(aaptPath, latest, "aapt2")
+			if _, err := os.Stat(aaptFullPath); err == nil {
+				return aaptFullPath, nil
+			}
+		}
 	}
-	return "", fmt.Errorf("aapt executable not found in %s", envSdkRoot)
+
+	return "", fmt.Errorf("aapt executable not found in %s", sdkRoot)
+}
+
+func findAabFile(args ExecArgs) (string, error) {
+	bundleDir := path.Join(args.ProjectDir, "app", "build", "outputs", "bundle", args.BuildVariant)
+
+	info, err := os.Stat(bundleDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("AAB directory `%s` does not exist", bundleDir)
+		}
+		return "", fmt.Errorf("error accessing AAB directory `%s`: %v", bundleDir, err)
+	}
+	if !info.IsDir() {
+		return "", fmt.Errorf("AAB directory `%s` is not a directory", bundleDir)
+	}
+
+	files, err := os.ReadDir(bundleDir)
+	if err != nil {
+		return "", fmt.Errorf("could not read AAB directory `%s`: %v", bundleDir, err)
+	}
+	var aabFilePath string
+	for _, file := range files {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".aab") {
+			aabFilePath = path.Join(bundleDir, file.Name())
+			break
+		}
+	}
+	if aabFilePath == "" {
+		return "", fmt.Errorf("no AAB file found in `%s`", bundleDir)
+	}
+
+	return aabFilePath, nil
+}
+
+func executeGradleTask(args ExecArgs, gradleArgs ...string) ([]byte, error) {
+	cmd := exec.Command(
+		args.GradlewPath,
+		append(
+			[]string{
+				"--no-daemon", "--console",
+				"plain", "-q",
+			},
+			gradleArgs...,
+		)...,
+	)
+	cmd.Dir = args.ProjectDir
+	return cmd.CombinedOutput()
 }
