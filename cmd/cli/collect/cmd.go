@@ -458,7 +458,7 @@ func GenerateHtmlReport(r *report.Report) (string, error) {
 
 func collectReport(args ExecArgs, pathToAab string) (report.Report, error) {
 	result := report.Report{
-		Version: "0.0.1",
+		Version: "stats/0.0.1",
 	}
 
 	context, err := parseContext(args)
