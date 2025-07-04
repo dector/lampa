@@ -24,6 +24,7 @@ import (
 
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
+	"github.com/samber/lo"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -40,10 +41,10 @@ const (
 	OptProjectDir   = "from"
 	OptReportsDir   = "to-dir"
 	OptBuildVariant = "variant"
+	OptFormat       = "format"
 
 	OptRewriteReport = "rewrite-report"
 	OptWithName      = "with-name"
-	OptWithHtml      = "with-html"
 )
 
 func CreateCliCommand() *cli.Command {
@@ -57,7 +58,7 @@ func CreateCliCommand() *cli.Command {
 			},
 			&cli.StringFlag{
 				Name:  OptReportsDir,
-				Usage: "report directory root",
+				Usage: "directory where to put report",
 				Value: ".",
 			},
 			&cli.StringFlag{
@@ -70,10 +71,10 @@ func CreateCliCommand() *cli.Command {
 				Usage: "report file name (without extension)",
 				Value: "report.lampa",
 			},
-			&cli.BoolFlag{
-				Name:  OptWithHtml,
-				Usage: "generate HTML report as well",
-				Value: false,
+			&cli.StringFlag{
+				Name:  OptFormat,
+				Usage: "report formats to produce delimited with ',' (json,html)",
+				Value: "json",
 			},
 
 			&cli.BoolFlag{
@@ -97,7 +98,10 @@ func parseExecArgs(c *cli.Command) ExecArgs {
 	args.BuildVariant = strings.TrimSpace(args.BuildVariant)
 
 	args.OverwriteReport = c.Bool(OptRewriteReport)
-	args.GenerateHtmlReport = c.Bool(OptWithHtml)
+
+	formats := strings.Split(c.String(OptFormat), ",")
+	args.Formats.Json = lo.Contains(formats, "json")
+	args.Formats.Html = lo.Contains(formats, "html")
 
 	reportName := c.String(OptWithName)
 	args.JsonReportFile = path.Join(args.ReportsDir, reportName+".json")
@@ -138,16 +142,18 @@ func validateExecArgs(args *ExecArgs) error {
 	}
 
 	// Reports
-	if utils.FileExists(args.JsonReportFile) {
-		if args.OverwriteReport {
-			if utils.IsDir(args.JsonReportFile) {
-				return fmt.Errorf("report file `%s` is a directory", args.JsonReportFile)
+	if args.Formats.Json {
+		if utils.FileExists(args.JsonReportFile) {
+			if args.OverwriteReport {
+				if utils.IsDir(args.JsonReportFile) {
+					return fmt.Errorf("report file `%s` is a directory", args.JsonReportFile)
+				}
+			} else {
+				return fmt.Errorf("report file `%s` already exists", args.JsonReportFile)
 			}
-		} else {
-			return fmt.Errorf("report file `%s` already exists", args.JsonReportFile)
 		}
 	}
-	if args.GenerateHtmlReport {
+	if args.Formats.Html {
 		if utils.FileExists(args.HtmlReportFile) {
 			if args.OverwriteReport {
 				if utils.IsDir(args.HtmlReportFile) {
@@ -157,6 +163,9 @@ func validateExecArgs(args *ExecArgs) error {
 				return fmt.Errorf("HTML report file `%s` already exists", args.HtmlReportFile)
 			}
 		}
+	}
+	if !args.Formats.Any() {
+		return fmt.Errorf("No report formats selected. Choose at least one.")
 	}
 
 	// Bundletool
@@ -201,6 +210,15 @@ func validateExecArgs(args *ExecArgs) error {
 	return nil
 }
 
+type FormatArgs struct {
+	Json bool
+	Html bool
+}
+
+func (self FormatArgs) Any() bool {
+	return self.Json || self.Html
+}
+
 type ExecArgs struct {
 	ProjectDir string
 	ReportsDir string
@@ -210,8 +228,9 @@ type ExecArgs struct {
 
 	BuildVariant string
 
-	OverwriteReport    bool
-	GenerateHtmlReport bool
+	OverwriteReport bool
+
+	Formats FormatArgs
 
 	BundletoolPath string
 	AndroidSdkPath string
@@ -234,7 +253,7 @@ func execute(args ExecArgs) error {
 	fmt.Printf("Project directory: %s\n", args.ProjectDir)
 	// fmt.Printf("Report directory: %s\n", to)
 	fmt.Printf("Report file: %s\n", args.JsonReportFile)
-	if args.GenerateHtmlReport {
+	if args.Formats.Html {
 		fmt.Printf("HTML report file: %s\n", args.HtmlReportFile)
 	}
 	fmt.Println()
@@ -242,11 +261,13 @@ func execute(args ExecArgs) error {
 	// Print warnings
 	hasWarningSection := false
 	if args.OverwriteReport {
-		if utils.FileExists(args.JsonReportFile) {
-			hasWarningSection = true
-			out.PrintlnWarn("Existing report file will be overwritten")
+		if args.Formats.Json {
+			if utils.FileExists(args.JsonReportFile) {
+				hasWarningSection = true
+				out.PrintlnWarn("Existing report file will be overwritten")
+			}
 		}
-		if args.GenerateHtmlReport {
+		if args.Formats.Html {
 			if utils.FileExists(args.HtmlReportFile) {
 				hasWarningSection = true
 				out.PrintlnWarn("Existing HTML report file will be overwritten")
@@ -368,14 +389,16 @@ func StepReport(args ExecArgs) error {
 	}
 
 	// Json Report
-	err = WriteJsonReportToFile(report, args)
-	if err != nil {
-		return err
+	if args.Formats.Json {
+		err = WriteJsonReportToFile(report, args)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("\nReport written to %s\n", args.JsonReportFile)
 	}
-	fmt.Printf("\nReport written to %s\n", args.JsonReportFile)
 
 	// Html Report
-	if args.GenerateHtmlReport {
+	if args.Formats.Html {
 		err = WriteHtmlReportToFile(report, args)
 		if err != nil {
 			return err

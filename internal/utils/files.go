@@ -7,6 +7,10 @@ import (
 )
 
 func TryResolveFsPath(s string) string {
+	if s == "" {
+		return ""
+	}
+
 	s = filepath.Clean(s)
 	if strings.HasPrefix(s, "~") {
 		s = filepath.Join(os.Getenv("HOME"), s[1:])
