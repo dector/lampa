@@ -38,13 +38,13 @@ const (
 )
 
 const (
-	OptProjectDir   = "from"
+	OptProjectDir   = "project"
 	OptReportsDir   = "to-dir"
 	OptBuildVariant = "variant"
 	OptFormat       = "format"
 
-	OptRewriteReport = "rewrite-report"
-	OptWithName      = "with-name"
+	OptOverwriteReport = "overwrite"
+	OptFileName        = "file-name"
 )
 
 func CreateCliCommand() *cli.Command {
@@ -67,7 +67,7 @@ func CreateCliCommand() *cli.Command {
 				Value: "release",
 			},
 			&cli.StringFlag{
-				Name:  OptWithName,
+				Name:  OptFileName,
 				Usage: "report file name (without extension)",
 				Value: "report.lampa",
 			},
@@ -78,8 +78,8 @@ func CreateCliCommand() *cli.Command {
 			},
 
 			&cli.BoolFlag{
-				Name:  OptRewriteReport,
-				Usage: "allow overriding report file if it exists",
+				Name:  OptOverwriteReport,
+				Usage: "allow overwriting report file if it exists",
 			},
 		},
 		Action: CmdActionCollect,
@@ -97,13 +97,13 @@ func parseExecArgs(c *cli.Command) ExecArgs {
 	args.BuildVariant = c.String(OptBuildVariant)
 	args.BuildVariant = strings.TrimSpace(args.BuildVariant)
 
-	args.OverwriteReport = c.Bool(OptRewriteReport)
+	args.OverwriteReport = c.Bool(OptOverwriteReport)
 
 	formats := strings.Split(c.String(OptFormat), ",")
 	args.Formats.Json = lo.Contains(formats, "json")
 	args.Formats.Html = lo.Contains(formats, "html")
 
-	reportName := c.String(OptWithName)
+	reportName := c.String(OptFileName)
 	args.JsonReportFile = path.Join(args.ReportsDir, reportName+".json")
 	args.JsonReportFile = utils.TryResolveFsPath(args.JsonReportFile)
 	args.HtmlReportFile = path.Join(args.ReportsDir, reportName+".html")
