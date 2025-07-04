@@ -1,0 +1,41 @@
+name: Latest build
+
+on:
+  push:
+    branches:
+      - trunk
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Set up Task
+        uses: arduino/setup-task@v2
+
+      - name: Build all binaries
+        run: task build:all
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: snapshot
+          prerelease: true
+          files: |
+            out/release/lampa-linux-amd64
+            out/release/lampa-linux-arm64
+            out/release/lampa-darwin-amd64
+            out/release/lampa-darwin-arm64
+            out/release/lampa-windows-amd64.exe
+            out/release/lampa-windows-arm64.exe
