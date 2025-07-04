@@ -6,7 +6,7 @@
       "Website": "https://github.com/dector/lampa",
       "Sources": "https://github.com/dector/lampa",
       "Version": "0.1.0-0.dev",
-      "BuildCommit": "1e44ec152e1eea34477e7728a2f71eea96134b29"
+      "BuildCommit": "0cdea49145b976958e6f27e14c19d5af71e031f6"
     },
     "Git": {
       "Commit": "4445df6ede6cf0ae32e4477dc4793d0b40039ea3",
@@ -15,7 +15,7 @@
       "CommitsAfterTag": 0,
       "IsDirty": false
     },
-    "GenerationTime": "2025-07-04T19:50:19Z"
+    "GenerationTime": "2025-07-04T20:58:04Z"
   },
   "Build": {
     "AabName": "app-release.aab",
