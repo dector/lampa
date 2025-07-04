@@ -1199,11 +1199,11 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 			}
 			ctx = templ.InitializeContext(ctx)
 
-			d1 := lo.Map(r1.Build.CompileDependencies, func(d string, _ int) Dep {
-				return parseDep(d)
+			d1 := lo.Map(r1.Build.Dependencies.Compile, func(d report.CoordinatedDependency, _ int) Dep {
+				return parseDep(d.String())
 			})
-			d2 := lo.Map(r2.Build.CompileDependencies, func(d string, _ int) Dep {
-				return parseDep(d)
+			d2 := lo.Map(r2.Build.Dependencies.Compile, func(d report.CoordinatedDependency, _ int) Dep {
+				return parseDep(d.String())
 			})
 			depsNew := findNewDeps(d1, d2)
 			sort.Slice(depsNew, func(i, j int) bool {

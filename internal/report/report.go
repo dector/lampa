@@ -1,5 +1,7 @@
 package report
 
+import "fmt"
+
 type Report struct {
 	Version string `json:"v"`
 
@@ -35,9 +37,19 @@ type BuildSegment struct {
 	TargetSdkVersion  string
 	CompileSdkVersion string
 
-	Locales []string
+	// Locales []string
 
-	CompileDependencies []string
+	Dependencies DependenciesSegment
+}
+
+type DependenciesSegment struct {
+	Compile []CoordinatedDependency
+}
+
+type CoordinatedDependency struct {
+	Group   string
+	Name    string
+	Version string
 }
 
 type ContextSegment struct {
@@ -53,4 +65,8 @@ type GitSegment struct {
 	Tag             string
 	CommitsAfterTag uint
 	IsDirty         bool
+}
+
+func (self CoordinatedDependency) String() string {
+	return fmt.Sprintf("%s:%s:%s", self.Group, self.Name, self.Version)
 }

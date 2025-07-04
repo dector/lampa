@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"lampa/internal/report"
 	"lampa/internal/templates/icons"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -275,12 +274,11 @@ templ DependenciesSection(r *report.Report) {
 	}) {
 		@SubSection("Compile-Time", 1) {
 			{{
-				deps := r.Build.CompileDependencies
-				sort.Strings(deps)
+				deps := r.Build.Dependencies.Compile
 			}}
 			@InfoItem("Total", len(deps))
 			for _, d := range deps {
-				@DependencyItem(d)
+				@DependencyItem(d.String())
 			}
 		}
 	}

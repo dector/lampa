@@ -98,10 +98,10 @@ type Dependency struct {
 }
 
 func parseDependencies(report report.Report) ([]Dependency, error) {
-	result := make([]Dependency, 0, len(report.Build.CompileDependencies))
+	result := make([]Dependency, 0, len(report.Build.Dependencies.Compile))
 
-	for _, depStr := range report.Build.CompileDependencies {
-		parts := strings.Split(depStr, ":")
+	for _, depStr := range report.Build.Dependencies.Compile {
+		parts := strings.Split(depStr.String(), ":")
 		if len(parts) == 3 {
 			result = append(result, Dependency{
 				Group:   parts[0],

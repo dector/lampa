@@ -18,6 +18,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -457,7 +458,7 @@ func GenerateHtmlReport(r *report.Report) (string, error) {
 
 func collectReport(args ExecArgs, pathToAab string) (report.Report, error) {
 	result := report.Report{
-		Version: "stats/0.0.1-SNAPSHOT",
+		Version: "0.0.1",
 	}
 
 	context, err := parseContext(args)
@@ -486,9 +487,30 @@ func collectReport(args ExecArgs, pathToAab string) (report.Report, error) {
 	}
 
 	for _, info := range tree.Summary {
-		d := info.String()
-		result.Build.CompileDependencies = append(result.Build.CompileDependencies, d)
+		d := report.CoordinatedDependency{
+			Group:   info.GroupID,
+			Name:    info.ArtifactID,
+			Version: info.Version,
+		}
+		result.Build.Dependencies.Compile = append(result.Build.Dependencies.Compile, d)
 	}
+	slices.SortFunc(result.Build.Dependencies.Compile, func(a, b report.CoordinatedDependency) int {
+		if a.Group > b.Group {
+			return 1
+		} else if a.Group < b.Group {
+			return -1
+		} else if a.Name > b.Name {
+			return 1
+		} else if a.Name < b.Name {
+			return -1
+		} else if a.Version > b.Version {
+			return 1
+		} else if a.Version < b.Version {
+			return -1
+		} else {
+			return 0
+		}
+	})
 
 	return result, nil
 }
