@@ -70,6 +70,8 @@ Other useful flags are:
   - `--format html`/`--format json,html` - if you need only HTML report or both.
   - `--file-name <report-file-name>` - if you need to customize generated report filename (without extension).
 
+[Sample report](https://github.com/dector/lampa/blob/trunk/samples/report/libretube-0.28.0.json).
+
 ### Generate only HTML report for current version
 
 ``` shell
@@ -78,6 +80,8 @@ export ANDROID_SDK_ROOT="~/Apps/AndroidSDK"
 
 lampa collect --format html
 ```
+
+[Sample report](http://htmlpreview.github.io/?https://raw.githubusercontent.com/dector/lampa/refs/heads/trunk/samples/report/libretube-0.28.0.html).
 
 ### Generate comparative HTML report for two releases
 
@@ -97,6 +101,8 @@ lampa collect --to-dir build --file-name v0.28.1
 
 lampa compare build/v0.28.0.json build/v0.28.1.json build/diff.html
 ```
+
+[Sample report](http://htmlpreview.github.io/?https://raw.githubusercontent.com/dector/lampa/refs/heads/trunk/samples/report/libretube-diff.html).
 
 ## Contributing
 
