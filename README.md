@@ -1,13 +1,3 @@
-<p align="center">
-  <img width="500" height="500" src="docs/lampa-logo.webp" alt="Lampa logo">
-</p>
-
-# Lampa
-
-<p align="center">
-    <a href="https://mastodon.online/search?q=from%3A%40dector+%23lampa&type=statuses">Updates on Mastodon</a>
-</p>
-
 > [!WARNING]
 > Pre-1.0 software: Lampa is currently in the early stages of development.
 >
@@ -17,6 +7,29 @@
 >
 > But if you're feeling adventurous - feel free to try it, your feedback is highly appreciated!
 > Please report any issues you encounter, and feel free to share your ideas in [Discussions](https://github.com/dector/lampa/discussions) tab — though I can't guarantee immediate prioritization.
+
+<p align="center">
+  <img width="500" height="500" src="docs/lampa-logo.webp" alt="Lampa logo">
+</p>
+
+<p align="center">
+    <a href="https://mastodon.online/search?q=from%3A%40dector+%23lampa&type=statuses">Updates on Mastodon</a>
+</p>
+
+# Lampa
+
+## Contents
+
+- [What is this](#what-is-this)
+- [Getting Started](#getting-started)
+  - [Install](#install)
+  - [Runtime dependencies](#runtime-dependencies)
+- [How To Use](#how-to-use)
+  - [Generate JSON report for current version](#generate-json-report-for-current-version)
+  - [Generate only HTML report for current version](#generate-only-html-report-for-current-version)
+  - [Generate comparative HTML report for two releases](#generate-comparative-html-report-for-two-releases)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## What is this
 
