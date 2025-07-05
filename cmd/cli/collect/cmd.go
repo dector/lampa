@@ -170,6 +170,12 @@ func validateExecArgs(args *ExecArgs) error {
 		return fmt.Errorf("No report formats selected. Choose at least one.")
 	}
 
+	// Java
+	cmd := exec.Command("java", "--version")
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("java not found or not executable: %v", err)
+	}
+
 	// Bundletool
 	if args.BundletoolPath == "" {
 		return fmt.Errorf("%s environment variable is not set", EnvBundletoolJar)
