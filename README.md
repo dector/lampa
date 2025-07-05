@@ -28,6 +28,7 @@
   - [Generate JSON report for current version](#generate-json-report-for-current-version)
   - [Generate only HTML report for current version](#generate-only-html-report-for-current-version)
   - [Generate comparative HTML report for two releases](#generate-comparative-html-report-for-two-releases)
+  - [GitHub Action](#github-action)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -129,6 +130,19 @@ lampa compare build/v0.28.0.json build/v0.28.1.json build/diff.html
 ```
 
 [Sample report](https://dector.space/lampa/github/libre-tube/LibreTube/v0.28.0..v0.28.1.html).
+
+### GitHub Action
+
+GitHub Action:
+```
+dector/run-lampa@v1
+```
+
+You can use this GitHub Action to integrate Lampa into your CI/CD pipeline.
+
+See detailed instructions on [GitHub Marketplace](https://github.com/marketplace/actions/run-lampa).
+
+[Production-ready example workflow](https://github.com/marketplace/actions/run-lampa#example-workflow)
 
 ## Contributing
 
