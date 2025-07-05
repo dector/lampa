@@ -1,0 +1,162 @@
+package components
+
+import (
+	"fmt"
+	"lampa/internal/templates/icons"
+	"strings"
+)
+
+templ CardIcon(name string, size int) {
+	switch name {
+		case "package":
+			@icons.Package(size)
+		case "lamp":
+			@icons.Lamp(size)
+		case "blocks":
+			@icons.Blocks(size)
+		default:
+			@icons.Hash(size)
+	}
+}
+
+templ Divider() {
+	<div class="h-[1px] shrink-0 bg-gray-300 mx-2"></div>
+}
+
+templ ReportLayout() {
+	<div class="min-h-screen bg-gray-100 py-8 px-4">
+		<div class="max-w-4xl mx-auto space-y-8">
+			{ children... }
+		</div>
+	</div>
+}
+
+type SectionCardArg struct {
+	Name string
+	Icon string
+
+	IsCollapsible bool
+	IsCollapsed   bool
+}
+
+templ Card(arg SectionCardArg) {
+	{{
+		xData := fmt.Sprintf("{collapsed:%v}", arg.IsCollapsed)
+	}}
+	<div
+		class="rounded-lg border border-gray-100 bg-white text-card-foreground shadow-sm"
+		x-data={ xData }
+	>
+		{ children... }
+	</div>
+}
+
+templ CardHeader() {
+	<div class="flex flex-col space-y-1.5 p-6">
+		{ children... }
+	</div>
+}
+
+templ CardContent() {
+	<div class="p-6 pt-0" x-show="!collapsed">
+		<div class="flex flex-col space-y-4">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ CardTitle(classes string, arg SectionCardArg) {
+	{{
+		expansionClasses := ""
+		// if arg.IsCollapsible {
+		expansionClasses = "cursor-pointer"
+		// }
+
+		onClick := ""
+		// if arg.IsCollapsible {
+		onClick = `collapsed = !collapsed`
+		// }
+	}}
+	<h3
+		class={ "text-2xl font-semibold leading-none tracking-tight",
+		classes,
+		expansionClasses }
+		x-on:click={ onClick }
+	>
+		{ children... }
+		<span class="text-xs font-normal tracking-normal text-gray-400 group-open:hidden" x-show="collapsed">Click to expand</span>
+	</h3>
+}
+
+templ SectionCard(arg SectionCardArg) {
+	@Card(arg) {
+		@CardHeader() {
+			@CardTitle("flex items-center gap-2", arg) {
+				@CardIcon(arg.Icon, 5)
+				{ arg.Name }
+			}
+		}
+		@CardContent() {
+			{ children... }
+		}
+	}
+}
+
+templ SubSection(name string, columns int) {
+	<div>
+		if name != "" {
+			<h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+				@icons.Hasher(5)
+				// <Icon class={`w-5 h-5 ${iconColor}`} />
+				{ name }
+			</h3>
+		}
+		{{
+			colsClasses := fmt.Sprintf("grid-cols-1 md:grid-cols-%d", columns)
+		}}
+		<div class={ "grid gap-6", colsClasses }>
+			// <div class="flex flex-col space-y-4">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ InfoItem(name string, value any) {
+	<div class="flex items-center gap-3">
+		<span class="text-gray-500">
+			@icons.Hash(4)
+		</span>
+		<div>
+			<div class="text-sm font-medium text-gray-900">{ name }</div>
+			// <div class={ `text-sm text-gray-600 ${isHash ? 'font-mono break-all text-xs' : ''}` }>
+			<div class={ "text-sm text-gray-600" }>
+				{{
+				s := Str(value)
+
+				isUrl := strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://")
+				}}
+				if isUrl {
+					<a
+						class="hover:text-orange-500"
+						href={ s }
+						referrerpolicy="no-referrer"
+						target="_blank"
+					>{ s }</a>
+				} else {
+					{ s }
+				}
+			</div>
+		</div>
+	</div>
+}
+
+func Str(value any) string {
+	switch v := value.(type) {
+	case uint:
+		return fmt.Sprintf("%d", v)
+	case int:
+		return fmt.Sprintf("%d", v)
+	}
+
+	return fmt.Sprintf("%s", value)
+}

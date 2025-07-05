@@ -3,10 +3,10 @@ package pages
 import (
 	"fmt"
 	"lampa/internal/report"
+	"lampa/internal/templates"
+	"lampa/internal/templates/components"
 	"lampa/internal/templates/icons"
-	"strconv"
 	"strings"
-	"time"
 )
 
 templ CollectHtml(r *report.Report) {
@@ -14,7 +14,7 @@ templ CollectHtml(r *report.Report) {
 		title := fmt.Sprintf("%s %s+%s :: Lampa Report", r.Build.AppName, r.Build.VersionName, r.Build.VersionCode)
 	}}
 	@HtmlPage(title) {
-		@layout() {
+		@components.ReportLayout() {
 			// 	<div>with { r.Context.Tool.Name } { r.Context.Tool.Version } ({ r.Context.Tool.BuildCommit })</div>
 			// HEADER
 			<div class="text-center space-y-2">
@@ -43,240 +43,74 @@ templ CollectHtml(r *report.Report) {
 					<p class="flex gap-1 items-center justify-center">
 						on
 						@icons.Calendar(4)
-						{ formatGenerationTime(r.Context.GenerationTime) }
+						{ templates.FormatGenerationTime(r.Context.GenerationTime) }
 						UTC
 					</p>
 				</div>
 				// <div class="text-gray-300">with { r.Context.Tool.Name } { r.Context.Tool.Version } ({ r.Context.Tool.BuildCommit })</div>
 			</div>
 			// Build section
-			@SectionCard(SectionCardArg{
+			@components.SectionCard(components.SectionCardArg{
 				Name: "Build",
 				Icon: "package",
 			}) {
-				@SubSection("Application", 2) {
-					@InfoItem("Application Id", r.Build.ApplicationId)
-					@InfoItem("Build Variant", r.Build.BuildVariant)
-					@InfoItem("Version Name", r.Build.VersionName)
-					@InfoItem("Version Code", r.Build.VersionCode)
+				@components.SubSection("Application", 2) {
+					@components.InfoItem("Application Id", r.Build.ApplicationId)
+					@components.InfoItem("Build Variant", r.Build.BuildVariant)
+					@components.InfoItem("Version Name", r.Build.VersionName)
+					@components.InfoItem("Version Code", r.Build.VersionCode)
 				}
-				@Divider()
-				@SubSection("SDK", 2) {
-					@InfoItem("Min SDK", r.Build.MinSdkVersion)
-					@InfoItem("Target SDK", r.Build.TargetSdkVersion)
-					@InfoItem("Compile SDK", r.Build.CompileSdkVersion)
+				@components.Divider()
+				@components.SubSection("SDK", 2) {
+					@components.InfoItem("Min SDK", r.Build.MinSdkVersion)
+					@components.InfoItem("Target SDK", r.Build.TargetSdkVersion)
+					@components.InfoItem("Compile SDK", r.Build.CompileSdkVersion)
 				}
-				@Divider()
-				@SubSection("Git", 2) {
-					@InfoItem("Branch", r.Context.Git.Branch)
-					@InfoItem("Tag", r.Context.Git.Tag)
-					@InfoItem("Commit", r.Context.Git.Commit)
-					@InfoItem("Commits after Tag", r.Context.Git.CommitsAfterTag)
+				@components.Divider()
+				@components.SubSection("Git", 2) {
+					@components.InfoItem("Branch", r.Context.Git.Branch)
+					@components.InfoItem("Tag", r.Context.Git.Tag)
+					@components.InfoItem("Commit", r.Context.Git.Commit)
+					@components.InfoItem("Commits after Tag", r.Context.Git.CommitsAfterTag)
 				}
-				@Divider()
-				@SubSection("File", 2) {
-					@InfoItem("Name", r.Build.AabName)
-					@InfoItem("Size", formatFileSize(r.Build.AabSize))
-					@InfoItem("SHA1", r.Build.AabSha1)
+				@components.Divider()
+				@components.SubSection("File", 2) {
+					@components.InfoItem("Name", r.Build.AabName)
+					@components.InfoItem("Size", templates.FormatFileSize(r.Build.AabSize))
+					@components.InfoItem("SHA1", r.Build.AabSha1)
 				}
 			}
 			@DependenciesSection(r)
-			@SectionCard(SectionCardArg{
+			@components.SectionCard(components.SectionCardArg{
 				Name:          "Tool",
 				Icon:          "lamp",
 				IsCollapsible: true,
 				IsCollapsed:   true,
 			}) {
-				@SubSection("", 2) {
-					@InfoItem("Name", r.Context.Tool.Name)
-					@InfoItem("Tool Version", r.Context.Tool.Version)
-					@InfoItem("Build Commit", r.Context.Tool.BuildCommit)
-					@InfoItem("Format Version", r.Version)
-					@InfoItem("Website", r.Context.Tool.Website)
-					@InfoItem("Sources", r.Context.Tool.Sources)
+				@components.SubSection("", 2) {
+					@components.InfoItem("Name", r.Context.Tool.Name)
+					@components.InfoItem("Tool Version", r.Context.Tool.Version)
+					@components.InfoItem("Build Commit", r.Context.Tool.BuildCommit)
+					@components.InfoItem("Format Version", r.Version)
+					@components.InfoItem("Website", r.Context.Tool.Website)
+					@components.InfoItem("Sources", r.Context.Tool.Sources)
 				}
 			}
 		}
 	}
-}
-
-templ layout() {
-	<div class="min-h-screen bg-gray-100 py-8 px-4">
-		<div class="max-w-4xl mx-auto space-y-8">
-			{ children... }
-		</div>
-	</div>
-}
-
-func formatGenerationTime(s string) string {
-	t, _ := time.Parse(time.RFC3339, s)
-	return t.Format("January 2, 2006 at 15:04:05")
-}
-
-templ Card(arg SectionCardArg) {
-	{{
-		xData := fmt.Sprintf("{collapsed:%v}", arg.IsCollapsed)
-	}}
-	<div
-		class="rounded-lg border border-gray-100 bg-white text-card-foreground shadow-sm"
-		x-data={ xData }
-	>
-		{ children... }
-	</div>
-}
-
-templ CardHeader() {
-	<div class="flex flex-col space-y-1.5 p-6">
-		{ children... }
-	</div>
-}
-
-templ CardTitle(classes string, arg SectionCardArg) {
-	{{
-		expansionClasses := ""
-		// if arg.IsCollapsible {
-		expansionClasses = "cursor-pointer"
-		// }
-
-		onClick := ""
-		// if arg.IsCollapsible {
-		onClick = `collapsed = !collapsed`
-		// }
-	}}
-	<h3
-		class={ "text-2xl font-semibold leading-none tracking-tight",
-		classes,
-		expansionClasses }
-		x-on:click={ onClick }
-	>
-		{ children... }
-		<span class="text-xs font-normal tracking-normal text-gray-400 group-open:hidden" x-show="collapsed">Click to expand</span>
-	</h3>
-}
-
-templ CardContent() {
-	<div class="p-6 pt-0" x-show="!collapsed">
-		<div class="flex flex-col space-y-4">
-			{ children... }
-		</div>
-	</div>
-}
-
-type SectionCardArg struct {
-	Name string
-	Icon string
-
-	IsCollapsible bool
-	IsCollapsed   bool
-}
-
-templ CardIcon(name string, size int) {
-	switch name {
-		case "package":
-			@icons.Package(size)
-		case "lamp":
-			@icons.Lamp(size)
-		case "blocks":
-			@icons.Blocks(size)
-		default:
-			@icons.Hash(size)
-	}
-}
-
-templ SectionCard(arg SectionCardArg) {
-	@Card(arg) {
-		@CardHeader() {
-			@CardTitle("flex items-center gap-2", arg) {
-				@CardIcon(arg.Icon, 5)
-				{ arg.Name }
-			}
-		}
-		@CardContent() {
-			{ children... }
-		}
-	}
-}
-
-templ Divider() {
-	<div class="h-[1px] shrink-0 bg-gray-300 mx-2"></div>
-}
-
-templ SubSection(name string, columns int) {
-	<div>
-		if name != "" {
-			<h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-				@icons.Hasher(5)
-				// <Icon class={`w-5 h-5 ${iconColor}`} />
-				{ name }
-			</h3>
-		}
-		{{
-			colsClasses := fmt.Sprintf("grid-cols-1 md:grid-cols-%d", columns)
-		}}
-		<div class={ "grid gap-6", colsClasses }>
-			// <div class="flex flex-col space-y-4">
-			{ children... }
-		</div>
-	</div>
-}
-
-templ InfoItem(name string, value any) {
-	<div class="flex items-center gap-3">
-		<span class="text-gray-500">
-			@icons.Hash(4)
-		</span>
-		<div>
-			<div class="text-sm font-medium text-gray-900">{ name }</div>
-			// <div class={ `text-sm text-gray-600 ${isHash ? 'font-mono break-all text-xs' : ''}` }>
-			<div class={ "text-sm text-gray-600" }>
-				{{
-					s := ""
-					switch v := value.(type) {
-					case uint:
-						s = fmt.Sprintf("%d", v)
-					case int:
-						s = fmt.Sprintf("%d", v)
-					default:
-						s = fmt.Sprintf("%s", value)
-					}
-
-					isUrl := strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://")
-				}}
-				if isUrl {
-					<a
-						class="hover:text-orange-500"
-						href={ s }
-						referrerpolicy="no-referrer"
-						target="_blank"
-					>{ s }</a>
-				} else {
-					{ s }
-				}
-			</div>
-		</div>
-	</div>
-}
-
-func formatFileSize(sizeBytes string) string {
-	size, err := strconv.Atoi(sizeBytes)
-	if err != nil {
-		return "??"
-	}
-
-	return fmt.Sprintf("%.2f MB", float64(size)/(1024*1024))
 }
 
 templ DependenciesSection(r *report.Report) {
-	@SectionCard(SectionCardArg{
+	@components.SectionCard(components.SectionCardArg{
 		Name:        "Dependencies",
 		Icon:        "blocks",
 		IsCollapsed: true,
 	}) {
-		@SubSection("Compile-Time", 1) {
+		@components.SubSection("Compile-Time", 1) {
 			{{
 				deps := r.Build.Dependencies.Compile
 			}}
-			@InfoItem("Total", len(deps))
+			@components.InfoItem("Total", len(deps))
 			for _, d := range deps {
 				@DependencyItem(d.String())
 			}
