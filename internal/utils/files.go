@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -38,4 +39,21 @@ func IsDir(path string) bool {
 		return false
 	}
 	return info.IsDir()
+}
+
+func EnsureParentDirExists(path string) error {
+	parentDir := filepath.Dir(path)
+
+	if FileExists(parentDir) {
+		return nil
+	}
+	if IsDir(parentDir) {
+		return nil
+	}
+
+	if err := os.MkdirAll(parentDir, 0755); err != nil {
+		return fmt.Errorf("could not create parent directory for report file: %v", err)
+	}
+
+	return nil
 }

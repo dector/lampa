@@ -418,6 +418,11 @@ func StepReport(args ExecArgs) error {
 }
 
 func WriteJsonReportToFile(report *report.Report, args ExecArgs) error {
+	err := utils.EnsureParentDirExists(args.JsonReportFile)
+	if err != nil {
+		return err
+	}
+
 	file, err := os.Create(args.JsonReportFile)
 	if err != nil {
 		return fmt.Errorf("could not create report file: %v", err)
@@ -437,6 +442,11 @@ func WriteJsonReportToFile(report *report.Report, args ExecArgs) error {
 }
 
 func WriteHtmlReportToFile(report *report.Report, args ExecArgs) error {
+	err := utils.EnsureParentDirExists(args.HtmlReportFile)
+	if err != nil {
+		return err
+	}
+
 	reportHtml, err := GenerateHtmlReport(report)
 	if err != nil {
 		return fmt.Errorf("could not generate HTML report: %v", err)
