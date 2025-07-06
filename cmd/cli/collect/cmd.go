@@ -317,6 +317,8 @@ func execute(args ExecArgs) error {
 		MsgAfterSuccess: "Building: Done.",
 		MsgAfterFail:    "Building: Failed.",
 	}, func() (string, error) {
+		out.Info("Building AAB")
+
 		task := "bundle" + cases.Title(language.BritishEnglish).String(args.BuildVariant)
 		output, err := executeGradleTask(args, task)
 		if err != nil {
@@ -396,6 +398,7 @@ func execute(args ExecArgs) error {
 
 func StepBundletool(args *ExecArgs) error {
 	if !args.NeedToDownloadBundletool {
+		out.Info("Using user-provided bundletool JAR")
 		return nil
 	}
 
@@ -414,6 +417,8 @@ func StepBundletool(args *ExecArgs) error {
 }
 
 func stepBundletoolInternal(args *ExecArgs) error {
+	out.Info("Using self-provided bundletool")
+
 	// Download bundletool-all-1.18.1.jar to ./.lampa/cache
 	cacheDir := filepath.Join(args.ProjectDir, ".lampa", "cache")
 	bundletoolFileName := filepath.Base(BundletoolUrl)
@@ -427,6 +432,8 @@ func stepBundletoolInternal(args *ExecArgs) error {
 
 	// Download if not exists
 	if !utils.FileExists(bundletoolPath) {
+		out.Info("Cached bundletool not found. Downloading...")
+
 		// fmt.Printf("Downloading bundletool from %s...\n", BundletoolUrl)
 		outFile, err := os.Create(bundletoolPath)
 		if err != nil {
@@ -461,6 +468,8 @@ func stepBundletoolInternal(args *ExecArgs) error {
 			return fmt.Errorf("failed to save bundletool: %w", err)
 		}
 	}
+
+	out.Info("Verifying bundletool.jar checksum")
 
 	// Verify checksum of downloaded file
 	expectedChecksum := BundletoolHash
@@ -624,6 +633,8 @@ func collectReport(args ExecArgs, pathToAab string) (report.Report, error) {
 		return report.Report{}, err
 	}
 
+	out.Info("Fetching dependencies tree")
+
 	output, err := executeGradleTask(args, "app:dependencies", "--configuration", configurationName)
 	if err != nil {
 		return report.Report{}, fmt.Errorf("failed to execute gradlew: %v\nOutput:\n%s", err, string(output))
@@ -676,6 +687,8 @@ func parseContext(args ExecArgs) (report.ContextSegment, error) {
 		},
 		GenerationTime: time.Now().UTC().Format(time.RFC3339),
 	}
+
+	out.Info("Parsing git repo information")
 
 	_, err := exec.LookPath("git")
 	if err != nil {
@@ -772,6 +785,8 @@ func DynamicSpinner[T any](args SpinnerArgs, action func() (T, error)) (*T, erro
 }
 
 func analyzeBuild(result *report.Report, args ExecArgs, pathToAab string) error {
+	out.Info("Analyzing AAB file")
+
 	result.Build.BuildVariant = args.BuildVariant
 	result.Build.AabName = filepath.Base(pathToAab)
 	// result.Build.ApkName = filepath.Base(args.PathToApk)
@@ -917,6 +932,8 @@ func analyzeBuild(result *report.Report, args ExecArgs, pathToAab string) error 
 }
 
 func addDataFromApk(result *report.Report, args ExecArgs, pathToAab string) error {
+	out.Info("Analyzing universal APK")
+
 	tempDir, err := os.MkdirTemp("", fmt.Sprintf("lampa-%x", sha1.Sum([]byte(args.ProjectDir))))
 	if err != nil {
 		return fmt.Errorf("failed to create temp dir for universal APK: %w", err)
@@ -1009,6 +1026,8 @@ func addDataFromApk(result *report.Report, args ExecArgs, pathToAab string) erro
 }
 
 func findAaptExecutable(sdkRoot string) (string, error) {
+	out.Info("Searching for aapt2 executable")
+
 	aaptPath := filepath.Join(sdkRoot, "build-tools")
 	entries, err := os.ReadDir(aaptPath)
 
@@ -1035,6 +1054,8 @@ func findAaptExecutable(sdkRoot string) (string, error) {
 }
 
 func findAabFile(args ExecArgs) (string, error) {
+	out.Info("Searching for AAB file")
+
 	bundleDir := path.Join(args.ProjectDir, "app", "build", "outputs", "bundle", args.BuildVariant)
 
 	info, err := os.Stat(bundleDir)

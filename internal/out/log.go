@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	. "lampa/internal/globals"
+
 	"github.com/fatih/color"
 )
 
@@ -18,4 +20,14 @@ func PrintlnErr(s string, a ...any) {
 func PrintlnWarn(s string, a ...any) {
 	msg := fmt.Sprintf("Warning: %s\n", fmt.Sprintf(s, a...))
 	os.Stderr.WriteString(yellow(msg))
+}
+
+// --- Info
+
+func Info(s string) {
+	if G.Verbosity < VerbosityInfo {
+		return
+	}
+
+	fmt.Println(s)
 }

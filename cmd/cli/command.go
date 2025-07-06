@@ -8,6 +8,8 @@ import (
 	"lampa/internal/out"
 	"net/http"
 
+	. "lampa/internal/globals"
+
 	"github.com/samber/lo"
 	"github.com/square/exit"
 	"github.com/urfave/cli/v3"
@@ -18,11 +20,37 @@ func CreateCliCommand() *cli.Command {
 		Name: "lampa",
 		// Version: G.Version,
 		Usage: "Android releases analyzer",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:    "v",
+				Aliases: []string{"vv", "vvv"},
+				Usage:   "Increase verbosity (-v, -vv, -vvv)",
+				Value:   false,
+			},
+		},
 		Commands: []*cli.Command{
 			collect.CreateCliCommand(),
 			compare.CreateCliCommand(),
 			CreateVersionCommand(),
 			// devReportCommand(),
+		},
+		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
+			// Set verbosity
+			verbosity := c.Count("v")
+			switch verbosity {
+			case 0:
+				G.Verbosity = VerbosityNormal
+			case 1:
+				G.Verbosity = VerbosityInfo
+			case 2:
+				G.Verbosity = VerbosityDebug
+			default:
+				if verbosity >= 3 {
+					G.Verbosity = VerbosityTrace
+				}
+			}
+
+			return ctx, nil
 		},
 		CommandNotFound: handleCommandNotFound,
 	}

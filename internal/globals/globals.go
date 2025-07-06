@@ -13,7 +13,18 @@ type Globals struct {
 	BuildCommitShort string
 
 	UsePlainOutput bool
+
+	Verbosity VerbosityLevel
 }
+
+type VerbosityLevel int
+
+const (
+	VerbosityNormal VerbosityLevel = iota
+	VerbosityInfo
+	VerbosityDebug
+	VerbosityTrace
+)
 
 var G = Globals{
 	Version: "0.2.0-snapshot",
