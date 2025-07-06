@@ -61,11 +61,7 @@ brew install dector/lampa
 
 ### Runtime dependencies
 
-DX will be improved in the future but currently you need to:
-
-  - Have [Java](https://adoptium.net) installed (for Bundletool).
-  - Have [Android SDK](https://developer.android.com/studio) installed - for now we need `aapt2` but I have plans to change it in the future. You need to have `ANDROID_SDK_ROOT` env variable set.
-  - (Optional) [Bundletool](https://github.com/google/bundletool/releases/latest) is optional. If `BUNDLETOOL_JAR` is not set, it will be downloaded automatically.
+Since we are using `Gradle` to build Android projects - single runtime dependency is [Java](https://adoptium.net).
 
 ## How To Use
 
@@ -79,8 +75,6 @@ Remember that you can always use `lampa help` if you forget something.
 You will need to use this report for comparative HTML report.
 
 ``` shell
-export ANDROID_SDK_ROOT="~/Apps/AndroidSDK"
-
 lampa collect
 ```
 
@@ -107,8 +101,6 @@ Other useful flags are:
 ### Generate only HTML report for current version
 
 ``` shell
-export ANDROID_SDK_ROOT="~/Apps/AndroidSDK"
-
 lampa collect --format html
 ```
 
@@ -156,3 +148,5 @@ open new [discussion](https://github.com/dector/lampa/discussions).
 ## License
 
 Project is distributed under [MIT License](https://opensource.org/license/mit).
+
+Protobuf schema from [AOSP](https://source.android.com/) is covered by Apache2 license.
