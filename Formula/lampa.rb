@@ -9,21 +9,21 @@
 class Lampa < Formula
   desc "Lampa"
   homepage "https://github.com/dector/lampa"
-  version "0.1.0-5.dev"
+  version "0.3.0"
   license "MIT"
 
   if OS.mac? && Hardware::CPU.intel?
     url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-darwin-amd64-#{version}"
-    sha256 "7ee1f9bb9930a3a9a59496cfca8482473e7bc53b1c5093e99d4db71da0fe2ae2"
+    sha256 "7e15cc9b4555dbd12427c049b40508abf4da8ba09a3dbd58b55eac4b90587fbf"
   elsif OS.mac? && Hardware::CPU.arm?
     url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-darwin-arm64-#{version}"
-    sha256 "6b9969c0163a454d15f29ac5d96575bcac06df795044a90d4abbeb079c425b91"
+    sha256 "09d7d9355296f7ae2070f9056a98704d8cf0d145f0fe2b26ef7f440c2801b7e2"
   elsif OS.linux? && Hardware::CPU.intel?
     url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-linux-amd64-#{version}"
-    sha256 "6fe45dc00a42a73c88ffc93d1af8bae749bc2c00076ff066528ec657da11fb13"
+    sha256 "f942fb53cfc20ba033a18346abe3e7477d5854c0b4fa507c908ce74a793754c0"
   elsif OS.linux? && Hardware::CPU.arm?
     url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-linux-arm64-#{version}"
-    sha256 "0bccc3c85bcd799b7e9f6d5f5d14a088ec719987e0fd5a49a0d07f774ebbf0d8"
+    sha256 "afc2f923fad8a2350da9084a007874fcb2acc616359491d903c971a03c9618d5"
   end
 
   def install
