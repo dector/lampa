@@ -13,24 +13,24 @@ class Lampa < Formula
   license "MIT"
 
   if OS.mac? && Hardware::CPU.intel?
-    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-darwin-amd64-#{version}"
+    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-#{version}-darwin-amd64"
     sha256 "7e15cc9b4555dbd12427c049b40508abf4da8ba09a3dbd58b55eac4b90587fbf"
   elsif OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-darwin-arm64-#{version}"
+    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-#{version}-darwin-arm64"
     sha256 "09d7d9355296f7ae2070f9056a98704d8cf0d145f0fe2b26ef7f440c2801b7e2"
   elsif OS.linux? && Hardware::CPU.intel?
-    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-linux-amd64-#{version}"
+    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-#{version}-linux-amd64"
     sha256 "f942fb53cfc20ba033a18346abe3e7477d5854c0b4fa507c908ce74a793754c0"
   elsif OS.linux? && Hardware::CPU.arm?
-    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-linux-arm64-#{version}"
+    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-#{version}-linux-arm64"
     sha256 "afc2f923fad8a2350da9084a007874fcb2acc616359491d903c971a03c9618d5"
   end
 
   def install
-    bin.install "lampa-linux-amd64-#{version}" => "lampa" if OS.linux? && Hardware::CPU.intel?
-    bin.install "lampa-linux-arm64-#{version}" => "lampa" if OS.linux? && Hardware::CPU.arm?
-    bin.install "lampa-darwin-amd64-#{version}" => "lampa" if OS.mac? && Hardware::CPU.intel?
-    bin.install "lampa-darwin-arm64-#{version}" => "lampa" if OS.mac? && Hardware::CPU.arm?
+    bin.install "lampa-#{version}-linux-amd64" => "lampa" if OS.linux? && Hardware::CPU.intel?
+    bin.install "lampa-#{version}-linux-arm64" => "lampa" if OS.linux? && Hardware::CPU.arm?
+    bin.install "lampa-#{version}-darwin-amd64" => "lampa" if OS.mac? && Hardware::CPU.intel?
+    bin.install "lampa-#{version}-darwin-arm64" => "lampa" if OS.mac? && Hardware::CPU.arm?
   end
 
   test do
