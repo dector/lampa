@@ -13,24 +13,24 @@ class Lampa < Formula
   license "MIT"
 
   if OS.mac? && Hardware::CPU.intel?
-    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-darwin-amd64"
+    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-darwin-amd64-#{version}"
     sha256 "3e3822b8965b5ecec67b9be6b4bcce720adab160ccd5bf7fcaa91b9f2c60c40f"
   elsif OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-darwin-arm64"
+    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-darwin-arm64-#{version}"
     sha256 "2259b5b8c7e4f0357f2462685bec78c56ee7e29f676e3d29c9a93b1b04957835"
   elsif OS.linux? && Hardware::CPU.intel?
-    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-linux-amd64"
+    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-linux-amd64-#{version}"
     sha256 "90bdd9227eadf50c3d733b6a95bc8a9f3bc8914573a7e185452d79d02523b5f6"
   elsif OS.linux? && Hardware::CPU.arm?
-    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-linux-arm64"
+    url "https://github.com/dector/lampa/releases/download/v#{version}/lampa-linux-arm64-#{version}"
     sha256 "22a50b405c2e125bbbe82e51897284f9a90bbeef4127436867c59e713c93bcab"
   end
 
   def install
-    bin.install "lampa-linux-amd64" => "lampa" if OS.linux? && Hardware::CPU.intel?
-    bin.install "lampa-linux-arm64" => "lampa" if OS.linux? && Hardware::CPU.arm?
-    bin.install "lampa-darwin-amd64" => "lampa" if OS.mac? && Hardware::CPU.intel?
-    bin.install "lampa-darwin-arm64" => "lampa" if OS.mac? && Hardware::CPU.arm?
+    bin.install "lampa-linux-amd64-#{version}" => "lampa" if OS.linux? && Hardware::CPU.intel?
+    bin.install "lampa-linux-arm64-#{version}" => "lampa" if OS.linux? && Hardware::CPU.arm?
+    bin.install "lampa-darwin-amd64-#{version}" => "lampa" if OS.mac? && Hardware::CPU.intel?
+    bin.install "lampa-darwin-arm64-#{version}" => "lampa" if OS.mac? && Hardware::CPU.arm?
   end
 
   test do
