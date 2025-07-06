@@ -68,7 +68,7 @@ tasks:
     env:
       CGO_ENABLED: 0
     cmds:
-      - rm ./out/release
+      - rm ./out/release -r
       - SUFFIX=$(date +%s%3N | shasum | head -c 8)
       - go build -o /tmp/lampa-$SUFFIX ./cmd/cli/
       - |
@@ -80,4 +80,4 @@ tasks:
         GOOS=darwin GOARCH=arm64 go build -o out/release/lampa-$VERSION-darwin-arm64 ./cmd/cli
         GOOS=windows GOARCH=amd64 go build -o out/release/lampa-$VERSION-windows-amd64.exe ./cmd/cli
         GOOS=windows GOARCH=arm64 go build -o out/release/lampa-$VERSION-windows-arm64.exe ./cmd/cli
-      - sha256sum lampa-* > checksums.txt
+      - sha256sum ./out/release/lampa-* > ./out/release/checksums.txt
