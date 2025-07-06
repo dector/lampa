@@ -28,9 +28,4 @@ jobs:
         with:
           files: |
             out/release/checksums.txt
-            out/release/lampa-linux-amd64*
-            out/release/lampa-linux-arm64*
-            out/release/lampa-darwin-amd64*
-            out/release/lampa-darwin-arm64*
-            out/release/lampa-windows-amd64*.exe
-            out/release/lampa-windows-arm64*.exe
+            out/release/lampa-*
