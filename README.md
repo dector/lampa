@@ -15,11 +15,14 @@
 <hr/>
 
 <p align="center">
+    <img src="https://img.shields.io/github/v/release/dector/lampa" alt="Lastest GitHub Release">
+</p>
+<p align="center">
     <a href="https://mastodon.online/search?q=from%3A%40dector+%23lampa&type=statuses">Updates on Mastodon</a>
 </p>
 
 <p align="center">
-  <img src="https://i.imgur.com/1gKgW0K.png" alt="Lampa screenshot">
+    <img src="https://i.imgur.com/1gKgW0K.png" alt="Lampa screenshot">
 </p>
 
 # Lampa
