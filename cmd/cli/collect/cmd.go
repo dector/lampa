@@ -874,10 +874,23 @@ func analyzeBuild(result *report.Report, args ExecArgs, pathToAab string) error 
 	result.Build.TargetSdkVersion = manifestData.TargetSdkVersion
 	result.Build.CompileSdkVersion = manifestData.CompileSdkVersion
 
-	err = addDataFromApk(result, args, pathToAab)
-	if err != nil {
-		return err
+	appLabel := manifestData.Label
+	if strings.HasPrefix(appLabel, "@string/") {
+		str, err := findString(pathToAab, strings.TrimPrefix(appLabel, "@string/"))
+		if err != nil {
+			return err
+		}
+		if str != "" {
+			result.Build.AppName = str
+		}
+	} else {
+		result.Build.AppName = manifestData.Label
 	}
+
+	// err = addDataFromApk(result, args, pathToAab)
+	// if err != nil {
+	// 	return err
+	// }
 	// cmd := exec.Command(args.PathToAapt, "dump", "badging", args.PathToApk)
 	// cmd.Dir = args.ProjectDir
 
@@ -1105,4 +1118,28 @@ func executeGradleTask(args ExecArgs, gradleArgs ...string) ([]byte, error) {
 	)
 	cmd.Dir = args.ProjectDir
 	return cmd.CombinedOutput()
+}
+
+func findString(pathToAab string, stringName string) (string, error) {
+	res, err := bundle.LoadResources(pathToAab)
+	if err != nil {
+		return "", fmt.Errorf("could not load resources from AAB file `%s`: %v", pathToAab, err)
+	}
+
+	for _, p := range res.GetPackage() {
+		for _, t := range p.GetType() {
+			if t.GetName() == "string" {
+				for _, e := range t.GetEntry() {
+					if e.GetName() == stringName {
+						for _, cv := range e.GetConfigValue() {
+							text := cv.GetValue().GetItem().GetStr().GetValue()
+							return text, nil
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return "", fmt.Errorf("string `%s` not found in AAB file `%s`", stringName, pathToAab)
 }

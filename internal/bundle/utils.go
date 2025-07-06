@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"io"
 	"lampa/internal/proto"
+
+	gproto "google.golang.org/protobuf/proto"
 )
 
 type Manifest struct {
 	Package string
+	Label   string
 
 	VersionCode string
 	VersionName string
@@ -101,19 +104,51 @@ func decodeManifest(xml *proto.XmlNode) (Manifest, error) {
 					m.TargetSdkVersion = attr.GetValue()
 				}
 			}
-			// case "application":
-			// 	for _, attr := range e.GetAttribute() {
-			// 		switch attr.GetName() {
-			// 		// case "label":
-			// 		// 	m.Label = attr.GetValue()
-			// 		// case "icon":
-			// 		// 	m.Icon = attr.GetValue()
-			// 		// case "theme":
-			// 		// 	m.Theme = attr.GetValue()
-			// 		}
-			// 	}
+		case "application":
+			for _, attr := range e.GetAttribute() {
+				switch attr.GetName() {
+				case "label":
+					m.Label = attr.GetValue()
+				}
+			}
 		}
 	}
 
 	return m, nil
+}
+
+func LoadResources(aabFile string) (*proto.ResourceTable, error) {
+	zipReader, err := zip.OpenReader(aabFile)
+	if err != nil {
+		panic(err)
+	}
+	defer zipReader.Close()
+
+	var data []byte
+	for _, file := range zipReader.File {
+		if file.Name == "base/resources.pb" {
+			rc, err := file.Open()
+			if err != nil {
+				return nil, err
+			}
+			defer rc.Close()
+
+			data, err = io.ReadAll(rc)
+			if err != nil {
+				return nil, err
+			}
+			break
+		}
+	}
+	if data == nil {
+		return nil, fmt.Errorf("base/resources.pb not found")
+	}
+
+	var res proto.ResourceTable
+	err = gproto.Unmarshal(data, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }
