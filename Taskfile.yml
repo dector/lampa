@@ -68,7 +68,7 @@ tasks:
     env:
       CGO_ENABLED: 0
     cmds:
-      - rm ./out/release -r
+      - rm -r ./out/release || true
       - SUFFIX=$(date +%s%3N | shasum | head -c 8)
       - go build -o /tmp/lampa-$SUFFIX ./cmd/cli/
       - |
