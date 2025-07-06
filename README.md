@@ -12,8 +12,14 @@
   <img width="500" height="500" src="docs/lampa-logo.webp" alt="Lampa logo">
 </p>
 
+<hr/>
+
 <p align="center">
     <a href="https://mastodon.online/search?q=from%3A%40dector+%23lampa&type=statuses">Updates on Mastodon</a>
+</p>
+
+<p align="center">
+  <img src="https://i.imgur.com/1gKgW0K.png" alt="Lampa screenshot">
 </p>
 
 # Lampa
