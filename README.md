@@ -57,9 +57,9 @@ brew install dector/lampa
 
 DX will be improved in the future but currently you need to:
 
-  - Have [Java](https://adoptium.net) installed.
-  - Have [Android SDK](https://developer.android.com/studio) installed - for now we need `aapt2` but I have plans to change it in the future.
-  - Have [Bundletool](https://github.com/google/bundletool/releases/latest) installed.
+  - Have [Java](https://adoptium.net) installed (for Bundletool).
+  - Have [Android SDK](https://developer.android.com/studio) installed - for now we need `aapt2` but I have plans to change it in the future. You need to have `ANDROID_SDK_ROOT` env variable set.
+  - (Optional) [Bundletool](https://github.com/google/bundletool/releases/latest) is optional. If `BUNDLETOOL_JAR` is not set, it will be downloaded automatically.
 
 ## How To Use
 
@@ -73,7 +73,6 @@ Remember that you can always use `lampa help` if you forget something.
 You will need to use this report for comparative HTML report.
 
 ``` shell
-export BUNDLETOOL_JAR="~/Apps/bundletool-all-1.18.1.jar"
 export ANDROID_SDK_ROOT="~/Apps/AndroidSDK"
 
 lampa collect
@@ -102,7 +101,6 @@ Other useful flags are:
 ### Generate only HTML report for current version
 
 ``` shell
-export BUNDLETOOL_JAR="~/Apps/bundletool-all-1.18.1.jar"
 export ANDROID_SDK_ROOT="~/Apps/AndroidSDK"
 
 lampa collect --format html

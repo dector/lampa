@@ -14,6 +14,7 @@ import (
 	pages "lampa/internal/templates/html"
 	"lampa/internal/utils"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path"
@@ -32,6 +33,9 @@ import (
 
 	. "lampa/internal/globals"
 )
+
+const BundletoolUrl = "https://github.com/google/bundletool/releases/download/1.18.1/bundletool-all-1.18.1.jar"
+const BundletoolHash = "e105bfd112a86986bb869d94b831c0e1e571a314"
 
 const (
 	EnvAndroidSdkRoot = "ANDROID_SDK_ROOT"
@@ -114,7 +118,13 @@ func parseExecArgs(c *cli.Command) ExecArgs {
 	args.GradlewPath = path.Join(args.ProjectDir, "gradlew")
 
 	args.AndroidSdkPath = utils.TryResolveFsPath(os.Getenv(EnvAndroidSdkRoot))
-	args.BundletoolPath = utils.TryResolveFsPath(os.Getenv(EnvBundletoolJar))
+
+	bundleToolEnv := strings.TrimSpace(os.Getenv(EnvBundletoolJar))
+	if bundleToolEnv == "" {
+		args.NeedToDownloadBundletool = true
+	} else {
+		args.BundletoolPath = utils.TryResolveFsPath(bundleToolEnv)
+	}
 
 	return args
 }
@@ -178,13 +188,16 @@ func validateExecArgs(args *ExecArgs) error {
 
 	// Bundletool
 	if args.BundletoolPath == "" {
-		return fmt.Errorf("%s environment variable is not set", EnvBundletoolJar)
-	}
-	if !utils.FileExists(args.BundletoolPath) {
-		return fmt.Errorf("bundletool jar file `%s` does not exist", args.BundletoolPath)
-	}
-	if utils.IsDir(args.BundletoolPath) {
-		return fmt.Errorf("bundletool jar file `%s` is a directory", args.BundletoolPath)
+		if !args.NeedToDownloadBundletool {
+			return fmt.Errorf("%s environment variable is not set", EnvBundletoolJar)
+		}
+	} else {
+		if !utils.FileExists(args.BundletoolPath) {
+			return fmt.Errorf("bundletool jar file `%s` does not exist", args.BundletoolPath)
+		}
+		if utils.IsDir(args.BundletoolPath) {
+			return fmt.Errorf("bundletool jar file `%s` is a directory", args.BundletoolPath)
+		}
 	}
 
 	// Aapt
@@ -244,6 +257,8 @@ type ExecArgs struct {
 	AndroidSdkPath string
 	AaptPath       string
 	GradlewPath    string
+
+	NeedToDownloadBundletool bool
 }
 
 func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
@@ -282,11 +297,22 @@ func execute(args ExecArgs) error {
 			}
 		}
 	}
+	if args.NeedToDownloadBundletool {
+		hasWarningSection = true
+		out.PrintlnWarn("%s is not set, so it will be downloaded automatically.", EnvBundletoolJar)
+	}
 	if hasWarningSection {
 		fmt.Println()
 	}
 
-	_, err := DynamicSpinner(SpinnerArgs{
+	var err error
+
+	err = StepBundletool(&args)
+	if err != nil {
+		return err
+	}
+
+	_, err = DynamicSpinner(SpinnerArgs{
 		Msg:             "Building...",
 		MsgAfterSuccess: "Building: Done.",
 		MsgAfterFail:    "Building: Failed.",
@@ -363,6 +389,113 @@ func execute(args ExecArgs) error {
 	err = StepReport(args)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func StepBundletool(args *ExecArgs) error {
+	if !args.NeedToDownloadBundletool {
+		return nil
+	}
+
+	_, err := DynamicSpinner(
+		SpinnerArgs{
+			Msg:             "Downloading bundletool...",
+			MsgAfterSuccess: "Downloading bundletool: Done.",
+			MsgAfterFail:    "Downloading bundletool: Failed.",
+		},
+		func() (any, error) {
+			return nil, stepBundletoolInternal(args)
+		},
+	)
+
+	return err
+}
+
+func stepBundletoolInternal(args *ExecArgs) error {
+	// Download bundletool-all-1.18.1.jar to ./.lampa/cache
+	cacheDir := filepath.Join(args.ProjectDir, ".lampa", "cache")
+	bundletoolFileName := filepath.Base(BundletoolUrl)
+	bundletoolPath := filepath.Join(cacheDir, bundletoolFileName)
+
+	// Ensure cache directory exists
+	err := os.MkdirAll(cacheDir, 0o755)
+	if err != nil {
+		return fmt.Errorf("failed to create cache directory for bundletool: %w", err)
+	}
+
+	// Download if not exists
+	if !utils.FileExists(bundletoolPath) {
+		// fmt.Printf("Downloading bundletool from %s...\n", BundletoolUrl)
+		outFile, err := os.Create(bundletoolPath)
+		if err != nil {
+			return fmt.Errorf("failed to create bundletool file: %w", err)
+		}
+		defer outFile.Close()
+
+		client := &http.Client{}
+		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			// Allow up to 10 redirects
+			if len(via) >= 10 {
+				return fmt.Errorf("stopped after 10 redirects")
+			}
+			return nil
+		}
+		req, err := http.NewRequestWithContext(context.Background(), "GET", BundletoolUrl, nil)
+		if err != nil {
+			return fmt.Errorf("failed to create HTTP request for bundletool: %w", err)
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			return fmt.Errorf("failed to download bundletool: %w", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != 200 {
+			return fmt.Errorf("failed to download bundletool: HTTP %d", resp.StatusCode)
+		}
+
+		_, err = io.Copy(outFile, resp.Body)
+		if err != nil {
+			return fmt.Errorf("failed to save bundletool: %w", err)
+		}
+	}
+
+	// Verify checksum of downloaded file
+	expectedChecksum := BundletoolHash
+	file, err := os.Open(bundletoolPath)
+	if err != nil {
+		return fmt.Errorf("failed to open bundletool file for checksum: %w", err)
+	}
+	defer file.Close()
+	hasher := sha1.New()
+	if _, err := io.Copy(hasher, file); err != nil {
+		return fmt.Errorf("failed to compute checksum of bundletool: %w", err)
+	}
+	actualChecksum := fmt.Sprintf("%x", hasher.Sum(nil))
+	if actualChecksum != expectedChecksum {
+		return fmt.Errorf("bundletool checksum mismatch: expected %s, got %s", expectedChecksum, actualChecksum)
+	}
+
+	args.BundletoolPath = utils.TryResolveFsPath(bundletoolPath)
+
+	// Ensure .lampa/gitignore exists and ignores all content
+	gitignorePath := filepath.Join(args.ProjectDir, ".lampa", ".gitignore")
+	if !utils.FileExists(gitignorePath) {
+		err := os.MkdirAll(filepath.Dir(gitignorePath), 0o755)
+		if err != nil {
+			return fmt.Errorf("failed to create .lampa directory for gitignore: %w", err)
+		}
+		f, err := os.Create(gitignorePath)
+		if err != nil {
+			return fmt.Errorf("failed to create .lampa/gitignore: %w", err)
+		}
+		defer f.Close()
+		_, err = f.WriteString("*\n")
+		if err != nil {
+			return fmt.Errorf("failed to write to .lampa/gitignore: %w", err)
+		}
 	}
 
 	return nil
