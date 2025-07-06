@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+var G = Globals{
+	Version: "0.3.0",
+}
+
 type Globals struct {
 	Version string
 
@@ -26,10 +30,6 @@ const (
 	VerbosityDebug
 	VerbosityTrace
 )
-
-var G = Globals{
-	Version: "0.2.1-snapshot",
-}
 
 func (self *Globals) Init() {
 	self.BuildCommit = commitHash
