@@ -18,9 +18,13 @@ func main() {
 
 	if len(os.Args) == 2 {
 		cmd := os.Args[1]
-		if cmd == "version" || cmd == "--version" {
-			fmt.Printf("%s+%s\n", G.Version, G.BuildCommit)
-			os.Exit(exit.OK)
+		if cmd == "version" {
+			printVersionAndExit("")
+		}
+	} else if len(os.Args) == 3 {
+		cmd := os.Args[1]
+		if cmd == "version" && os.Args[2] == "--short" {
+			printVersionAndExit("short")
 		}
 	}
 	out.PrintHeader()
@@ -39,4 +43,14 @@ func main() {
 		}
 		os.Exit(exit.NotOK)
 	}
+}
+
+func printVersionAndExit(format string) {
+	switch format {
+	case "short":
+		fmt.Printf("%s\n", G.Version)
+	default:
+		fmt.Printf("%s+%s\n", G.Version, G.BuildCommit)
+	}
+	os.Exit(exit.OK)
 }
