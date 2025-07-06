@@ -23,12 +23,27 @@ jobs:
           name: release-artifacts
           path: out/release
 
+      # - name: Delete existing snapshot tag (if exists)
+      #   run: |
+      #     git fetch --tags
+      #     if git rev-parse snapshot >/dev/null 2>&1; then
+      #       git push origin :refs/tags/snapshot
+      #     fi
+
+      # - name: Create snapshot tag from latest commit
+      #   run: |
+      #     git config user.name "Releaser[bot]"
+      #     git config user.email "releaser[bot]@users.noreply.github.com"
+      #     git tag -f snapshot
+      #     git push origin snapshot --force
+
       - name: Update binaries
         uses: softprops/action-gh-release@v2
         with:
           tag_name: snapshot
           prerelease: true
           files: |
+            out/release/checksums.txt
             out/release/lampa-linux-amd64
             out/release/lampa-linux-arm64
             out/release/lampa-darwin-amd64
