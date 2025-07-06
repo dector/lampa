@@ -36,6 +36,7 @@
   - [Generate comparative HTML report for two releases](#generate-comparative-html-report-for-two-releases)
   - [GitHub Action](#github-action)
 - [Contributing](#contributing)
+- [Changelog](#changelog)
 - [License](#license)
 
 ## What is this
@@ -144,6 +145,10 @@ See detailed instructions on [GitHub Marketplace](https://github.com/marketplace
 
 I will add this section latest. For now feel free to contact me directly or
 open new [discussion](https://github.com/dector/lampa/discussions).
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 
 ## License
 
