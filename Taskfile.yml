@@ -62,26 +62,22 @@ tasks:
       - task run -- version
     silent: true
 
-  build:_all:
+  build:all:
     deps:
       - gen
     env:
       CGO_ENABLED: 0
     cmds:
+      - rm ./out/release
       - SUFFIX=$(date +%s%3N | shasum | head -c 8)
       - go build -o /tmp/lampa-$SUFFIX ./cmd/cli/
       - |
         VERSION=$(/tmp/lampa-$SUFFIX version --short)
         rm /tmp/lampa-$SUFFIX
-        GOOS=linux GOARCH=amd64 go build -o out/release/lampa-linux-amd64-$VERSION ./cmd/cli
-        GOOS=linux GOARCH=arm64 go build -o out/release/lampa-linux-arm64-$VERSION ./cmd/cli
-        GOOS=darwin GOARCH=amd64 go build -o out/release/lampa-darwin-amd64-$VERSION ./cmd/cli
-        GOOS=darwin GOARCH=arm64 go build -o out/release/lampa-darwin-arm64-$VERSION ./cmd/cli
-        GOOS=windows GOARCH=amd64 go build -o out/release/lampa-windows-amd64-$VERSION.exe ./cmd/cli
-        GOOS=windows GOARCH=arm64 go build -o out/release/lampa-windows-arm64-$VERSION.exe ./cmd/cli
-  build:all:
-    deps:
-      - build:_all
-    dir: ./out/release
-    cmds:
+        GOOS=linux GOARCH=amd64 go build -o out/release/lampa-$VERSION-linux-amd64 ./cmd/cli
+        GOOS=linux GOARCH=arm64 go build -o out/release/lampa-$VERSION-linux-arm64 ./cmd/cli
+        GOOS=darwin GOARCH=amd64 go build -o out/release/lampa-$VERSION-darwin-amd64 ./cmd/cli
+        GOOS=darwin GOARCH=arm64 go build -o out/release/lampa-$VERSION-darwin-arm64 ./cmd/cli
+        GOOS=windows GOARCH=amd64 go build -o out/release/lampa-$VERSION-windows-amd64.exe ./cmd/cli
+        GOOS=windows GOARCH=arm64 go build -o out/release/lampa-$VERSION-windows-arm64.exe ./cmd/cli
       - sha256sum lampa-* > checksums.txt
