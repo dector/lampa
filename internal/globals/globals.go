@@ -16,7 +16,7 @@ type Globals struct {
 }
 
 var G = Globals{
-	Version: "0.2.0-01.00",
+	Version: "0.2.0-snapshot",
 }
 
 func (self *Globals) Init() {
