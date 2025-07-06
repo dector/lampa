@@ -57,6 +57,11 @@ tasks:
       - go build -o out/lampa ./cmd/cli/
     silent: true
 
+  version:
+    cmds:
+      - task run -- version
+    silent: true
+
   build:all:
     deps:
       - gen
