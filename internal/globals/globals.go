@@ -27,7 +27,7 @@ const (
 )
 
 var G = Globals{
-	Version: "0.2.0-snapshot",
+	Version: "0.2.0-01",
 }
 
 func (self *Globals) Init() {
