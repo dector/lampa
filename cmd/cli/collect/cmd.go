@@ -1,7 +1,6 @@
 package collect
 
 import (
-	"archive/zip"
 	"context"
 	"crypto/sha1"
 	"encoding/json"
@@ -14,7 +13,6 @@ import (
 	pages "lampa/internal/templates/html"
 	"lampa/internal/utils"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"path"
@@ -32,14 +30,6 @@ import (
 	"golang.org/x/text/language"
 
 	. "lampa/internal/globals"
-)
-
-const BundletoolUrl = "https://github.com/google/bundletool/releases/download/1.18.1/bundletool-all-1.18.1.jar"
-const BundletoolHash = "e105bfd112a86986bb869d94b831c0e1e571a314"
-
-const (
-	EnvAndroidSdkRoot = "ANDROID_SDK_ROOT"
-	EnvBundletoolJar  = "BUNDLETOOL_JAR"
 )
 
 const (
@@ -117,15 +107,6 @@ func parseExecArgs(c *cli.Command) ExecArgs {
 
 	args.GradlewPath = path.Join(args.ProjectDir, "gradlew")
 
-	args.AndroidSdkPath = utils.TryResolveFsPath(os.Getenv(EnvAndroidSdkRoot))
-
-	bundleToolEnv := strings.TrimSpace(os.Getenv(EnvBundletoolJar))
-	if bundleToolEnv == "" {
-		args.NeedToDownloadBundletool = true
-	} else {
-		args.BundletoolPath = utils.TryResolveFsPath(bundleToolEnv)
-	}
-
 	return args
 }
 
@@ -186,35 +167,6 @@ func validateExecArgs(args *ExecArgs) error {
 		return fmt.Errorf("java not found or not executable: %v", err)
 	}
 
-	// Bundletool
-	if args.BundletoolPath == "" {
-		if !args.NeedToDownloadBundletool {
-			return fmt.Errorf("%s environment variable is not set", EnvBundletoolJar)
-		}
-	} else {
-		if !utils.FileExists(args.BundletoolPath) {
-			return fmt.Errorf("bundletool jar file `%s` does not exist", args.BundletoolPath)
-		}
-		if utils.IsDir(args.BundletoolPath) {
-			return fmt.Errorf("bundletool jar file `%s` is a directory", args.BundletoolPath)
-		}
-	}
-
-	// Aapt
-	if args.AndroidSdkPath == "" {
-		return fmt.Errorf("%s environment variable is not set", EnvAndroidSdkRoot)
-	}
-	if !utils.FileExists(args.AndroidSdkPath) {
-		return fmt.Errorf("Android SDK path `%s` does not exist", args.AndroidSdkPath)
-	}
-	if !utils.IsDir(args.AndroidSdkPath) {
-		return fmt.Errorf("Android SDK path `%s` is not a directory", args.AndroidSdkPath)
-	}
-	args.AaptPath, err = findAaptExecutable(args.AndroidSdkPath)
-	if err != nil {
-		return err
-	}
-
 	// Gradlew
 	info, err = os.Stat(args.GradlewPath)
 	if err != nil {
@@ -253,12 +205,7 @@ type ExecArgs struct {
 
 	Formats FormatArgs
 
-	BundletoolPath string
-	AndroidSdkPath string
-	AaptPath       string
-	GradlewPath    string
-
-	NeedToDownloadBundletool bool
+	GradlewPath string
 }
 
 func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
@@ -297,20 +244,11 @@ func execute(args ExecArgs) error {
 			}
 		}
 	}
-	if args.NeedToDownloadBundletool {
-		hasWarningSection = true
-		out.PrintlnWarn("%s is not set, so it will be downloaded automatically.", EnvBundletoolJar)
-	}
 	if hasWarningSection {
 		fmt.Println()
 	}
 
 	var err error
-
-	err = StepBundletool(&args)
-	if err != nil {
-		return err
-	}
 
 	_, err = DynamicSpinner(SpinnerArgs{
 		Msg:             "Building...",
@@ -391,120 +329,6 @@ func execute(args ExecArgs) error {
 	err = StepReport(args)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func StepBundletool(args *ExecArgs) error {
-	if !args.NeedToDownloadBundletool {
-		out.Info("Using user-provided bundletool JAR")
-		return nil
-	}
-
-	_, err := DynamicSpinner(
-		SpinnerArgs{
-			Msg:             "Downloading bundletool...",
-			MsgAfterSuccess: "Downloading bundletool: Done.",
-			MsgAfterFail:    "Downloading bundletool: Failed.",
-		},
-		func() (any, error) {
-			return nil, stepBundletoolInternal(args)
-		},
-	)
-
-	return err
-}
-
-func stepBundletoolInternal(args *ExecArgs) error {
-	out.Info("Using self-provided bundletool")
-
-	// Download bundletool-all-1.18.1.jar to ./.lampa/cache
-	cacheDir := filepath.Join(args.ProjectDir, ".lampa", "cache")
-	bundletoolFileName := filepath.Base(BundletoolUrl)
-	bundletoolPath := filepath.Join(cacheDir, bundletoolFileName)
-
-	// Ensure cache directory exists
-	err := os.MkdirAll(cacheDir, 0o755)
-	if err != nil {
-		return fmt.Errorf("failed to create cache directory for bundletool: %w", err)
-	}
-
-	// Download if not exists
-	if !utils.FileExists(bundletoolPath) {
-		out.Info("Cached bundletool not found. Downloading...")
-
-		// fmt.Printf("Downloading bundletool from %s...\n", BundletoolUrl)
-		outFile, err := os.Create(bundletoolPath)
-		if err != nil {
-			return fmt.Errorf("failed to create bundletool file: %w", err)
-		}
-		defer outFile.Close()
-
-		client := &http.Client{}
-		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-			// Allow up to 10 redirects
-			if len(via) >= 10 {
-				return fmt.Errorf("stopped after 10 redirects")
-			}
-			return nil
-		}
-		req, err := http.NewRequestWithContext(context.Background(), "GET", BundletoolUrl, nil)
-		if err != nil {
-			return fmt.Errorf("failed to create HTTP request for bundletool: %w", err)
-		}
-		resp, err := client.Do(req)
-		if err != nil {
-			return fmt.Errorf("failed to download bundletool: %w", err)
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != 200 {
-			return fmt.Errorf("failed to download bundletool: HTTP %d", resp.StatusCode)
-		}
-
-		_, err = io.Copy(outFile, resp.Body)
-		if err != nil {
-			return fmt.Errorf("failed to save bundletool: %w", err)
-		}
-	}
-
-	out.Info("Verifying bundletool.jar checksum")
-
-	// Verify checksum of downloaded file
-	expectedChecksum := BundletoolHash
-	file, err := os.Open(bundletoolPath)
-	if err != nil {
-		return fmt.Errorf("failed to open bundletool file for checksum: %w", err)
-	}
-	defer file.Close()
-	hasher := sha1.New()
-	if _, err := io.Copy(hasher, file); err != nil {
-		return fmt.Errorf("failed to compute checksum of bundletool: %w", err)
-	}
-	actualChecksum := fmt.Sprintf("%x", hasher.Sum(nil))
-	if actualChecksum != expectedChecksum {
-		return fmt.Errorf("bundletool checksum mismatch: expected %s, got %s", expectedChecksum, actualChecksum)
-	}
-
-	args.BundletoolPath = utils.TryResolveFsPath(bundletoolPath)
-
-	// Ensure .lampa/gitignore exists and ignores all content
-	gitignorePath := filepath.Join(args.ProjectDir, ".lampa", ".gitignore")
-	if !utils.FileExists(gitignorePath) {
-		err := os.MkdirAll(filepath.Dir(gitignorePath), 0o755)
-		if err != nil {
-			return fmt.Errorf("failed to create .lampa directory for gitignore: %w", err)
-		}
-		f, err := os.Create(gitignorePath)
-		if err != nil {
-			return fmt.Errorf("failed to create .lampa/gitignore: %w", err)
-		}
-		defer f.Close()
-		_, err = f.WriteString("*\n")
-		if err != nil {
-			return fmt.Errorf("failed to write to .lampa/gitignore: %w", err)
-		}
 	}
 
 	return nil
@@ -947,128 +771,6 @@ func analyzeBuild(result *report.Report, args ExecArgs, pathToAab string) error 
 	// }
 
 	return nil
-}
-
-func addDataFromApk(result *report.Report, args ExecArgs, pathToAab string) error {
-	out.Info("Analyzing universal APK")
-
-	tempDir, err := os.MkdirTemp("", fmt.Sprintf("lampa-%x", sha1.Sum([]byte(args.ProjectDir))))
-	if err != nil {
-		return fmt.Errorf("failed to create temp dir for universal APK: %w", err)
-	}
-	defer os.RemoveAll(tempDir)
-
-	universalApkPath := filepath.Join(tempDir, "universal.apk")
-
-	// Use bundletool to build the universal APK from the AAB
-	cmd := exec.Command(
-		"java", "-jar", args.BundletoolPath, "build-apks",
-		"--bundle", pathToAab,
-		"--output", universalApkPath+".apks",
-		"--mode", "universal",
-		"--overwrite",
-	)
-	cmd.Dir = args.ProjectDir
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("failed to build universal APK with bundletool: %v\nOutput:\n%s", err, string(output))
-	}
-
-	// Extract universal.apk from the .apks file (which is a zip)
-	apksFile, err := os.Open(universalApkPath + ".apks")
-	if err != nil {
-		return fmt.Errorf("failed to open .apks file: %w", err)
-	}
-	defer apksFile.Close()
-
-	stat, err := apksFile.Stat()
-	if err != nil {
-		return fmt.Errorf("failed to stat .apks file: %w", err)
-	}
-
-	zipReader, err := zip.NewReader(apksFile, stat.Size())
-	if err != nil {
-		return fmt.Errorf("failed to read .apks as zip: %w", err)
-	}
-
-	found := false
-	for _, f := range zipReader.File {
-		if f.Name == "universal.apk" {
-			outFile, err := os.Create(universalApkPath)
-			if err != nil {
-				return fmt.Errorf("failed to create universal.apk: %w", err)
-			}
-			rc, err := f.Open()
-			if err != nil {
-				outFile.Close()
-				return fmt.Errorf("failed to open universal.apk in zip: %w", err)
-			}
-			_, err = io.Copy(outFile, rc)
-			rc.Close()
-			outFile.Close()
-			if err != nil {
-				return fmt.Errorf("failed to extract universal.apk: %w", err)
-			}
-			found = true
-			break
-		}
-	}
-	if !found {
-		return fmt.Errorf("universal.apk not found in .apks file")
-	}
-
-	// Use aapt2 to extract the application label (app name) from the APK
-	cmdAapt := exec.Command(args.AaptPath, "dump", "badging", universalApkPath)
-	cmdAapt.Dir = args.ProjectDir
-	outputAapt, err := cmdAapt.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("failed to run aapt2 on universal.apk: %v\nOutput:\n%s", err, string(outputAapt))
-	}
-
-	// Parse the output to find the application-label
-	lines := strings.Split(string(outputAapt), "\n")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "application-label:") {
-			// Format: application-label:'App Name'
-			idx := strings.Index(line, ":")
-			if idx != -1 {
-				label := strings.Trim(line[idx+1:], "'")
-				result.Build.AppName = label
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-func findAaptExecutable(sdkRoot string) (string, error) {
-	out.Info("Searching for aapt2 executable")
-
-	aaptPath := filepath.Join(sdkRoot, "build-tools")
-	entries, err := os.ReadDir(aaptPath)
-
-	if err == nil {
-		// Find the latest build-tools version
-		var latest string
-		for _, entry := range entries {
-			if entry.IsDir() {
-				// TODO improve
-				if latest == "" || entry.Name() > latest {
-					latest = entry.Name()
-				}
-			}
-		}
-		if latest != "" {
-			aaptFullPath := filepath.Join(aaptPath, latest, "aapt2")
-			if _, err := os.Stat(aaptFullPath); err == nil {
-				return aaptFullPath, nil
-			}
-		}
-	}
-
-	return "", fmt.Errorf("aapt executable not found in %s", sdkRoot)
 }
 
 func findAabFile(args ExecArgs) (string, error) {
