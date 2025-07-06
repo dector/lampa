@@ -34,6 +34,6 @@ class Lampa < Formula
   end
 
   test do
-    system "#{bin}/lampa", "--version"
+    system "#{bin}/lampa", "version"
   end
 end

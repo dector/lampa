@@ -31,9 +31,12 @@ func CreateCliCommand() *cli.Command {
 
 func CreateVersionCommand() *cli.Command {
 	return &cli.Command{
-		Name:    "version",
-		Aliases: []string{"--version"},
-		Usage:   "show version and exit",
+		Name:  "version",
+		Usage: "show version and exit",
+		Action: func(ctx context.Context, c *cli.Command) error {
+			// Empty command because it's handled on the top
+			return nil
+		},
 	}
 }
 
