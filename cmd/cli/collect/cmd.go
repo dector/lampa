@@ -5,10 +5,10 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"io"
 	"lampa/internal"
+	"lampa/internal/bundle"
 	"lampa/internal/out"
 	"lampa/internal/report"
 	pages "lampa/internal/templates/html"
@@ -831,43 +831,48 @@ func analyzeBuild(result *report.Report, args ExecArgs, pathToAab string) error 
 	// Generate APK
 	// Get other data from APK
 
-	// Analyze AAB manifest using bundletool
-	cmd := exec.Command("java", "-jar", args.BundletoolPath, "dump", "manifest", "--bundle", pathToAab)
-	cmd.Dir = args.ProjectDir
-	output, err := cmd.CombinedOutput()
+	manifestData, err := bundle.LoadManifest(pathToAab)
 	if err != nil {
-		return fmt.Errorf("failed to analyze AAB manifest with bundletool: %v.\nReason: %s", err, string(output))
-	}
-	manifest := string(output)
-
-	// Parse manifest as XML
-	type Manifest struct {
-		XMLName          struct{} `xml:"manifest"`
-		Package          string   `xml:"package,attr"`
-		VersionCode      string   `xml:"versionCode,attr"`
-		VersionName      string   `xml:"versionName,attr"`
-		BuildVersionCode string   `xml:"platformBuildVersionCode,attr"`
-		BuildVersionName string   `xml:"platformBuildVersionName,attr"`
-		Application      struct {
-			Label string `xml:"label,attr"`
-		} `xml:"application"`
-		UsesSdk struct {
-			MinSdkVersion    string `xml:"minSdkVersion,attr"`
-			TargetSdkVersion string `xml:"targetSdkVersion,attr"`
-		} `xml:"uses-sdk"`
+		return fmt.Errorf("failed to load AAB manifest: %v", err)
 	}
 
-	var manifestData Manifest
-	if err := xml.Unmarshal([]byte(manifest), &manifestData); err != nil {
-		return fmt.Errorf("could not parse manifest XML: %v", err)
-	}
+	// Analyze AAB manifest using bundletool
+	// cmd := exec.Command("java", "-jar", args.BundletoolPath, "dump", "manifest", "--bundle", pathToAab)
+	// cmd.Dir = args.ProjectDir
+	// output, err := cmd.CombinedOutput()
+	// if err != nil {
+	// 	return fmt.Errorf("failed to analyze AAB manifest with bundletool: %v.\nReason: %s", err, string(output))
+	// }
+	// manifest := string(output)
+
+	// // Parse manifest as XML
+	// type Manifest struct {
+	// 	XMLName          struct{} `xml:"manifest"`
+	// 	Package          string   `xml:"package,attr"`
+	// 	VersionCode      string   `xml:"versionCode,attr"`
+	// 	VersionName      string   `xml:"versionName,attr"`
+	// 	BuildVersionCode string   `xml:"platformBuildVersionCode,attr"`
+	// 	BuildVersionName string   `xml:"platformBuildVersionName,attr"`
+	// 	Application      struct {
+	// 		Label string `xml:"label,attr"`
+	// 	} `xml:"application"`
+	// 	UsesSdk struct {
+	// 		MinSdkVersion    string `xml:"minSdkVersion,attr"`
+	// 		TargetSdkVersion string `xml:"targetSdkVersion,attr"`
+	// 	} `xml:"uses-sdk"`
+	// }
+
+	// var manifestData Manifest
+	// if err := xml.Unmarshal([]byte(manifest), &manifestData); err != nil {
+	// 	return fmt.Errorf("could not parse manifest XML: %v", err)
+	// }
 	result.Build.ApplicationId = manifestData.Package
 	result.Build.VersionCode = manifestData.VersionCode
 	result.Build.VersionName = manifestData.VersionName
 	// result.Build.AppName = manifestData.Application.Label
-	result.Build.MinSdkVersion = manifestData.UsesSdk.MinSdkVersion
-	result.Build.TargetSdkVersion = manifestData.UsesSdk.TargetSdkVersion
-	result.Build.CompileSdkVersion = manifestData.BuildVersionCode
+	result.Build.MinSdkVersion = manifestData.MinSdkVersion
+	result.Build.TargetSdkVersion = manifestData.TargetSdkVersion
+	result.Build.CompileSdkVersion = manifestData.CompileSdkVersion
 
 	err = addDataFromApk(result, args, pathToAab)
 	if err != nil {

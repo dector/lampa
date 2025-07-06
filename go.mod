@@ -11,6 +11,7 @@ require (
 	github.com/square/exit v1.3.0
 	github.com/urfave/cli/v3 v3.3.8
 	golang.org/x/text v0.24.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
