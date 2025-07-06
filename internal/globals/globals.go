@@ -13,6 +13,7 @@ type Globals struct {
 	BuildCommitShort string
 
 	UsePlainOutput bool
+	UseOnlyStdout  bool
 
 	Verbosity VerbosityLevel
 }
@@ -36,6 +37,7 @@ func (self *Globals) Init() {
 
 	isCI := strings.TrimSpace(os.Getenv("CI")) != ""
 	self.UsePlainOutput = isCI
+	self.UseOnlyStdout = isCI
 }
 
 //go:generate sh -c "printf %s $(git rev-parse HEAD) > gen/COMMIT.txt"

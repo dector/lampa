@@ -14,12 +14,22 @@ var yellow = color.New(color.FgYellow).SprintFunc()
 
 func PrintlnErr(s string, a ...any) {
 	msg := fmt.Sprintf("\nERROR: %s\n", fmt.Sprintf(s, a...))
-	os.Stderr.WriteString(red(msg))
+
+	if G.UseOnlyStdout {
+		os.Stdout.WriteString(red(msg))
+	} else {
+		os.Stderr.WriteString(red(msg))
+	}
 }
 
 func PrintlnWarn(s string, a ...any) {
 	msg := fmt.Sprintf("Warning: %s\n", fmt.Sprintf(s, a...))
-	os.Stderr.WriteString(yellow(msg))
+
+	if G.UseOnlyStdout {
+		os.Stdout.WriteString(yellow(msg))
+	} else {
+		os.Stderr.WriteString(yellow(msg))
+	}
 }
 
 // --- Info
