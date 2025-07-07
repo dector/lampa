@@ -60,7 +60,13 @@ func CreateCliCommand() *cli.Command {
 func CreateVersionCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "version",
-		Usage: "show version and exit",
+		Usage: "print long build version and exit",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "short",
+				Usage: "display version without build info",
+			},
+		},
 		Action: func(ctx context.Context, c *cli.Command) error {
 			// Empty command because it's handled on the top
 			return nil
