@@ -12,6 +12,7 @@ import (
 	pages "lampa/internal/templates/html"
 	"lampa/internal/utils"
 	"lampa/pkg/bundles"
+	"lampa/pkg/gradle"
 	"log"
 	"os"
 	"os/exec"
@@ -105,8 +106,6 @@ func parseExecArgs(c *cli.Command) ExecArgs {
 	args.HtmlReportFile = path.Join(args.ReportsDir, reportName+".html")
 	args.HtmlReportFile = utils.TryResolveFsPath(args.HtmlReportFile)
 
-	args.GradlewPath = path.Join(args.ProjectDir, "gradlew")
-
 	return args
 }
 
@@ -168,16 +167,17 @@ func validateExecArgs(args *ExecArgs) error {
 	}
 
 	// Gradlew
-	info, err = os.Stat(args.GradlewPath)
+	gradlewPath := gradle.In(args.ProjectDir).FullPath()
+	info, err = os.Stat(gradlewPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("%s does not exist", args.GradlewPath)
+			return fmt.Errorf("%s does not exist", gradlewPath)
 		} else {
-			return fmt.Errorf("could not stat %s: %v", args.GradlewPath, err)
+			return fmt.Errorf("could not stat %s: %v", gradlewPath, err)
 		}
 	}
 	if info.IsDir() {
-		return fmt.Errorf("%s exists but is a directory, not a file", args.GradlewPath)
+		return fmt.Errorf("%s exists but is a directory, not a file", gradlewPath)
 	}
 
 	return nil
@@ -204,8 +204,6 @@ type ExecArgs struct {
 	OverwriteReport bool
 
 	Formats FormatArgs
-
-	GradlewPath string
 }
 
 func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
@@ -258,9 +256,9 @@ func execute(args ExecArgs) error {
 		out.Info("Building AAB")
 
 		task := "bundle" + cases.Title(language.BritishEnglish).String(args.BuildVariant)
-		output, err := executeGradleTask(args, task)
+		output, err := gradle.In(args.ProjectDir).Execute(task)
 		if err != nil {
-			return "", fmt.Errorf("failed to build app: %v\nOutput:\n%s", err, string(output))
+			return "", fmt.Errorf("failed to build app: %v\nOutput:\n%s", err, output)
 		}
 
 		return "", nil
@@ -268,63 +266,6 @@ func execute(args ExecArgs) error {
 	if err != nil {
 		return err
 	}
-
-	// pathToApk, err := DynamicSpinner(SpinnerArgs{
-	// 	Msg:             "Building...",
-	// 	MsgAfterSuccess: "Building: Done.",
-	// 	MsgAfterFail:    "Building: Failed.",
-	// }, func() (string, error) {
-	// 	task := "assemble" + cases.Title(language.BritishEnglish).String(buildVariant)
-	// 	cmd := exec.Command(gradlewPath, "--no-daemon", "--console", "plain", "-q", task)
-	// 	cmd.Dir = from
-	// 	output, err := cmd.CombinedOutput()
-	// 	if err != nil {
-	// 		return "", fmt.Errorf("failed to build app: %v\nOutput:\n%s", err, string(output))
-	// 	}
-
-	// 	var variantPaths []string
-	// 	var wordStart int
-	// 	for i, r := range buildVariant {
-	// 		if i > 0 && unicode.IsUpper(r) {
-	// 			variantPaths = append(variantPaths, strings.ToLower(buildVariant[wordStart:i]))
-	// 			wordStart = i
-	// 		}
-	// 	}
-	// 	variantPaths = append(variantPaths, strings.ToLower(buildVariant[wordStart:]))
-
-	// 	apkDir := path.Join(append([]string{from, "app", "build", "outputs", "apk"}, variantPaths...)...)
-
-	// 	info, err := os.Stat(apkDir)
-	// 	if err != nil {
-	// 		if os.IsNotExist(err) {
-	// 			return "", fmt.Errorf("APK directory `%s` does not exist", apkDir)
-	// 		}
-	// 		return "", fmt.Errorf("error accessing APK directory `%s`: %v", apkDir, err)
-	// 	}
-	// 	if !info.IsDir() {
-	// 		return "", fmt.Errorf("APK directory `%s` is not a directory", apkDir)
-	// 	}
-
-	// 	files, err := os.ReadDir(apkDir)
-	// 	if err != nil {
-	// 		return "", fmt.Errorf("could not read APK directory `%s`: %v", apkDir, err)
-	// 	}
-	// 	var apkFilePath string
-	// 	for _, file := range files {
-	// 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".apk") {
-	// 			apkFilePath = path.Join(apkDir, file.Name())
-	// 			break
-	// 		}
-	// 	}
-	// 	if apkFilePath == "" {
-	// 		return "", fmt.Errorf("no APK file found in `%s`", apkDir)
-	// 	}
-
-	// 	return apkFilePath, nil
-	// })
-	// if err != nil {
-	// 	return err
-	// }
 
 	err = StepReport(args)
 	if err != nil {
@@ -459,9 +400,11 @@ func collectReport(args ExecArgs, pathToAab string) (report.Report, error) {
 
 	out.Info("Fetching dependencies tree")
 
-	output, err := executeGradleTask(args, "app:dependencies", "--configuration", configurationName)
+	output, err := gradle.
+		In(args.ProjectDir).
+		Execute("app:dependencies", "--configuration", configurationName)
 	if err != nil {
-		return report.Report{}, fmt.Errorf("failed to execute gradlew: %v\nOutput:\n%s", err, string(output))
+		return report.Report{}, fmt.Errorf("failed to execute gradlew: %v\nOutput:\n%s", err, output)
 	}
 
 	// fmt.Println(string(output))
@@ -650,50 +593,14 @@ func analyzeBuild(result *report.Report, args ExecArgs, pathToAab string) error 
 	}
 	result.Build.AabSize = strconv.FormatInt(infoAab.Size(), 10)
 
-	// TODO analyze AAB manifest
-	// Display AAB size range
-	// Generate APK
-	// Get other data from APK
-
 	manifestData, err := bundles.LoadManifest(pathToAab)
 	if err != nil {
 		return fmt.Errorf("failed to load AAB manifest: %v", err)
 	}
 
-	// Analyze AAB manifest using bundletool
-	// cmd := exec.Command("java", "-jar", args.BundletoolPath, "dump", "manifest", "--bundle", pathToAab)
-	// cmd.Dir = args.ProjectDir
-	// output, err := cmd.CombinedOutput()
-	// if err != nil {
-	// 	return fmt.Errorf("failed to analyze AAB manifest with bundletool: %v.\nReason: %s", err, string(output))
-	// }
-	// manifest := string(output)
-
-	// // Parse manifest as XML
-	// type Manifest struct {
-	// 	XMLName          struct{} `xml:"manifest"`
-	// 	Package          string   `xml:"package,attr"`
-	// 	VersionCode      string   `xml:"versionCode,attr"`
-	// 	VersionName      string   `xml:"versionName,attr"`
-	// 	BuildVersionCode string   `xml:"platformBuildVersionCode,attr"`
-	// 	BuildVersionName string   `xml:"platformBuildVersionName,attr"`
-	// 	Application      struct {
-	// 		Label string `xml:"label,attr"`
-	// 	} `xml:"application"`
-	// 	UsesSdk struct {
-	// 		MinSdkVersion    string `xml:"minSdkVersion,attr"`
-	// 		TargetSdkVersion string `xml:"targetSdkVersion,attr"`
-	// 	} `xml:"uses-sdk"`
-	// }
-
-	// var manifestData Manifest
-	// if err := xml.Unmarshal([]byte(manifest), &manifestData); err != nil {
-	// 	return fmt.Errorf("could not parse manifest XML: %v", err)
-	// }
 	result.Build.ApplicationId = manifestData.Package
 	result.Build.VersionCode = manifestData.VersionCode
 	result.Build.VersionName = manifestData.VersionName
-	// result.Build.AppName = manifestData.Application.Label
 	result.Build.MinSdkVersion = manifestData.MinSdkVersion
 	result.Build.TargetSdkVersion = manifestData.TargetSdkVersion
 	result.Build.CompileSdkVersion = manifestData.CompileSdkVersion
@@ -711,56 +618,6 @@ func analyzeBuild(result *report.Report, args ExecArgs, pathToAab string) error 
 		result.Build.AppName = manifestData.Label
 	}
 
-	// err = addDataFromApk(result, args, pathToAab)
-	// if err != nil {
-	// 	return err
-	// }
-	// cmd := exec.Command(args.PathToAapt, "dump", "badging", args.PathToApk)
-	// cmd.Dir = args.ProjectDir
-
-	// output, err := cmd.CombinedOutput()
-	// if err != nil {
-	// 	return fmt.Errorf("failed to analyze build: %v.\nReason: %s", err, string(output))
-	// }
-
-	// lines := strings.Split(string(output), "\n")
-	// props := make(map[string]string)
-	// for _, l := range lines {
-	// 	if idx := strings.Index(l, ":"); idx != -1 {
-	// 		key := strings.TrimSpace(l[:idx])
-	// 		val := strings.TrimSpace(l[idx+1:])
-	// 		props[key] = val
-	// 	}
-	// }
-
-	// for k, v := range props {
-	// 	switch k {
-	// 	case "minSdkVersion":
-	// 		result.Build.MinSdkVersion = strings.Trim(v, "'")
-	// 	case "targetSdkVersion":
-	// 		result.Build.TargetSdkVersion = strings.Trim(v, "'")
-	// 	case "application-label":
-	// 		result.Build.AppName = strings.Trim(v, "'")
-	// 	case "package":
-	// 		{
-	// 			parts := strings.Split(v, " ")
-	// 			for _, part := range parts {
-	// 				if kv := strings.SplitN(part, "=", 2); len(kv) == 2 {
-	// 					key := strings.TrimSpace(kv[0])
-	// 					val := strings.Trim(strings.TrimSpace(kv[1]), "'")
-	// 					switch key {
-	// 					case "name":
-	// 						result.Build.ApplicationId = val
-	// 					case "versionCode":
-	// 						result.Build.VersionCode = val
-	// 					case "versionName":
-	// 						result.Build.VersionName = val
-	// 					case "compileSdkVersion":
-	// 						result.Build.CompileSdkVersion = val
-	// 					}
-	// 				}
-	// 			}
-	// 		}
 	// 	case "locales":
 	// 		{
 	// 			result.Build.Locales = lo.Map(strings.Fields(v), func(locale string, _ int) string {
@@ -805,21 +662,6 @@ func findAabFile(args ExecArgs) (string, error) {
 	}
 
 	return aabFilePath, nil
-}
-
-func executeGradleTask(args ExecArgs, gradleArgs ...string) ([]byte, error) {
-	cmd := exec.Command(
-		args.GradlewPath,
-		append(
-			[]string{
-				"--no-daemon", "--console",
-				"plain", "-q",
-			},
-			gradleArgs...,
-		)...,
-	)
-	cmd.Dir = args.ProjectDir
-	return cmd.CombinedOutput()
 }
 
 func findString(pathToAab string, stringName string) (string, error) {
