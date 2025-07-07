@@ -59,8 +59,8 @@ Download latest version from [Releases page](https://github.com/dector/lampa/rel
 for Linux/MacOS use Homebrew:
 
 ``` shell
-brew tap dector/lampa https://github.com/dector/lampa
-brew install dector/lampa/stable
+brew tap dector/lampa
+brew install lampa
 ```
 
 ### Runtime dependencies
