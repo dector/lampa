@@ -60,7 +60,7 @@ for Linux/MacOS use Homebrew:
 
 ``` shell
 brew tap dector/lampa https://github.com/dector/lampa
-brew install dector/lampa
+brew install dector/lampa/stable
 ```
 
 ### Runtime dependencies
