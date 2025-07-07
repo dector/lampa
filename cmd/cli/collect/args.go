@@ -2,12 +2,13 @@ package collect
 
 import (
 	"fmt"
-	"lampa/internal/utils"
-	"lampa/pkg/gradle"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
+
+	"github.com/dector/lampa/internal/utils"
+	"github.com/dector/lampa/pkg/gradle"
 
 	"github.com/samber/lo"
 	"github.com/urfave/cli/v3"

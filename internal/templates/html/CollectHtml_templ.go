@@ -10,10 +10,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"lampa/internal/report"
-	"lampa/internal/templates"
-	"lampa/internal/templates/components"
-	"lampa/internal/templates/icons"
+	"github.com/dector/lampa/internal/report"
+	"github.com/dector/lampa/internal/templates"
+	"github.com/dector/lampa/internal/templates/components"
+	"github.com/dector/lampa/internal/templates/icons"
 	"strings"
 )
 

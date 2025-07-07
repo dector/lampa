@@ -3,12 +3,13 @@ package collect
 import (
 	"context"
 	"fmt"
-	"lampa/internal/android"
-	"lampa/internal/out"
-	"lampa/internal/report"
-	"lampa/internal/spinner"
-	"lampa/internal/utils"
-	"lampa/pkg/gradle"
+
+	"github.com/dector/lampa/internal/android"
+	"github.com/dector/lampa/internal/out"
+	"github.com/dector/lampa/internal/report"
+	"github.com/dector/lampa/internal/spinner"
+	"github.com/dector/lampa/internal/utils"
+	"github.com/dector/lampa/pkg/gradle"
 
 	"github.com/urfave/cli/v3"
 	"golang.org/x/text/cases"

@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"lampa/cmd/cli/collect"
-	"lampa/cmd/cli/compare"
-	"lampa/internal/out"
 	"net/http"
 
-	. "lampa/internal/globals"
+	"github.com/dector/lampa/cmd/cli/collect"
+	"github.com/dector/lampa/cmd/cli/compare"
+	"github.com/dector/lampa/internal/out"
+
+	. "github.com/dector/lampa/internal/globals"
 
 	"github.com/samber/lo"
 	"github.com/square/exit"

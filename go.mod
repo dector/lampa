@@ -1,4 +1,4 @@
-module lampa
+module github.com/dector/lampa
 
 go 1.24.1
 

@@ -2,7 +2,8 @@ package bundles
 
 import (
 	"fmt"
-	"lampa/pkg/bundles/model"
+
+	"github.com/dector/lampa/pkg/bundles/model"
 )
 
 func ToTextXML(xml *model.XmlNode) string {

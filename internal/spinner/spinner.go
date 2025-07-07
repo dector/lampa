@@ -7,7 +7,7 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 
-	. "lampa/internal/globals"
+	. "github.com/dector/lampa/internal/globals"
 )
 
 type SpinnerArgs struct {

@@ -4,10 +4,6 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io"
-	"lampa/internal"
-	"lampa/internal/out"
-	"lampa/pkg/bundles"
-	"lampa/pkg/gradle"
 	"log"
 	"os"
 	"os/exec"
@@ -17,7 +13,12 @@ import (
 	"strings"
 	"time"
 
-	. "lampa/internal/globals"
+	"github.com/dector/lampa/internal"
+	"github.com/dector/lampa/internal/out"
+	"github.com/dector/lampa/pkg/bundles"
+	"github.com/dector/lampa/pkg/gradle"
+
+	. "github.com/dector/lampa/internal/globals"
 )
 
 type ParseFromArgs struct {

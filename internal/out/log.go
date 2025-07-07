@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	. "lampa/internal/globals"
+	. "github.com/dector/lampa/internal/globals"
 
 	"github.com/fatih/color"
 )

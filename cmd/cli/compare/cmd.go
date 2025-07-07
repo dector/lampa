@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"lampa/internal/report"
-	"lampa/internal/templates/html/compare"
 	"os"
 	"strings"
+
+	"github.com/dector/lampa/internal/report"
+	"github.com/dector/lampa/internal/templates/html/compare"
 
 	"github.com/urfave/cli/v3"
 )

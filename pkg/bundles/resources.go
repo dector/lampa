@@ -1,8 +1,8 @@
 package bundles
 
 import (
-	"lampa/pkg/bundles/model"
-	"lampa/pkg/bundles/parsers"
+	"github.com/dector/lampa/pkg/bundles/model"
+	"github.com/dector/lampa/pkg/bundles/parsers"
 )
 
 func LoadResources(aabFile string) (*model.ResourceTable, error) {

@@ -1,7 +1,7 @@
 package parsers
 
 import (
-	"lampa/pkg/bundles/model"
+	"github.com/dector/lampa/pkg/bundles/model"
 
 	"google.golang.org/protobuf/proto"
 )

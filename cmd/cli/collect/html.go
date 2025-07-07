@@ -3,11 +3,12 @@ package collect
 import (
 	"context"
 	"fmt"
-	"lampa/internal/report"
-	pages "lampa/internal/templates/html"
-	"lampa/internal/utils"
 	"os"
 	"strings"
+
+	"github.com/dector/lampa/internal/report"
+	pages "github.com/dector/lampa/internal/templates/html"
+	"github.com/dector/lampa/internal/utils"
 )
 
 func GenerateHtmlReport(r *report.Report) (string, error) {

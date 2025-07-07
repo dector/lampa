@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	. "lampa/internal/globals"
+	. "github.com/dector/lampa/internal/globals"
 )
 
 func PrintHeader() {

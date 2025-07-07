@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	. "lampa/internal/globals"
-	"lampa/internal/out"
+	. "github.com/dector/lampa/internal/globals"
+	"github.com/dector/lampa/internal/out"
 
 	"github.com/square/exit"
 )

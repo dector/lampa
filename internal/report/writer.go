@@ -2,8 +2,9 @@ package report
 
 import (
 	"fmt"
-	"lampa/internal/utils"
 	"os"
+
+	"github.com/dector/lampa/internal/utils"
 )
 
 func (self Report) WriteToFile(file string) error {

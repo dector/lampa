@@ -2,10 +2,11 @@ package android
 
 import (
 	"fmt"
-	"lampa/internal/out"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/dector/lampa/internal/out"
 )
 
 type AndroidProject struct {
