@@ -29,7 +29,7 @@ type ParseFromArgs struct {
 
 func ParseFrom(args ParseFromArgs) (Report, error) {
 	result := Report{
-		Version: "stats/0.0.1",
+		Version: StatsReportPrefix + LatestStatsReportVersion,
 	}
 
 	context, err := parseContext(args)

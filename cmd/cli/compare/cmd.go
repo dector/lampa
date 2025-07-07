@@ -137,6 +137,19 @@ func ReadReportFromFile(file string) (*report.Report, error) {
 		return nil, fmt.Errorf("could not read %s: %v", file, err)
 	}
 
+	var reportV report.Report_Version
+	if err := json.Unmarshal(data, &reportV); err != nil {
+		return nil, fmt.Errorf("could not parse %s as report: %v", file, err)
+	}
+
+	v, ok := strings.CutPrefix(reportV.Version, report.StatsReportPrefix)
+	if !ok {
+		return nil, fmt.Errorf("unrecognized report version: %s", reportV.Version)
+	}
+	if v != report.LatestStatsReportVersion {
+		return nil, fmt.Errorf("unsupported report version: %s", reportV.Version)
+	}
+
 	var report report.Report
 	if err := json.Unmarshal(data, &report); err != nil {
 		return nil, fmt.Errorf("could not parse %s as report: %v", file, err)

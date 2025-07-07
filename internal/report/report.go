@@ -2,6 +2,13 @@ package report
 
 import "fmt"
 
+const StatsReportPrefix = "stats/"
+const LatestStatsReportVersion = "0.0.1"
+
+type Report_Version struct {
+	Version string `json:"v"`
+}
+
 type Report struct {
 	Version string `json:"v"`
 
