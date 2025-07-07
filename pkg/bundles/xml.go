@@ -1,8 +1,11 @@
 package bundles
 
-import "fmt"
+import (
+	"fmt"
+	"lampa/pkg/bundles/model"
+)
 
-func ToTextXML(xml *XmlNode) string {
+func ToTextXML(xml *model.XmlNode) string {
 	var result string
 	if elem := xml.GetElement(); elem != nil {
 		result += fmt.Sprintf("<%s", elem.GetName())

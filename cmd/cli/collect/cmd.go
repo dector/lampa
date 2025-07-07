@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"io"
 	"lampa/internal"
-	"lampa/internal/bundle"
 	"lampa/internal/out"
 	"lampa/internal/report"
 	pages "lampa/internal/templates/html"
 	"lampa/internal/utils"
+	"lampa/pkg/bundles"
 	"log"
 	"os"
 	"os/exec"
@@ -655,7 +655,7 @@ func analyzeBuild(result *report.Report, args ExecArgs, pathToAab string) error 
 	// Generate APK
 	// Get other data from APK
 
-	manifestData, err := bundle.LoadManifest(pathToAab)
+	manifestData, err := bundles.LoadManifest(pathToAab)
 	if err != nil {
 		return fmt.Errorf("failed to load AAB manifest: %v", err)
 	}
@@ -823,7 +823,7 @@ func executeGradleTask(args ExecArgs, gradleArgs ...string) ([]byte, error) {
 }
 
 func findString(pathToAab string, stringName string) (string, error) {
-	res, err := bundle.LoadResources(pathToAab)
+	res, err := bundles.LoadResources(pathToAab)
 	if err != nil {
 		return "", fmt.Errorf("could not load resources from AAB file `%s`: %v", pathToAab, err)
 	}

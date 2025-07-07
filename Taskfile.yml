@@ -46,7 +46,7 @@ tasks:
       - |
         protoc --go_out=. \
           --go_opt=paths=source_relative \
-          ./pkg/bundles/*.proto
+          ./pkg/bundles/model/*.proto
     silent: true
 
   build:
