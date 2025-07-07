@@ -17,9 +17,9 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v5.29.3
-// source: internal/proto/xml.proto
+// source: pkg/bundles/xml.proto
 
-package proto
+package bundles
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -69,11 +69,11 @@ func (x Configuration_LayoutDirection) String() string {
 }
 
 func (Configuration_LayoutDirection) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[0].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[0].Descriptor()
 }
 
 func (Configuration_LayoutDirection) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[0]
+	return &file_pkg_bundles_xml_proto_enumTypes[0]
 }
 
 func (x Configuration_LayoutDirection) Number() protoreflect.EnumNumber {
@@ -82,7 +82,7 @@ func (x Configuration_LayoutDirection) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_LayoutDirection.Descriptor instead.
 func (Configuration_LayoutDirection) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 0}
 }
 
 type Configuration_ScreenLayoutSize int32
@@ -124,11 +124,11 @@ func (x Configuration_ScreenLayoutSize) String() string {
 }
 
 func (Configuration_ScreenLayoutSize) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[1].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[1].Descriptor()
 }
 
 func (Configuration_ScreenLayoutSize) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[1]
+	return &file_pkg_bundles_xml_proto_enumTypes[1]
 }
 
 func (x Configuration_ScreenLayoutSize) Number() protoreflect.EnumNumber {
@@ -137,7 +137,7 @@ func (x Configuration_ScreenLayoutSize) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_ScreenLayoutSize.Descriptor instead.
 func (Configuration_ScreenLayoutSize) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 1}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 1}
 }
 
 type Configuration_ScreenLayoutLong int32
@@ -173,11 +173,11 @@ func (x Configuration_ScreenLayoutLong) String() string {
 }
 
 func (Configuration_ScreenLayoutLong) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[2].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[2].Descriptor()
 }
 
 func (Configuration_ScreenLayoutLong) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[2]
+	return &file_pkg_bundles_xml_proto_enumTypes[2]
 }
 
 func (x Configuration_ScreenLayoutLong) Number() protoreflect.EnumNumber {
@@ -186,7 +186,7 @@ func (x Configuration_ScreenLayoutLong) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_ScreenLayoutLong.Descriptor instead.
 func (Configuration_ScreenLayoutLong) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 2}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 2}
 }
 
 type Configuration_ScreenRound int32
@@ -222,11 +222,11 @@ func (x Configuration_ScreenRound) String() string {
 }
 
 func (Configuration_ScreenRound) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[3].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[3].Descriptor()
 }
 
 func (Configuration_ScreenRound) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[3]
+	return &file_pkg_bundles_xml_proto_enumTypes[3]
 }
 
 func (x Configuration_ScreenRound) Number() protoreflect.EnumNumber {
@@ -235,7 +235,7 @@ func (x Configuration_ScreenRound) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_ScreenRound.Descriptor instead.
 func (Configuration_ScreenRound) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 3}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 3}
 }
 
 type Configuration_WideColorGamut int32
@@ -271,11 +271,11 @@ func (x Configuration_WideColorGamut) String() string {
 }
 
 func (Configuration_WideColorGamut) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[4].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[4].Descriptor()
 }
 
 func (Configuration_WideColorGamut) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[4]
+	return &file_pkg_bundles_xml_proto_enumTypes[4]
 }
 
 func (x Configuration_WideColorGamut) Number() protoreflect.EnumNumber {
@@ -284,7 +284,7 @@ func (x Configuration_WideColorGamut) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_WideColorGamut.Descriptor instead.
 func (Configuration_WideColorGamut) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 4}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 4}
 }
 
 type Configuration_Hdr int32
@@ -320,11 +320,11 @@ func (x Configuration_Hdr) String() string {
 }
 
 func (Configuration_Hdr) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[5].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[5].Descriptor()
 }
 
 func (Configuration_Hdr) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[5]
+	return &file_pkg_bundles_xml_proto_enumTypes[5]
 }
 
 func (x Configuration_Hdr) Number() protoreflect.EnumNumber {
@@ -333,7 +333,7 @@ func (x Configuration_Hdr) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_Hdr.Descriptor instead.
 func (Configuration_Hdr) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 5}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 5}
 }
 
 type Configuration_Orientation int32
@@ -372,11 +372,11 @@ func (x Configuration_Orientation) String() string {
 }
 
 func (Configuration_Orientation) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[6].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[6].Descriptor()
 }
 
 func (Configuration_Orientation) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[6]
+	return &file_pkg_bundles_xml_proto_enumTypes[6]
 }
 
 func (x Configuration_Orientation) Number() protoreflect.EnumNumber {
@@ -385,7 +385,7 @@ func (x Configuration_Orientation) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_Orientation.Descriptor instead.
 func (Configuration_Orientation) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 6}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 6}
 }
 
 type Configuration_UiModeType int32
@@ -436,11 +436,11 @@ func (x Configuration_UiModeType) String() string {
 }
 
 func (Configuration_UiModeType) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[7].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[7].Descriptor()
 }
 
 func (Configuration_UiModeType) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[7]
+	return &file_pkg_bundles_xml_proto_enumTypes[7]
 }
 
 func (x Configuration_UiModeType) Number() protoreflect.EnumNumber {
@@ -449,7 +449,7 @@ func (x Configuration_UiModeType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_UiModeType.Descriptor instead.
 func (Configuration_UiModeType) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 7}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 7}
 }
 
 type Configuration_UiModeNight int32
@@ -485,11 +485,11 @@ func (x Configuration_UiModeNight) String() string {
 }
 
 func (Configuration_UiModeNight) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[8].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[8].Descriptor()
 }
 
 func (Configuration_UiModeNight) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[8]
+	return &file_pkg_bundles_xml_proto_enumTypes[8]
 }
 
 func (x Configuration_UiModeNight) Number() protoreflect.EnumNumber {
@@ -498,7 +498,7 @@ func (x Configuration_UiModeNight) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_UiModeNight.Descriptor instead.
 func (Configuration_UiModeNight) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 8}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 8}
 }
 
 type Configuration_Touchscreen int32
@@ -537,11 +537,11 @@ func (x Configuration_Touchscreen) String() string {
 }
 
 func (Configuration_Touchscreen) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[9].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[9].Descriptor()
 }
 
 func (Configuration_Touchscreen) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[9]
+	return &file_pkg_bundles_xml_proto_enumTypes[9]
 }
 
 func (x Configuration_Touchscreen) Number() protoreflect.EnumNumber {
@@ -550,7 +550,7 @@ func (x Configuration_Touchscreen) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_Touchscreen.Descriptor instead.
 func (Configuration_Touchscreen) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 9}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 9}
 }
 
 type Configuration_KeysHidden int32
@@ -589,11 +589,11 @@ func (x Configuration_KeysHidden) String() string {
 }
 
 func (Configuration_KeysHidden) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[10].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[10].Descriptor()
 }
 
 func (Configuration_KeysHidden) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[10]
+	return &file_pkg_bundles_xml_proto_enumTypes[10]
 }
 
 func (x Configuration_KeysHidden) Number() protoreflect.EnumNumber {
@@ -602,7 +602,7 @@ func (x Configuration_KeysHidden) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_KeysHidden.Descriptor instead.
 func (Configuration_KeysHidden) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 10}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 10}
 }
 
 type Configuration_Keyboard int32
@@ -641,11 +641,11 @@ func (x Configuration_Keyboard) String() string {
 }
 
 func (Configuration_Keyboard) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[11].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[11].Descriptor()
 }
 
 func (Configuration_Keyboard) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[11]
+	return &file_pkg_bundles_xml_proto_enumTypes[11]
 }
 
 func (x Configuration_Keyboard) Number() protoreflect.EnumNumber {
@@ -654,7 +654,7 @@ func (x Configuration_Keyboard) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_Keyboard.Descriptor instead.
 func (Configuration_Keyboard) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 11}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 11}
 }
 
 type Configuration_NavHidden int32
@@ -690,11 +690,11 @@ func (x Configuration_NavHidden) String() string {
 }
 
 func (Configuration_NavHidden) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[12].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[12].Descriptor()
 }
 
 func (Configuration_NavHidden) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[12]
+	return &file_pkg_bundles_xml_proto_enumTypes[12]
 }
 
 func (x Configuration_NavHidden) Number() protoreflect.EnumNumber {
@@ -703,7 +703,7 @@ func (x Configuration_NavHidden) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_NavHidden.Descriptor instead.
 func (Configuration_NavHidden) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 12}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 12}
 }
 
 type Configuration_Navigation int32
@@ -745,11 +745,11 @@ func (x Configuration_Navigation) String() string {
 }
 
 func (Configuration_Navigation) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[13].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[13].Descriptor()
 }
 
 func (Configuration_Navigation) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[13]
+	return &file_pkg_bundles_xml_proto_enumTypes[13]
 }
 
 func (x Configuration_Navigation) Number() protoreflect.EnumNumber {
@@ -758,7 +758,7 @@ func (x Configuration_Navigation) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_Navigation.Descriptor instead.
 func (Configuration_Navigation) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 13}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 13}
 }
 
 type Configuration_GrammaticalGender int32
@@ -797,11 +797,11 @@ func (x Configuration_GrammaticalGender) String() string {
 }
 
 func (Configuration_GrammaticalGender) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[14].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[14].Descriptor()
 }
 
 func (Configuration_GrammaticalGender) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[14]
+	return &file_pkg_bundles_xml_proto_enumTypes[14]
 }
 
 func (x Configuration_GrammaticalGender) Number() protoreflect.EnumNumber {
@@ -810,7 +810,7 @@ func (x Configuration_GrammaticalGender) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Configuration_GrammaticalGender.Descriptor instead.
 func (Configuration_GrammaticalGender) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0, 14}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0, 14}
 }
 
 // The visibility of the resource outside of its package.
@@ -857,11 +857,11 @@ func (x Visibility_Level) String() string {
 }
 
 func (Visibility_Level) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[15].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[15].Descriptor()
 }
 
 func (Visibility_Level) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[15]
+	return &file_pkg_bundles_xml_proto_enumTypes[15]
 }
 
 func (x Visibility_Level) Number() protoreflect.EnumNumber {
@@ -870,7 +870,7 @@ func (x Visibility_Level) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Visibility_Level.Descriptor instead.
 func (Visibility_Level) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{11, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{11, 0}
 }
 
 type OverlayableItem_Policy int32
@@ -927,11 +927,11 @@ func (x OverlayableItem_Policy) String() string {
 }
 
 func (OverlayableItem_Policy) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[16].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[16].Descriptor()
 }
 
 func (OverlayableItem_Policy) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[16]
+	return &file_pkg_bundles_xml_proto_enumTypes[16]
 }
 
 func (x OverlayableItem_Policy) Number() protoreflect.EnumNumber {
@@ -940,7 +940,7 @@ func (x OverlayableItem_Policy) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use OverlayableItem_Policy.Descriptor instead.
 func (OverlayableItem_Policy) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{14, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{14, 0}
 }
 
 type Reference_Type int32
@@ -975,11 +975,11 @@ func (x Reference_Type) String() string {
 }
 
 func (Reference_Type) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[17].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[17].Descriptor()
 }
 
 func (Reference_Type) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[17]
+	return &file_pkg_bundles_xml_proto_enumTypes[17]
 }
 
 func (x Reference_Type) Number() protoreflect.EnumNumber {
@@ -988,7 +988,7 @@ func (x Reference_Type) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Reference_Type.Descriptor instead.
 func (Reference_Type) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{23, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{23, 0}
 }
 
 type FileReference_Type int32
@@ -1027,11 +1027,11 @@ func (x FileReference_Type) String() string {
 }
 
 func (FileReference_Type) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[18].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[18].Descriptor()
 }
 
 func (FileReference_Type) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[18]
+	return &file_pkg_bundles_xml_proto_enumTypes[18]
 }
 
 func (x FileReference_Type) Number() protoreflect.EnumNumber {
@@ -1040,7 +1040,7 @@ func (x FileReference_Type) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use FileReference_Type.Descriptor instead.
 func (FileReference_Type) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{28, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{28, 0}
 }
 
 // Bitmask of formats allowed for an attribute.
@@ -1105,11 +1105,11 @@ func (x Attribute_FormatFlags) String() string {
 }
 
 func (Attribute_FormatFlags) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[19].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[19].Descriptor()
 }
 
 func (Attribute_FormatFlags) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[19]
+	return &file_pkg_bundles_xml_proto_enumTypes[19]
 }
 
 func (x Attribute_FormatFlags) Number() protoreflect.EnumNumber {
@@ -1118,7 +1118,7 @@ func (x Attribute_FormatFlags) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Attribute_FormatFlags.Descriptor instead.
 func (Attribute_FormatFlags) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{30, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{30, 0}
 }
 
 // The arity of the plural.
@@ -1164,11 +1164,11 @@ func (x Plural_Arity) String() string {
 }
 
 func (Plural_Arity) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_xml_proto_enumTypes[20].Descriptor()
+	return file_pkg_bundles_xml_proto_enumTypes[20].Descriptor()
 }
 
 func (Plural_Arity) Type() protoreflect.EnumType {
-	return &file_internal_proto_xml_proto_enumTypes[20]
+	return &file_pkg_bundles_xml_proto_enumTypes[20]
 }
 
 func (x Plural_Arity) Number() protoreflect.EnumNumber {
@@ -1177,7 +1177,7 @@ func (x Plural_Arity) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Plural_Arity.Descriptor instead.
 func (Plural_Arity) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{34, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{34, 0}
 }
 
 // A description of the requirements a device must have in order for a
@@ -1243,7 +1243,7 @@ type Configuration struct {
 
 func (x *Configuration) Reset() {
 	*x = Configuration{}
-	mi := &file_internal_proto_xml_proto_msgTypes[0]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1255,7 +1255,7 @@ func (x *Configuration) String() string {
 func (*Configuration) ProtoMessage() {}
 
 func (x *Configuration) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[0]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1268,7 +1268,7 @@ func (x *Configuration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Configuration.ProtoReflect.Descriptor instead.
 func (*Configuration) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Configuration) GetMcc() uint32 {
@@ -1463,7 +1463,7 @@ type StringPool struct {
 
 func (x *StringPool) Reset() {
 	*x = StringPool{}
-	mi := &file_internal_proto_xml_proto_msgTypes[1]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1475,7 +1475,7 @@ func (x *StringPool) String() string {
 func (*StringPool) ProtoMessage() {}
 
 func (x *StringPool) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[1]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1488,7 +1488,7 @@ func (x *StringPool) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StringPool.ProtoReflect.Descriptor instead.
 func (*StringPool) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{1}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *StringPool) GetData() []byte {
@@ -1509,7 +1509,7 @@ type SourcePosition struct {
 
 func (x *SourcePosition) Reset() {
 	*x = SourcePosition{}
-	mi := &file_internal_proto_xml_proto_msgTypes[2]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1521,7 +1521,7 @@ func (x *SourcePosition) String() string {
 func (*SourcePosition) ProtoMessage() {}
 
 func (x *SourcePosition) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[2]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1534,7 +1534,7 @@ func (x *SourcePosition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SourcePosition.ProtoReflect.Descriptor instead.
 func (*SourcePosition) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{2}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *SourcePosition) GetLineNumber() uint32 {
@@ -1563,7 +1563,7 @@ type Source struct {
 
 func (x *Source) Reset() {
 	*x = Source{}
-	mi := &file_internal_proto_xml_proto_msgTypes[3]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1575,7 +1575,7 @@ func (x *Source) String() string {
 func (*Source) ProtoMessage() {}
 
 func (x *Source) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[3]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1588,7 +1588,7 @@ func (x *Source) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Source.ProtoReflect.Descriptor instead.
 func (*Source) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{3}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Source) GetPathIdx() uint32 {
@@ -1616,7 +1616,7 @@ type ToolFingerprint struct {
 
 func (x *ToolFingerprint) Reset() {
 	*x = ToolFingerprint{}
-	mi := &file_internal_proto_xml_proto_msgTypes[4]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1628,7 +1628,7 @@ func (x *ToolFingerprint) String() string {
 func (*ToolFingerprint) ProtoMessage() {}
 
 func (x *ToolFingerprint) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[4]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1641,7 +1641,7 @@ func (x *ToolFingerprint) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToolFingerprint.ProtoReflect.Descriptor instead.
 func (*ToolFingerprint) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{4}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ToolFingerprint) GetTool() string {
@@ -1669,7 +1669,7 @@ type DynamicRefTable struct {
 
 func (x *DynamicRefTable) Reset() {
 	*x = DynamicRefTable{}
-	mi := &file_internal_proto_xml_proto_msgTypes[5]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1681,7 +1681,7 @@ func (x *DynamicRefTable) String() string {
 func (*DynamicRefTable) ProtoMessage() {}
 
 func (x *DynamicRefTable) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[5]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1694,7 +1694,7 @@ func (x *DynamicRefTable) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DynamicRefTable.ProtoReflect.Descriptor instead.
 func (*DynamicRefTable) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{5}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *DynamicRefTable) GetPackageId() *PackageId {
@@ -1730,7 +1730,7 @@ type ResourceTable struct {
 
 func (x *ResourceTable) Reset() {
 	*x = ResourceTable{}
-	mi := &file_internal_proto_xml_proto_msgTypes[6]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1742,7 +1742,7 @@ func (x *ResourceTable) String() string {
 func (*ResourceTable) ProtoMessage() {}
 
 func (x *ResourceTable) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[6]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1755,7 +1755,7 @@ func (x *ResourceTable) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResourceTable.ProtoReflect.Descriptor instead.
 func (*ResourceTable) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{6}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ResourceTable) GetSourcePool() *StringPool {
@@ -1803,7 +1803,7 @@ type PackageId struct {
 
 func (x *PackageId) Reset() {
 	*x = PackageId{}
-	mi := &file_internal_proto_xml_proto_msgTypes[7]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1815,7 +1815,7 @@ func (x *PackageId) String() string {
 func (*PackageId) ProtoMessage() {}
 
 func (x *PackageId) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[7]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1828,7 +1828,7 @@ func (x *PackageId) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PackageId.ProtoReflect.Descriptor instead.
 func (*PackageId) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{7}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *PackageId) GetId() uint32 {
@@ -1859,7 +1859,7 @@ type Package struct {
 
 func (x *Package) Reset() {
 	*x = Package{}
-	mi := &file_internal_proto_xml_proto_msgTypes[8]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1871,7 +1871,7 @@ func (x *Package) String() string {
 func (*Package) ProtoMessage() {}
 
 func (x *Package) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[8]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1884,7 +1884,7 @@ func (x *Package) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Package.ProtoReflect.Descriptor instead.
 func (*Package) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{8}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Package) GetPackageId() *PackageId {
@@ -1918,7 +1918,7 @@ type TypeId struct {
 
 func (x *TypeId) Reset() {
 	*x = TypeId{}
-	mi := &file_internal_proto_xml_proto_msgTypes[9]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1930,7 +1930,7 @@ func (x *TypeId) String() string {
 func (*TypeId) ProtoMessage() {}
 
 func (x *TypeId) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[9]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1943,7 +1943,7 @@ func (x *TypeId) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TypeId.ProtoReflect.Descriptor instead.
 func (*TypeId) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{9}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *TypeId) GetId() uint32 {
@@ -1970,7 +1970,7 @@ type Type struct {
 
 func (x *Type) Reset() {
 	*x = Type{}
-	mi := &file_internal_proto_xml_proto_msgTypes[10]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1982,7 +1982,7 @@ func (x *Type) String() string {
 func (*Type) ProtoMessage() {}
 
 func (x *Type) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[10]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1995,7 +1995,7 @@ func (x *Type) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Type.ProtoReflect.Descriptor instead.
 func (*Type) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{10}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *Type) GetTypeId() *TypeId {
@@ -2037,7 +2037,7 @@ type Visibility struct {
 
 func (x *Visibility) Reset() {
 	*x = Visibility{}
-	mi := &file_internal_proto_xml_proto_msgTypes[11]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2049,7 +2049,7 @@ func (x *Visibility) String() string {
 func (*Visibility) ProtoMessage() {}
 
 func (x *Visibility) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[11]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2062,7 +2062,7 @@ func (x *Visibility) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Visibility.ProtoReflect.Descriptor instead.
 func (*Visibility) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{11}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Visibility) GetLevel() Visibility_Level {
@@ -2107,7 +2107,7 @@ type AllowNew struct {
 
 func (x *AllowNew) Reset() {
 	*x = AllowNew{}
-	mi := &file_internal_proto_xml_proto_msgTypes[12]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2119,7 +2119,7 @@ func (x *AllowNew) String() string {
 func (*AllowNew) ProtoMessage() {}
 
 func (x *AllowNew) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[12]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2132,7 +2132,7 @@ func (x *AllowNew) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AllowNew.ProtoReflect.Descriptor instead.
 func (*AllowNew) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{12}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *AllowNew) GetSource() *Source {
@@ -2164,7 +2164,7 @@ type Overlayable struct {
 
 func (x *Overlayable) Reset() {
 	*x = Overlayable{}
-	mi := &file_internal_proto_xml_proto_msgTypes[13]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2176,7 +2176,7 @@ func (x *Overlayable) String() string {
 func (*Overlayable) ProtoMessage() {}
 
 func (x *Overlayable) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[13]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2189,7 +2189,7 @@ func (x *Overlayable) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Overlayable.ProtoReflect.Descriptor instead.
 func (*Overlayable) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{13}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *Overlayable) GetName() string {
@@ -2231,7 +2231,7 @@ type OverlayableItem struct {
 
 func (x *OverlayableItem) Reset() {
 	*x = OverlayableItem{}
-	mi := &file_internal_proto_xml_proto_msgTypes[14]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2243,7 +2243,7 @@ func (x *OverlayableItem) String() string {
 func (*OverlayableItem) ProtoMessage() {}
 
 func (x *OverlayableItem) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[14]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2256,7 +2256,7 @@ func (x *OverlayableItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OverlayableItem.ProtoReflect.Descriptor instead.
 func (*OverlayableItem) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{14}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *OverlayableItem) GetSource() *Source {
@@ -2298,7 +2298,7 @@ type StagedId struct {
 
 func (x *StagedId) Reset() {
 	*x = StagedId{}
-	mi := &file_internal_proto_xml_proto_msgTypes[15]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2310,7 +2310,7 @@ func (x *StagedId) String() string {
 func (*StagedId) ProtoMessage() {}
 
 func (x *StagedId) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[15]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2323,7 +2323,7 @@ func (x *StagedId) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StagedId.ProtoReflect.Descriptor instead.
 func (*StagedId) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{15}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *StagedId) GetSource() *Source {
@@ -2350,7 +2350,7 @@ type EntryId struct {
 
 func (x *EntryId) Reset() {
 	*x = EntryId{}
-	mi := &file_internal_proto_xml_proto_msgTypes[16]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2362,7 +2362,7 @@ func (x *EntryId) String() string {
 func (*EntryId) ProtoMessage() {}
 
 func (x *EntryId) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[16]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2375,7 +2375,7 @@ func (x *EntryId) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EntryId.ProtoReflect.Descriptor instead.
 func (*EntryId) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{16}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *EntryId) GetId() uint32 {
@@ -2418,7 +2418,7 @@ type Entry struct {
 
 func (x *Entry) Reset() {
 	*x = Entry{}
-	mi := &file_internal_proto_xml_proto_msgTypes[17]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2430,7 +2430,7 @@ func (x *Entry) String() string {
 func (*Entry) ProtoMessage() {}
 
 func (x *Entry) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[17]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2443,7 +2443,7 @@ func (x *Entry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Entry.ProtoReflect.Descriptor instead.
 func (*Entry) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{17}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *Entry) GetEntryId() *EntryId {
@@ -2513,7 +2513,7 @@ type ConfigValue struct {
 
 func (x *ConfigValue) Reset() {
 	*x = ConfigValue{}
-	mi := &file_internal_proto_xml_proto_msgTypes[18]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2525,7 +2525,7 @@ func (x *ConfigValue) String() string {
 func (*ConfigValue) ProtoMessage() {}
 
 func (x *ConfigValue) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[18]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2538,7 +2538,7 @@ func (x *ConfigValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfigValue.ProtoReflect.Descriptor instead.
 func (*ConfigValue) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{18}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ConfigValue) GetConfig() *Configuration {
@@ -2577,7 +2577,7 @@ type Value struct {
 
 func (x *Value) Reset() {
 	*x = Value{}
-	mi := &file_internal_proto_xml_proto_msgTypes[19]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2589,7 +2589,7 @@ func (x *Value) String() string {
 func (*Value) ProtoMessage() {}
 
 func (x *Value) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[19]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2602,7 +2602,7 @@ func (x *Value) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Value.ProtoReflect.Descriptor instead.
 func (*Value) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{19}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *Value) GetSource() *Source {
@@ -2692,7 +2692,7 @@ type Item struct {
 
 func (x *Item) Reset() {
 	*x = Item{}
-	mi := &file_internal_proto_xml_proto_msgTypes[20]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2704,7 +2704,7 @@ func (x *Item) String() string {
 func (*Item) ProtoMessage() {}
 
 func (x *Item) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[20]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2717,7 +2717,7 @@ func (x *Item) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Item.ProtoReflect.Descriptor instead.
 func (*Item) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{20}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *Item) GetValue() isItem_Value {
@@ -2881,7 +2881,7 @@ type CompoundValue struct {
 
 func (x *CompoundValue) Reset() {
 	*x = CompoundValue{}
-	mi := &file_internal_proto_xml_proto_msgTypes[21]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2893,7 +2893,7 @@ func (x *CompoundValue) String() string {
 func (*CompoundValue) ProtoMessage() {}
 
 func (x *CompoundValue) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[21]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2906,7 +2906,7 @@ func (x *CompoundValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompoundValue.ProtoReflect.Descriptor instead.
 func (*CompoundValue) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{21}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *CompoundValue) GetValue() isCompoundValue_Value {
@@ -3041,7 +3041,7 @@ type Boolean struct {
 
 func (x *Boolean) Reset() {
 	*x = Boolean{}
-	mi := &file_internal_proto_xml_proto_msgTypes[22]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3053,7 +3053,7 @@ func (x *Boolean) String() string {
 func (*Boolean) ProtoMessage() {}
 
 func (x *Boolean) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[22]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3066,7 +3066,7 @@ func (x *Boolean) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Boolean.ProtoReflect.Descriptor instead.
 func (*Boolean) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{22}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *Boolean) GetValue() bool {
@@ -3099,7 +3099,7 @@ type Reference struct {
 
 func (x *Reference) Reset() {
 	*x = Reference{}
-	mi := &file_internal_proto_xml_proto_msgTypes[23]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3111,7 +3111,7 @@ func (x *Reference) String() string {
 func (*Reference) ProtoMessage() {}
 
 func (x *Reference) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[23]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3124,7 +3124,7 @@ func (x *Reference) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Reference.ProtoReflect.Descriptor instead.
 func (*Reference) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{23}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *Reference) GetType() Reference_Type {
@@ -3186,7 +3186,7 @@ type Id struct {
 
 func (x *Id) Reset() {
 	*x = Id{}
-	mi := &file_internal_proto_xml_proto_msgTypes[24]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3198,7 +3198,7 @@ func (x *Id) String() string {
 func (*Id) ProtoMessage() {}
 
 func (x *Id) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[24]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3211,7 +3211,7 @@ func (x *Id) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Id.ProtoReflect.Descriptor instead.
 func (*Id) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{24}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{24}
 }
 
 // A value that is a string.
@@ -3224,7 +3224,7 @@ type String struct {
 
 func (x *String) Reset() {
 	*x = String{}
-	mi := &file_internal_proto_xml_proto_msgTypes[25]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3236,7 +3236,7 @@ func (x *String) String() string {
 func (*String) ProtoMessage() {}
 
 func (x *String) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[25]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3249,7 +3249,7 @@ func (x *String) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use String.ProtoReflect.Descriptor instead.
 func (*String) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{25}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *String) GetValue() string {
@@ -3271,7 +3271,7 @@ type RawString struct {
 
 func (x *RawString) Reset() {
 	*x = RawString{}
-	mi := &file_internal_proto_xml_proto_msgTypes[26]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3283,7 +3283,7 @@ func (x *RawString) String() string {
 func (*RawString) ProtoMessage() {}
 
 func (x *RawString) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[26]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3296,7 +3296,7 @@ func (x *RawString) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RawString.ProtoReflect.Descriptor instead.
 func (*RawString) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{26}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *RawString) GetValue() string {
@@ -3318,7 +3318,7 @@ type StyledString struct {
 
 func (x *StyledString) Reset() {
 	*x = StyledString{}
-	mi := &file_internal_proto_xml_proto_msgTypes[27]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3330,7 +3330,7 @@ func (x *StyledString) String() string {
 func (*StyledString) ProtoMessage() {}
 
 func (x *StyledString) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[27]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3343,7 +3343,7 @@ func (x *StyledString) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StyledString.ProtoReflect.Descriptor instead.
 func (*StyledString) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{27}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *StyledString) GetValue() string {
@@ -3374,7 +3374,7 @@ type FileReference struct {
 
 func (x *FileReference) Reset() {
 	*x = FileReference{}
-	mi := &file_internal_proto_xml_proto_msgTypes[28]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3386,7 +3386,7 @@ func (x *FileReference) String() string {
 func (*FileReference) ProtoMessage() {}
 
 func (x *FileReference) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[28]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3399,7 +3399,7 @@ func (x *FileReference) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FileReference.ProtoReflect.Descriptor instead.
 func (*FileReference) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{28}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *FileReference) GetPath() string {
@@ -3443,7 +3443,7 @@ type Primitive struct {
 
 func (x *Primitive) Reset() {
 	*x = Primitive{}
-	mi := &file_internal_proto_xml_proto_msgTypes[29]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3455,7 +3455,7 @@ func (x *Primitive) String() string {
 func (*Primitive) ProtoMessage() {}
 
 func (x *Primitive) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[29]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3468,7 +3468,7 @@ func (x *Primitive) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Primitive.ProtoReflect.Descriptor instead.
 func (*Primitive) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{29}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *Primitive) GetOneofValue() isPrimitive_OneofValue {
@@ -3586,7 +3586,7 @@ func (x *Primitive) GetColorRgb4Value() uint32 {
 	return 0
 }
 
-// Deprecated: Marked as deprecated in internal/proto/xml.proto.
+// Deprecated: Marked as deprecated in pkg/bundles/xml.proto.
 func (x *Primitive) GetDimensionValueDeprecated() float32 {
 	if x != nil {
 		if x, ok := x.OneofValue.(*Primitive_DimensionValueDeprecated); ok {
@@ -3596,7 +3596,7 @@ func (x *Primitive) GetDimensionValueDeprecated() float32 {
 	return 0
 }
 
-// Deprecated: Marked as deprecated in internal/proto/xml.proto.
+// Deprecated: Marked as deprecated in pkg/bundles/xml.proto.
 func (x *Primitive) GetFractionValueDeprecated() float32 {
 	if x != nil {
 		if x, ok := x.OneofValue.(*Primitive_FractionValueDeprecated); ok {
@@ -3659,12 +3659,12 @@ type Primitive_ColorRgb4Value struct {
 }
 
 type Primitive_DimensionValueDeprecated struct {
-	// Deprecated: Marked as deprecated in internal/proto/xml.proto.
+	// Deprecated: Marked as deprecated in pkg/bundles/xml.proto.
 	DimensionValueDeprecated float32 `protobuf:"fixed32,4,opt,name=dimension_value_deprecated,json=dimensionValueDeprecated,proto3,oneof"`
 }
 
 type Primitive_FractionValueDeprecated struct {
-	// Deprecated: Marked as deprecated in internal/proto/xml.proto.
+	// Deprecated: Marked as deprecated in pkg/bundles/xml.proto.
 	FractionValueDeprecated float32 `protobuf:"fixed32,5,opt,name=fraction_value_deprecated,json=fractionValueDeprecated,proto3,oneof"`
 }
 
@@ -3717,7 +3717,7 @@ type Attribute struct {
 
 func (x *Attribute) Reset() {
 	*x = Attribute{}
-	mi := &file_internal_proto_xml_proto_msgTypes[30]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3729,7 +3729,7 @@ func (x *Attribute) String() string {
 func (*Attribute) ProtoMessage() {}
 
 func (x *Attribute) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[30]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3742,7 +3742,7 @@ func (x *Attribute) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Attribute.ProtoReflect.Descriptor instead.
 func (*Attribute) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{30}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *Attribute) GetFormatFlags() uint32 {
@@ -3788,7 +3788,7 @@ type Style struct {
 
 func (x *Style) Reset() {
 	*x = Style{}
-	mi := &file_internal_proto_xml_proto_msgTypes[31]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3800,7 +3800,7 @@ func (x *Style) String() string {
 func (*Style) ProtoMessage() {}
 
 func (x *Style) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[31]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3813,7 +3813,7 @@ func (x *Style) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Style.ProtoReflect.Descriptor instead.
 func (*Style) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{31}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *Style) GetParent() *Reference {
@@ -3849,7 +3849,7 @@ type Styleable struct {
 
 func (x *Styleable) Reset() {
 	*x = Styleable{}
-	mi := &file_internal_proto_xml_proto_msgTypes[32]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3861,7 +3861,7 @@ func (x *Styleable) String() string {
 func (*Styleable) ProtoMessage() {}
 
 func (x *Styleable) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[32]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3874,7 +3874,7 @@ func (x *Styleable) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Styleable.ProtoReflect.Descriptor instead.
 func (*Styleable) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{32}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *Styleable) GetEntry() []*Styleable_Entry {
@@ -3895,7 +3895,7 @@ type Array struct {
 
 func (x *Array) Reset() {
 	*x = Array{}
-	mi := &file_internal_proto_xml_proto_msgTypes[33]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3907,7 +3907,7 @@ func (x *Array) String() string {
 func (*Array) ProtoMessage() {}
 
 func (x *Array) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[33]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3920,7 +3920,7 @@ func (x *Array) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Array.ProtoReflect.Descriptor instead.
 func (*Array) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{33}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *Array) GetElement() []*Array_Element {
@@ -3941,7 +3941,7 @@ type Plural struct {
 
 func (x *Plural) Reset() {
 	*x = Plural{}
-	mi := &file_internal_proto_xml_proto_msgTypes[34]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3953,7 +3953,7 @@ func (x *Plural) String() string {
 func (*Plural) ProtoMessage() {}
 
 func (x *Plural) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[34]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3966,7 +3966,7 @@ func (x *Plural) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Plural.ProtoReflect.Descriptor instead.
 func (*Plural) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{34}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *Plural) GetEntry() []*Plural_Entry {
@@ -3993,7 +3993,7 @@ type XmlNode struct {
 
 func (x *XmlNode) Reset() {
 	*x = XmlNode{}
-	mi := &file_internal_proto_xml_proto_msgTypes[35]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4005,7 +4005,7 @@ func (x *XmlNode) String() string {
 func (*XmlNode) ProtoMessage() {}
 
 func (x *XmlNode) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[35]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4018,7 +4018,7 @@ func (x *XmlNode) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use XmlNode.ProtoReflect.Descriptor instead.
 func (*XmlNode) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{35}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *XmlNode) GetNode() isXmlNode_Node {
@@ -4088,7 +4088,7 @@ type XmlElement struct {
 
 func (x *XmlElement) Reset() {
 	*x = XmlElement{}
-	mi := &file_internal_proto_xml_proto_msgTypes[36]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4100,7 +4100,7 @@ func (x *XmlElement) String() string {
 func (*XmlElement) ProtoMessage() {}
 
 func (x *XmlElement) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[36]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4113,7 +4113,7 @@ func (x *XmlElement) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use XmlElement.ProtoReflect.Descriptor instead.
 func (*XmlElement) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{36}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *XmlElement) GetNamespaceDeclaration() []*XmlNamespace {
@@ -4164,7 +4164,7 @@ type XmlNamespace struct {
 
 func (x *XmlNamespace) Reset() {
 	*x = XmlNamespace{}
-	mi := &file_internal_proto_xml_proto_msgTypes[37]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4176,7 +4176,7 @@ func (x *XmlNamespace) String() string {
 func (*XmlNamespace) ProtoMessage() {}
 
 func (x *XmlNamespace) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[37]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4189,7 +4189,7 @@ func (x *XmlNamespace) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use XmlNamespace.ProtoReflect.Descriptor instead.
 func (*XmlNamespace) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{37}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *XmlNamespace) GetPrefix() string {
@@ -4231,7 +4231,7 @@ type XmlAttribute struct {
 
 func (x *XmlAttribute) Reset() {
 	*x = XmlAttribute{}
-	mi := &file_internal_proto_xml_proto_msgTypes[38]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4243,7 +4243,7 @@ func (x *XmlAttribute) String() string {
 func (*XmlAttribute) ProtoMessage() {}
 
 func (x *XmlAttribute) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[38]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4256,7 +4256,7 @@ func (x *XmlAttribute) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use XmlAttribute.ProtoReflect.Descriptor instead.
 func (*XmlAttribute) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{38}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *XmlAttribute) GetNamespaceUri() string {
@@ -4314,7 +4314,7 @@ type MacroBody struct {
 
 func (x *MacroBody) Reset() {
 	*x = MacroBody{}
-	mi := &file_internal_proto_xml_proto_msgTypes[39]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4326,7 +4326,7 @@ func (x *MacroBody) String() string {
 func (*MacroBody) ProtoMessage() {}
 
 func (x *MacroBody) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[39]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4339,7 +4339,7 @@ func (x *MacroBody) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MacroBody.ProtoReflect.Descriptor instead.
 func (*MacroBody) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{39}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *MacroBody) GetRawString() string {
@@ -4388,7 +4388,7 @@ type NamespaceAlias struct {
 
 func (x *NamespaceAlias) Reset() {
 	*x = NamespaceAlias{}
-	mi := &file_internal_proto_xml_proto_msgTypes[40]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4400,7 +4400,7 @@ func (x *NamespaceAlias) String() string {
 func (*NamespaceAlias) ProtoMessage() {}
 
 func (x *NamespaceAlias) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[40]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4413,7 +4413,7 @@ func (x *NamespaceAlias) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NamespaceAlias.ProtoReflect.Descriptor instead.
 func (*NamespaceAlias) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{40}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *NamespaceAlias) GetPrefix() string {
@@ -4447,7 +4447,7 @@ type StyleString struct {
 
 func (x *StyleString) Reset() {
 	*x = StyleString{}
-	mi := &file_internal_proto_xml_proto_msgTypes[41]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4459,7 +4459,7 @@ func (x *StyleString) String() string {
 func (*StyleString) ProtoMessage() {}
 
 func (x *StyleString) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[41]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4472,7 +4472,7 @@ func (x *StyleString) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StyleString.ProtoReflect.Descriptor instead.
 func (*StyleString) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{41}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *StyleString) GetStr() string {
@@ -4499,7 +4499,7 @@ type UntranslatableSection struct {
 
 func (x *UntranslatableSection) Reset() {
 	*x = UntranslatableSection{}
-	mi := &file_internal_proto_xml_proto_msgTypes[42]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4511,7 +4511,7 @@ func (x *UntranslatableSection) String() string {
 func (*UntranslatableSection) ProtoMessage() {}
 
 func (x *UntranslatableSection) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[42]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4524,7 +4524,7 @@ func (x *UntranslatableSection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UntranslatableSection.ProtoReflect.Descriptor instead.
 func (*UntranslatableSection) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{42}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *UntranslatableSection) GetStartIndex() uint64 {
@@ -4557,7 +4557,7 @@ type StyledString_Span struct {
 
 func (x *StyledString_Span) Reset() {
 	*x = StyledString_Span{}
-	mi := &file_internal_proto_xml_proto_msgTypes[43]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4569,7 +4569,7 @@ func (x *StyledString_Span) String() string {
 func (*StyledString_Span) ProtoMessage() {}
 
 func (x *StyledString_Span) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[43]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4582,7 +4582,7 @@ func (x *StyledString_Span) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StyledString_Span.ProtoReflect.Descriptor instead.
 func (*StyledString_Span) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{27, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{27, 0}
 }
 
 func (x *StyledString_Span) GetTag() string {
@@ -4614,7 +4614,7 @@ type Primitive_NullType struct {
 
 func (x *Primitive_NullType) Reset() {
 	*x = Primitive_NullType{}
-	mi := &file_internal_proto_xml_proto_msgTypes[44]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4626,7 +4626,7 @@ func (x *Primitive_NullType) String() string {
 func (*Primitive_NullType) ProtoMessage() {}
 
 func (x *Primitive_NullType) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[44]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4639,7 +4639,7 @@ func (x *Primitive_NullType) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Primitive_NullType.ProtoReflect.Descriptor instead.
 func (*Primitive_NullType) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{29, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{29, 0}
 }
 
 type Primitive_EmptyType struct {
@@ -4650,7 +4650,7 @@ type Primitive_EmptyType struct {
 
 func (x *Primitive_EmptyType) Reset() {
 	*x = Primitive_EmptyType{}
-	mi := &file_internal_proto_xml_proto_msgTypes[45]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4662,7 +4662,7 @@ func (x *Primitive_EmptyType) String() string {
 func (*Primitive_EmptyType) ProtoMessage() {}
 
 func (x *Primitive_EmptyType) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[45]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4675,7 +4675,7 @@ func (x *Primitive_EmptyType) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Primitive_EmptyType.ProtoReflect.Descriptor instead.
 func (*Primitive_EmptyType) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{29, 1}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{29, 1}
 }
 
 // A Symbol used to represent an enum or a flag.
@@ -4698,7 +4698,7 @@ type Attribute_Symbol struct {
 
 func (x *Attribute_Symbol) Reset() {
 	*x = Attribute_Symbol{}
-	mi := &file_internal_proto_xml_proto_msgTypes[46]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4710,7 +4710,7 @@ func (x *Attribute_Symbol) String() string {
 func (*Attribute_Symbol) ProtoMessage() {}
 
 func (x *Attribute_Symbol) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[46]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4723,7 +4723,7 @@ func (x *Attribute_Symbol) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Attribute_Symbol.ProtoReflect.Descriptor instead.
 func (*Attribute_Symbol) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{30, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{30, 0}
 }
 
 func (x *Attribute_Symbol) GetSource() *Source {
@@ -4778,7 +4778,7 @@ type Style_Entry struct {
 
 func (x *Style_Entry) Reset() {
 	*x = Style_Entry{}
-	mi := &file_internal_proto_xml_proto_msgTypes[47]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4790,7 +4790,7 @@ func (x *Style_Entry) String() string {
 func (*Style_Entry) ProtoMessage() {}
 
 func (x *Style_Entry) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[47]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4803,7 +4803,7 @@ func (x *Style_Entry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Style_Entry.ProtoReflect.Descriptor instead.
 func (*Style_Entry) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{31, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{31, 0}
 }
 
 func (x *Style_Entry) GetSource() *Source {
@@ -4849,7 +4849,7 @@ type Styleable_Entry struct {
 
 func (x *Styleable_Entry) Reset() {
 	*x = Styleable_Entry{}
-	mi := &file_internal_proto_xml_proto_msgTypes[48]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4861,7 +4861,7 @@ func (x *Styleable_Entry) String() string {
 func (*Styleable_Entry) ProtoMessage() {}
 
 func (x *Styleable_Entry) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[48]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4874,7 +4874,7 @@ func (x *Styleable_Entry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Styleable_Entry.ProtoReflect.Descriptor instead.
 func (*Styleable_Entry) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{32, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{32, 0}
 }
 
 func (x *Styleable_Entry) GetSource() *Source {
@@ -4913,7 +4913,7 @@ type Array_Element struct {
 
 func (x *Array_Element) Reset() {
 	*x = Array_Element{}
-	mi := &file_internal_proto_xml_proto_msgTypes[49]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4925,7 +4925,7 @@ func (x *Array_Element) String() string {
 func (*Array_Element) ProtoMessage() {}
 
 func (x *Array_Element) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[49]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4938,7 +4938,7 @@ func (x *Array_Element) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Array_Element.ProtoReflect.Descriptor instead.
 func (*Array_Element) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{33, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{33, 0}
 }
 
 func (x *Array_Element) GetSource() *Source {
@@ -4979,7 +4979,7 @@ type Plural_Entry struct {
 
 func (x *Plural_Entry) Reset() {
 	*x = Plural_Entry{}
-	mi := &file_internal_proto_xml_proto_msgTypes[50]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4991,7 +4991,7 @@ func (x *Plural_Entry) String() string {
 func (*Plural_Entry) ProtoMessage() {}
 
 func (x *Plural_Entry) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[50]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5004,7 +5004,7 @@ func (x *Plural_Entry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Plural_Entry.ProtoReflect.Descriptor instead.
 func (*Plural_Entry) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{34, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{34, 0}
 }
 
 func (x *Plural_Entry) GetSource() *Source {
@@ -5046,7 +5046,7 @@ type StyleString_Span struct {
 
 func (x *StyleString_Span) Reset() {
 	*x = StyleString_Span{}
-	mi := &file_internal_proto_xml_proto_msgTypes[51]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5058,7 +5058,7 @@ func (x *StyleString_Span) String() string {
 func (*StyleString_Span) ProtoMessage() {}
 
 func (x *StyleString_Span) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_xml_proto_msgTypes[51]
+	mi := &file_pkg_bundles_xml_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5071,7 +5071,7 @@ func (x *StyleString_Span) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StyleString_Span.ProtoReflect.Descriptor instead.
 func (*StyleString_Span) Descriptor() ([]byte, []int) {
-	return file_internal_proto_xml_proto_rawDescGZIP(), []int{41, 0}
+	return file_pkg_bundles_xml_proto_rawDescGZIP(), []int{41, 0}
 }
 
 func (x *StyleString_Span) GetName() string {
@@ -5095,11 +5095,11 @@ func (x *StyleString_Span) GetEndIndex() uint32 {
 	return 0
 }
 
-var File_internal_proto_xml_proto protoreflect.FileDescriptor
+var File_pkg_bundles_xml_proto protoreflect.FileDescriptor
 
-const file_internal_proto_xml_proto_rawDesc = "" +
+const file_pkg_bundles_xml_proto_rawDesc = "" +
 	"\n" +
-	"\x18internal/proto/xml.proto\"\xea\x17\n" +
+	"\x15pkg/bundles/xml.proto\"\xea\x17\n" +
 	"\rConfiguration\x12\x10\n" +
 	"\x03mcc\x18\x01 \x01(\rR\x03mcc\x12\x10\n" +
 	"\x03mnc\x18\x02 \x01(\rR\x03mnc\x12\x16\n" +
@@ -5520,23 +5520,23 @@ const file_internal_proto_xml_proto_rawDesc = "" +
 	"\x15UntranslatableSection\x12\x1f\n" +
 	"\vstart_index\x18\x01 \x01(\x04R\n" +
 	"startIndex\x12\x1b\n" +
-	"\tend_index\x18\x02 \x01(\x04R\bendIndexB\tZ\a./protob\x06proto3"
+	"\tend_index\x18\x02 \x01(\x04R\bendIndexB\vZ\t./bundlesb\x06proto3"
 
 var (
-	file_internal_proto_xml_proto_rawDescOnce sync.Once
-	file_internal_proto_xml_proto_rawDescData []byte
+	file_pkg_bundles_xml_proto_rawDescOnce sync.Once
+	file_pkg_bundles_xml_proto_rawDescData []byte
 )
 
-func file_internal_proto_xml_proto_rawDescGZIP() []byte {
-	file_internal_proto_xml_proto_rawDescOnce.Do(func() {
-		file_internal_proto_xml_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_internal_proto_xml_proto_rawDesc), len(file_internal_proto_xml_proto_rawDesc)))
+func file_pkg_bundles_xml_proto_rawDescGZIP() []byte {
+	file_pkg_bundles_xml_proto_rawDescOnce.Do(func() {
+		file_pkg_bundles_xml_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_pkg_bundles_xml_proto_rawDesc), len(file_pkg_bundles_xml_proto_rawDesc)))
 	})
-	return file_internal_proto_xml_proto_rawDescData
+	return file_pkg_bundles_xml_proto_rawDescData
 }
 
-var file_internal_proto_xml_proto_enumTypes = make([]protoimpl.EnumInfo, 21)
-var file_internal_proto_xml_proto_msgTypes = make([]protoimpl.MessageInfo, 52)
-var file_internal_proto_xml_proto_goTypes = []any{
+var file_pkg_bundles_xml_proto_enumTypes = make([]protoimpl.EnumInfo, 21)
+var file_pkg_bundles_xml_proto_msgTypes = make([]protoimpl.MessageInfo, 52)
+var file_pkg_bundles_xml_proto_goTypes = []any{
 	(Configuration_LayoutDirection)(0),   // 0: Configuration.LayoutDirection
 	(Configuration_ScreenLayoutSize)(0),  // 1: Configuration.ScreenLayoutSize
 	(Configuration_ScreenLayoutLong)(0),  // 2: Configuration.ScreenLayoutLong
@@ -5611,7 +5611,7 @@ var file_internal_proto_xml_proto_goTypes = []any{
 	(*Plural_Entry)(nil),                 // 71: Plural.Entry
 	(*StyleString_Span)(nil),             // 72: StyleString.Span
 }
-var file_internal_proto_xml_proto_depIdxs = []int32{
+var file_pkg_bundles_xml_proto_depIdxs = []int32{
 	0,  // 0: Configuration.layout_direction:type_name -> Configuration.LayoutDirection
 	1,  // 1: Configuration.screen_layout_size:type_name -> Configuration.ScreenLayoutSize
 	2,  // 2: Configuration.screen_layout_long:type_name -> Configuration.ScreenLayoutLong
@@ -5715,16 +5715,16 @@ var file_internal_proto_xml_proto_depIdxs = []int32{
 	0,  // [0:96] is the sub-list for field type_name
 }
 
-func init() { file_internal_proto_xml_proto_init() }
-func file_internal_proto_xml_proto_init() {
-	if File_internal_proto_xml_proto != nil {
+func init() { file_pkg_bundles_xml_proto_init() }
+func file_pkg_bundles_xml_proto_init() {
+	if File_pkg_bundles_xml_proto != nil {
 		return
 	}
-	file_internal_proto_xml_proto_msgTypes[19].OneofWrappers = []any{
+	file_pkg_bundles_xml_proto_msgTypes[19].OneofWrappers = []any{
 		(*Value_Item)(nil),
 		(*Value_CompoundValue)(nil),
 	}
-	file_internal_proto_xml_proto_msgTypes[20].OneofWrappers = []any{
+	file_pkg_bundles_xml_proto_msgTypes[20].OneofWrappers = []any{
 		(*Item_Ref)(nil),
 		(*Item_Str)(nil),
 		(*Item_RawStr)(nil),
@@ -5733,7 +5733,7 @@ func file_internal_proto_xml_proto_init() {
 		(*Item_Id)(nil),
 		(*Item_Prim)(nil),
 	}
-	file_internal_proto_xml_proto_msgTypes[21].OneofWrappers = []any{
+	file_pkg_bundles_xml_proto_msgTypes[21].OneofWrappers = []any{
 		(*CompoundValue_Attr)(nil),
 		(*CompoundValue_Style)(nil),
 		(*CompoundValue_Styleable)(nil),
@@ -5741,7 +5741,7 @@ func file_internal_proto_xml_proto_init() {
 		(*CompoundValue_Plural)(nil),
 		(*CompoundValue_Macro)(nil),
 	}
-	file_internal_proto_xml_proto_msgTypes[29].OneofWrappers = []any{
+	file_pkg_bundles_xml_proto_msgTypes[29].OneofWrappers = []any{
 		(*Primitive_NullValue)(nil),
 		(*Primitive_EmptyValue)(nil),
 		(*Primitive_FloatValue)(nil),
@@ -5757,7 +5757,7 @@ func file_internal_proto_xml_proto_init() {
 		(*Primitive_DimensionValueDeprecated)(nil),
 		(*Primitive_FractionValueDeprecated)(nil),
 	}
-	file_internal_proto_xml_proto_msgTypes[35].OneofWrappers = []any{
+	file_pkg_bundles_xml_proto_msgTypes[35].OneofWrappers = []any{
 		(*XmlNode_Element)(nil),
 		(*XmlNode_Text)(nil),
 	}
@@ -5765,18 +5765,18 @@ func file_internal_proto_xml_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_proto_xml_proto_rawDesc), len(file_internal_proto_xml_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_bundles_xml_proto_rawDesc), len(file_pkg_bundles_xml_proto_rawDesc)),
 			NumEnums:      21,
 			NumMessages:   52,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_internal_proto_xml_proto_goTypes,
-		DependencyIndexes: file_internal_proto_xml_proto_depIdxs,
-		EnumInfos:         file_internal_proto_xml_proto_enumTypes,
-		MessageInfos:      file_internal_proto_xml_proto_msgTypes,
+		GoTypes:           file_pkg_bundles_xml_proto_goTypes,
+		DependencyIndexes: file_pkg_bundles_xml_proto_depIdxs,
+		EnumInfos:         file_pkg_bundles_xml_proto_enumTypes,
+		MessageInfos:      file_pkg_bundles_xml_proto_msgTypes,
 	}.Build()
-	File_internal_proto_xml_proto = out.File
-	file_internal_proto_xml_proto_goTypes = nil
-	file_internal_proto_xml_proto_depIdxs = nil
+	File_pkg_bundles_xml_proto = out.File
+	file_pkg_bundles_xml_proto_goTypes = nil
+	file_pkg_bundles_xml_proto_depIdxs = nil
 }

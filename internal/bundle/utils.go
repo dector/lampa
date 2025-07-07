@@ -4,9 +4,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
-	"lampa/internal/proto"
-
-	gproto "google.golang.org/protobuf/proto"
+	"lampa/pkg/bundles"
 )
 
 type Manifest struct {
@@ -26,7 +24,7 @@ func LoadManifest(aabFile string) (Manifest, error) {
 	if err != nil {
 		return Manifest{}, err
 	}
-	manifestXml, err := proto.ParseXml(manifestContent)
+	manifestXml, err := bundles.ParseXml(&manifestContent)
 	if err != nil {
 		return Manifest{}, err
 	}
@@ -68,7 +66,7 @@ func LoadRawManifest(aabFile string) ([]byte, error) {
 	return manifestData, nil
 }
 
-func decodeManifest(xml *proto.XmlNode) (Manifest, error) {
+func decodeManifest(xml *bundles.XmlNode) (Manifest, error) {
 	m := Manifest{}
 
 	// Print p as XML using a simple loop
@@ -117,7 +115,7 @@ func decodeManifest(xml *proto.XmlNode) (Manifest, error) {
 	return m, nil
 }
 
-func LoadResources(aabFile string) (*proto.ResourceTable, error) {
+func LoadResources(aabFile string) (*bundles.ResourceTable, error) {
 	zipReader, err := zip.OpenReader(aabFile)
 	if err != nil {
 		panic(err)
@@ -144,11 +142,10 @@ func LoadResources(aabFile string) (*proto.ResourceTable, error) {
 		return nil, fmt.Errorf("base/resources.pb not found")
 	}
 
-	var res proto.ResourceTable
-	err = gproto.Unmarshal(data, &res)
+	res, err := bundles.ParseResources(&data)
 	if err != nil {
 		return nil, err
 	}
 
-	return &res, nil
+	return res, nil
 }

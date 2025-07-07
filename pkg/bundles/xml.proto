@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-option go_package = "./proto";
+option go_package = "./bundles";
 
 // https://gitlab.iode.tech/os/public/lineage/frameworks_base/-/blob/v5.3/tools/aapt2/Configuration.proto
 

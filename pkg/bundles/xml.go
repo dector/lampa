@@ -1,23 +1,8 @@
-package proto
+package bundles
 
-import (
-	"fmt"
+import "fmt"
 
-	"google.golang.org/protobuf/proto"
-)
-
-func ParseXml(data []byte) (*XmlNode, error) {
-	result := &XmlNode{}
-
-	err := proto.Unmarshal(data, result)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func ToText(xml *XmlNode) string {
+func ToTextXML(xml *XmlNode) string {
 	var result string
 	if elem := xml.GetElement(); elem != nil {
 		result += fmt.Sprintf("<%s", elem.GetName())
