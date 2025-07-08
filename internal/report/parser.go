@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/dector/lampa/internal"
+	"github.com/dector/lampa/internal/git"
 	"github.com/dector/lampa/internal/out"
 	"github.com/dector/lampa/pkg/bundles"
 	"github.com/dector/lampa/pkg/gradle"
@@ -109,29 +110,24 @@ func parseContext(args ParseFromArgs) (ContextSegment, error) {
 		return result, fmt.Errorf("git not found in PATH: %v", err)
 	}
 
-	cmd := exec.Command("git", "rev-parse", "--is-inside-work-tree")
-	cmd.Dir = args.ProjectDir
-	if err := cmd.Run(); err != nil {
-		return result, fmt.Errorf("failed to check if project is inside git repo: %v", err)
+	git := git.NewGit(args.ProjectDir)
+	err = git.Run("rev-parse", "--is-inside-work-tree")
+	if err != nil {
+		out.PrintlnWarn("git repository not found in %s", git.ProjectDir)
+		return result, nil
 	}
 
-	cmd = exec.Command("git", "rev-parse", "HEAD")
-	cmd.Dir = args.ProjectDir
-	output, err := cmd.Output()
+	output, err := git.RunWithOutput("rev-parse", "HEAD")
 	if err == nil {
 		result.Git.Commit = strings.TrimSpace(string(output))
 	}
 
-	cmd = exec.Command("git", "status", "--porcelain")
-	cmd.Dir = args.ProjectDir
-	output, err = cmd.Output()
+	output, err = git.RunWithOutput("status", "--porcelain")
 	if err == nil {
 		result.Git.IsDirty = len(strings.TrimSpace(string(output))) > 0
 	}
 
-	cmd = exec.Command("git", "describe", "--tags", "--long")
-	cmd.Dir = args.ProjectDir
-	output, err = cmd.Output()
+	output, err = git.RunWithOutput("describe", "--tags", "--long")
 	if err == nil {
 		parts := strings.SplitN(strings.TrimSpace(string(output)), "-", 3)
 		if len(parts) == 3 {
@@ -149,9 +145,7 @@ func parseContext(args ParseFromArgs) (ContextSegment, error) {
 		log.Printf("warning: git describe failed: %v", err)
 	}
 
-	cmd = exec.Command("git", "branch", "--show-current")
-	cmd.Dir = args.ProjectDir
-	output, err = cmd.Output()
+	output, err = git.RunWithOutput("branch", "--show-current")
 	if err == nil {
 		result.Git.Branch = strings.TrimSpace(string(output))
 	}
