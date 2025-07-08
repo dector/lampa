@@ -10,7 +10,6 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/Masterminds/semver/v3"
 	"github.com/dector/lampa/internal/report"
 	"github.com/dector/lampa/internal/templates"
 	"github.com/dector/lampa/internal/templates/components"
@@ -79,7 +78,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(r2.Build.AppName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 28, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 27, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -92,7 +91,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(r1.Build.VersionName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 32, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 31, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -105,7 +104,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(r1.Build.VersionCode)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 32, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 31, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -118,7 +117,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(r2.Build.VersionName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 34, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 33, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -131,7 +130,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(r2.Build.VersionCode)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 34, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 33, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -148,7 +147,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templates.FormatGenerationTime(r2.Context.GenerationTime))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 44, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 43, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -530,10 +529,10 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 			}
 			ctx = templ.InitializeContext(ctx)
 
-			d1 := lo.Map(r1.Build.Dependencies.Compile, func(d report.CoordinatedDependency, _ int) Dep {
+			d1 := lo.Map(r1.Build.Dependencies.Compile, func(d report.CoordinatedDependency, _ int) templates.Dep {
 				return parseDep(d.String())
 			})
-			d2 := lo.Map(r2.Build.Dependencies.Compile, func(d report.CoordinatedDependency, _ int) Dep {
+			d2 := lo.Map(r2.Build.Dependencies.Compile, func(d report.CoordinatedDependency, _ int) templates.Dep {
 				return parseDep(d.String())
 			})
 			depsNew := findNewDeps(d1, d2)
@@ -569,7 +568,7 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 				}
 				ctx = templ.InitializeContext(ctx)
 				for _, d := range depsNew {
-					templ_7745c5c3_Err = DependencyItemExt(d, "+").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.DependencyItemExt(d, "+").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -597,7 +596,7 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 				}
 				ctx = templ.InitializeContext(ctx)
 				for _, d := range depsRemoved {
-					templ_7745c5c3_Err = DependencyItemExt(d, "-").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.DependencyItemExt(d, "-").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -625,7 +624,7 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 				}
 				ctx = templ.InitializeContext(ctx)
 				for _, d := range depsUpgraded {
-					templ_7745c5c3_Err = DependencyItemExt(d, "^").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.DependencyItemExt(d, "^").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -653,7 +652,7 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 				}
 				ctx = templ.InitializeContext(ctx)
 				for _, d := range depsDowngraded {
-					templ_7745c5c3_Err = DependencyItemExt(d, "v").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.DependencyItemExt(d, "v").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -681,7 +680,7 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 				}
 				ctx = templ.InitializeContext(ctx)
 				for _, d := range depsUnchanged {
-					templ_7745c5c3_Err = DependencyItemExt(d, "").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.DependencyItemExt(d, "").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -706,49 +705,18 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 	})
 }
 
-type Dep struct {
-	Coordinate string
-	Version    string
-}
-
-func (d Dep) NonSemver() bool {
-	_, err := semver.NewVersion(d.Version)
-	return err != nil
-}
-
-func (d Dep) EqCoord(other Dep) bool {
-	return d.Coordinate == other.Coordinate
-}
-
-func (d Dep) String() string {
-	return fmt.Sprintf("%s:%s", d.Coordinate, d.Version)
-}
-
-// TODO handle hashes differently (in another section)
-func (d Dep) IsLater(other Dep) (bool, error) {
-	v1, err := semver.NewVersion(d.Version)
-	if err != nil {
-		return false, err
-	}
-	v2, err := semver.NewVersion(other.Version)
-	if err != nil {
-		return false, err
-	}
-	return v1.GreaterThan(v2), nil
-}
-
-func parseDep(s string) Dep {
+func parseDep(s string) templates.Dep {
 	parts := strings.Split(s, ":")
-	return Dep{
+	return templates.Dep{
 		Coordinate: parts[0] + ":" + parts[1],
 		Version:    parts[2],
 	}
 }
 
-func findNewDeps(d1, d2 []Dep) []Dep {
-	depsNew := make([]Dep, 0, len(d2))
+func findNewDeps(d1, d2 []templates.Dep) []templates.Dep {
+	depsNew := make([]templates.Dep, 0, len(d2))
 	for _, d := range d2 {
-		_, ok := lo.Find(d1, func(it Dep) bool {
+		_, ok := lo.Find(d1, func(it templates.Dep) bool {
 			return d.EqCoord(it)
 		})
 		if !ok {
@@ -756,12 +724,12 @@ func findNewDeps(d1, d2 []Dep) []Dep {
 		} else {
 			// FIXME quick fix
 			// checking if it has hash version
-			other, _ := lo.Find(d1, func(it Dep) bool {
+			other, _ := lo.Find(d1, func(it templates.Dep) bool {
 				return d.EqCoord(it) &&
 					(it.NonSemver() || d.NonSemver())
 			})
 			if other.Coordinate != "" {
-				depsNew = append(depsNew, Dep{
+				depsNew = append(depsNew, templates.Dep{
 					Coordinate: d.Coordinate,
 					Version:    fmt.Sprintf("%s → %s", other.Version, d.Version),
 				})
@@ -771,10 +739,10 @@ func findNewDeps(d1, d2 []Dep) []Dep {
 	return depsNew
 }
 
-func findRemovedDeps(d1, d2 []Dep) []Dep {
-	depsRemoved := make([]Dep, 0, len(d1))
+func findRemovedDeps(d1, d2 []templates.Dep) []templates.Dep {
+	depsRemoved := make([]templates.Dep, 0, len(d1))
 	for _, d := range d1 {
-		_, ok := lo.Find(d2, func(it Dep) bool {
+		_, ok := lo.Find(d2, func(it templates.Dep) bool {
 			return d.EqCoord(it)
 		})
 		if !ok {
@@ -784,10 +752,10 @@ func findRemovedDeps(d1, d2 []Dep) []Dep {
 	return depsRemoved
 }
 
-func findUpgradedDeps(d1, d2 []Dep) []Dep {
-	depsUpgraded := make([]Dep, 0, len(d2))
+func findUpgradedDeps(d1, d2 []templates.Dep) []templates.Dep {
+	depsUpgraded := make([]templates.Dep, 0, len(d2))
 	for _, d := range d2 {
-		it, ok := lo.Find(d1, func(it Dep) bool {
+		it, ok := lo.Find(d1, func(it templates.Dep) bool {
 			return d.EqCoord(it)
 		})
 		if ok {
@@ -796,7 +764,7 @@ func findUpgradedDeps(d1, d2 []Dep) []Dep {
 				continue
 			}
 			if ok {
-				depsUpgraded = append(depsUpgraded, Dep{
+				depsUpgraded = append(depsUpgraded, templates.Dep{
 					Coordinate: d.Coordinate,
 					Version:    fmt.Sprintf("%s → %s", it.Version, d.Version),
 				})
@@ -806,10 +774,10 @@ func findUpgradedDeps(d1, d2 []Dep) []Dep {
 	return depsUpgraded
 }
 
-func findDowngradedDeps(d1, d2 []Dep) []Dep {
-	depsDowngraded := make([]Dep, 0, len(d1))
+func findDowngradedDeps(d1, d2 []templates.Dep) []templates.Dep {
+	depsDowngraded := make([]templates.Dep, 0, len(d1))
 	for _, d := range d1 {
-		it, ok := lo.Find(d2, func(it Dep) bool {
+		it, ok := lo.Find(d2, func(it templates.Dep) bool {
 			return d.EqCoord(it)
 		})
 		if ok {
@@ -818,7 +786,7 @@ func findDowngradedDeps(d1, d2 []Dep) []Dep {
 				continue
 			}
 			if ok {
-				depsDowngraded = append(depsDowngraded, Dep{
+				depsDowngraded = append(depsDowngraded, templates.Dep{
 					Coordinate: it.Coordinate,
 					Version:    fmt.Sprintf("%s → %s", d.Version, it.Version),
 				})
@@ -828,10 +796,10 @@ func findDowngradedDeps(d1, d2 []Dep) []Dep {
 	return depsDowngraded
 }
 
-func findUnchangedDeps(d1, d2 []Dep) []Dep {
-	depsUnchanged := make([]Dep, 0, len(d1))
+func findUnchangedDeps(d1, d2 []templates.Dep) []templates.Dep {
+	depsUnchanged := make([]templates.Dep, 0, len(d1))
 	for _, d := range d1 {
-		it, ok := lo.Find(d2, func(it Dep) bool {
+		it, ok := lo.Find(d2, func(it templates.Dep) bool {
 			return d.EqCoord(it)
 		})
 		if ok {
@@ -841,150 +809,6 @@ func findUnchangedDeps(d1, d2 []Dep) []Dep {
 		}
 	}
 	return depsUnchanged
-}
-
-func DependencyItemExt(dependency Dep, style string) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var24 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var24 == nil {
-			templ_7745c5c3_Var24 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-
-		version := dependency.Version
-		parts := strings.SplitN(version, "→", 2)
-		if len(parts) == 2 {
-			version = strings.TrimSpace(parts[1])
-		}
-		depsUrl := fmt.Sprintf("https://deps.dev/maven/%s/%s/", dependency.Coordinate, version)
-
-		color := "bg-gray-100 text-gray-600 border-gray-200"
-		switch style {
-		case "+":
-			color = "bg-green-100 text-green-800 border-green-200"
-		case "-":
-			color = "bg-red-100 text-red-800 border-red-200"
-		case "^":
-			color = "bg-blue-100 text-blue-800 border-blue-200"
-		case "v":
-			color = "bg-orange-100 text-orange-800 border-orange-200"
-		}
-		var templ_7745c5c3_Var25 = []any{"flex items-center gap-3 p-3 rounded-lg border", color}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var25...)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<div class=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var26 string
-		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var25).String())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		switch style {
-		case "+":
-			templ_7745c5c3_Err = icons.Plus(4).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		case "-":
-			templ_7745c5c3_Err = icons.Minus(4).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		case "^":
-			templ_7745c5c3_Err = icons.ArrowUp(4).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		case "v":
-			templ_7745c5c3_Err = icons.ArrowDown(4).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		default:
-			templ_7745c5c3_Err = icons.Equal(4).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<div class=\"flex-1\"><div class=\"font-medium text-sm flex items-center gap-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var27 string
-		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(dependency.Coordinate)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 340, Col: 27}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, " <a class=\"hover:text-orange-500\" target=\"_blank\" referrerPolicy=\"no-referrer\" href=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var28 templ.SafeURL
-		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinURLErrs(depsUrl)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 345, Col: 19}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = icons.PackageSearch(4).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</a></div><div class=\"text-xs opacity-75\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var29 string
-		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(dependency.Version)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 351, Col: 24}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "</div></div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
 }
 
 func diff(v1 any, v2 any) string {

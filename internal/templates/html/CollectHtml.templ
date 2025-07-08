@@ -6,7 +6,6 @@ import (
 	"github.com/dector/lampa/internal/templates"
 	"github.com/dector/lampa/internal/templates/components"
 	"github.com/dector/lampa/internal/templates/icons"
-	"strings"
 )
 
 templ CollectHtml(r *report.Report) {
@@ -112,49 +111,11 @@ templ DependenciesSection(r *report.Report) {
 			}}
 			@components.InfoItem("Total", len(deps))
 			for _, d := range deps {
-				@DependencyItem(d.String())
+				@components.DependencyItem(templates.Dep{
+					Coordinate: fmt.Sprintf("%s:%s", d.Group, d.Name),
+					Version:    d.Version,
+				})
 			}
 		}
 	}
-}
-
-templ DependencyItem(dependency string) {
-	{{
-		p := strings.Split(dependency, ":")
-		group := p[0]
-		artefact := p[1]
-		version := p[2]
-
-		depsUrl := fmt.Sprintf("https://deps.dev/maven/%s:%s/%s/", group, artefact, version)
-
-		color := "bg-gray-100 text-gray-600 border-gray-200"
-	}}
-	<div class={ "flex items-center gap-3 p-3 rounded-lg border", color }>
-		@icons.Equal(4)
-		<div class="flex-1">
-			<div class="font-medium text-sm flex items-center gap-2">
-				{ group }:{ artefact }
-				<a
-					class="hover:text-orange-500"
-					target="_blank"
-					referrerPolicy="no-referrer"
-					href={ depsUrl }
-				>
-					@icons.PackageSearch(4)
-				</a>
-			</div>
-			// if dependency.FromVersion != "" {
-			// 	<div class="text-xs opacity-75">
-			// 		{ dependency.FromVersion } → { dependency.ToVersion }
-			// 	</div>
-			// } else if dependency.ToVersion != "" {
-			// 	<div class="text-xs opacity-75">
-			// 		{ dependency.ToVersion }
-			// 	</div>
-			// }
-			<div class="text-xs opacity-75">
-				{ version }
-			</div>
-		</div>
-	</div>
 }
