@@ -19,6 +19,8 @@ import (
 	"github.com/dector/lampa/pkg/bundles"
 	"github.com/dector/lampa/pkg/gradle"
 
+	gogit "github.com/go-git/go-git/v6"
+
 	. "github.com/dector/lampa/internal/globals"
 )
 
@@ -111,23 +113,32 @@ func parseContext(args ParseFromArgs) (ContextSegment, error) {
 	}
 
 	git := git.NewGit(args.ProjectDir)
-	err = git.Run("rev-parse", "--is-inside-work-tree")
+
+	repo, err := gogit.PlainOpen(args.ProjectDir)
 	if err != nil {
-		out.PrintlnWarn("git repository not found in %s", git.ProjectDir)
+		out.PrintlnWarn("git repository not found in %s", args.ProjectDir)
 		return result, nil
 	}
 
-	output, err := git.RunWithOutput("rev-parse", "HEAD")
+	headRef, err := repo.Head()
 	if err == nil {
-		result.Git.Commit = strings.TrimSpace(string(output))
+		result.Git.Commit = headRef.Hash().String()
+
+		refName := headRef.Name()
+		if refName.IsBranch() {
+			result.Git.Branch = refName.Short()
+		}
 	}
 
-	output, err = git.RunWithOutput("status", "--porcelain")
+	worktree, err := repo.Worktree()
 	if err == nil {
-		result.Git.IsDirty = len(strings.TrimSpace(string(output))) > 0
+		status, err := worktree.Status()
+		if err == nil {
+			result.Git.IsDirty = !status.IsClean()
+		}
 	}
 
-	output, err = git.RunWithOutput("describe", "--tags", "--long")
+	output, err := git.RunWithOutput("describe", "--tags", "--long")
 	if err == nil {
 		parts := strings.SplitN(strings.TrimSpace(string(output)), "-", 3)
 		if len(parts) == 3 {
@@ -143,11 +154,6 @@ func parseContext(args ParseFromArgs) (ContextSegment, error) {
 		}
 	} else {
 		log.Printf("warning: git describe failed: %v", err)
-	}
-
-	output, err = git.RunWithOutput("branch", "--show-current")
-	if err == nil {
-		result.Git.Branch = strings.TrimSpace(string(output))
 	}
 
 	return result, nil
