@@ -227,3 +227,61 @@ templ DependencyItemExt(dependency templates.Dep, style string) {
 		</div>
 	</div>
 }
+
+templ DependencyItemExt2(dependency MvnDependencyVM) {
+	{{
+		version := dependency.Version
+		depsUrl := fmt.Sprintf("https://deps.dev/maven/%s:%s/%s/", dependency.Group, dependency.Name, version)
+
+		color := "bg-gray-100 text-gray-600 border-gray-200"
+		switch dependency.Kind {
+		case DiffKindAdded:
+			color = "bg-green-100 text-green-800 border-green-200"
+		case DiffKindRemoved:
+			color = "bg-red-100 text-red-800 border-red-200"
+		case DiffKindUpgraded:
+			color = "bg-blue-100 text-blue-800 border-blue-200"
+		case DiffKindDowngraded:
+			color = "bg-orange-100 text-orange-800 border-orange-200"
+		}
+	}}
+	<div class={ "flex items-center gap-3 p-3 rounded-lg border", color }>
+		switch dependency.Kind {
+			case DiffKindAdded:
+				@icons.Plus(4)
+			case DiffKindRemoved:
+				@icons.Minus(4)
+			case DiffKindUpgraded:
+				@icons.ArrowUp(4)
+			case DiffKindDowngraded:
+				@icons.ArrowDown(4)
+			default:
+				@icons.Equal(4)
+		}
+		<div class="flex-1">
+			<div class="font-medium text-sm flex items-center gap-2">
+				{ dependency.Group }:{ dependency.Name }
+				<a
+					class="hover:text-orange-500"
+					target="_blank"
+					referrerPolicy="no-referrer"
+					href={ depsUrl }
+				>
+					@icons.PackageSearch(4)
+				</a>
+			</div>
+			// if dependency.FromVersion != "" {
+			// 	<div class="text-xs opacity-75">
+			// 		{ dependency.FromVersion } → { dependency.ToVersion }
+			// 	</div>
+			// } else if dependency.ToVersion != "" {
+			// 	<div class="text-xs opacity-75">
+			// 		{ dependency.ToVersion }
+			// 	</div>
+			// }
+			<div class="text-xs opacity-75">
+				{ dependency.Version }
+			</div>
+		</div>
+	</div>
+}

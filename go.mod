@@ -9,6 +9,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/samber/lo v1.51.0
 	github.com/square/exit v1.3.0
+	github.com/tiendc/go-deepcopy v1.6.1
 	github.com/urfave/cli/v3 v3.3.8
 	golang.org/x/text v0.26.0
 	google.golang.org/protobuf v1.36.6

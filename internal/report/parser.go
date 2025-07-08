@@ -62,14 +62,14 @@ func ParseFrom(args ParseFromArgs) (Report, error) {
 	}
 
 	for _, info := range tree.Summary {
-		d := CoordinatedDependency{
+		d := MvnDependency{
 			Group:   info.GroupID,
 			Name:    info.ArtifactID,
 			Version: info.Version,
 		}
 		result.Build.Dependencies.Compile = append(result.Build.Dependencies.Compile, d)
 	}
-	slices.SortFunc(result.Build.Dependencies.Compile, func(a, b CoordinatedDependency) int {
+	slices.SortFunc(result.Build.Dependencies.Compile, func(a, b MvnDependency) int {
 		if a.Group > b.Group {
 			return 1
 		} else if a.Group < b.Group {

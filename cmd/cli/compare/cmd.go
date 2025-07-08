@@ -174,7 +174,12 @@ func ReadReportFromFile(file string) (*report.Report, error) {
 
 func GenerateComparingHtmlReport(r1 *report.Report, r2 *report.Report) (string, error) {
 	w := &strings.Builder{}
-	err := compare.CompareHtml(r1, r2).Render(context.Background(), w)
+
+	r := report.BuildDiffReport(r1, r2)
+
+	err := compare.
+		CompareHtml(r).
+		Render(context.Background(), w)
 	if err != nil {
 		return "", err
 	}

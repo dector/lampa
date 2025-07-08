@@ -7,30 +7,28 @@ import (
 	"github.com/dector/lampa/internal/templates/components"
 	"github.com/dector/lampa/internal/templates/html"
 	"github.com/dector/lampa/internal/templates/icons"
-	"github.com/samber/lo"
-	"sort"
-	"strings"
 )
 
-templ CompareHtml(r1 *report.Report, r2 *report.Report) {
+templ CompareHtml(r report.Report) {
 	{{
-		title := fmt.Sprintf("%s %s+%s → %s+%s :: Lampa Report",
-			r2.Build.AppName,
-			r1.Build.VersionName, r1.Build.VersionCode,
-			r2.Build.VersionName, r2.Build.VersionCode,
+		title := fmt.Sprintf("%s %s+%s (since %s+%s) :: Lampa Report",
+			r.Build.AppName,
+			r.Build.VersionName, r.Build.VersionCode,
+			r.PrevBuild.VersionName, r.PrevBuild.VersionCode,
 		)
 	}}
 	@pages.HtmlPage(title) {
 		@components.ReportLayout() {
 			<div class="text-center space-y-2">
 				<h1 class="text-4xl tracking-wider text-gray-900 mt-8">
-					<span class="font-bold">{ r2.Build.AppName }</span>
+					<span class="font-bold">{ r.Build.AppName }</span>
 					<p class="text-lg text-gray-600">
-						Comparing versions
+						Version
+						{ r.Build.VersionName } ({ r.Build.VersionCode })
 						<br/>
-						{ r1.Build.VersionName } ({ r1.Build.VersionCode })
-						<span class="mx-2 text-gray-400">→</span>
-						{ r2.Build.VersionName } ({ r2.Build.VersionCode })
+						<span class="mx-2 text-gray-400">
+							(since { r.PrevBuild.VersionName } ({ r.PrevBuild.VersionCode }))
+						</span>
 					</p>
 				</h1>
 				<div class="flex flex-col items-center justify-center gap-1 text-sm text-gray-500 my-8">
@@ -40,7 +38,7 @@ templ CompareHtml(r1 *report.Report, r2 *report.Report) {
 					<p class="flex gap-1 items-center justify-center">
 						on
 						@icons.Calendar(4)
-						{ templates.FormatGenerationTime(r2.Context.GenerationTime) }
+						{ templates.FormatGenerationTime(r.Context.GenerationTime) }
 						UTC
 					</p>
 				</div>
@@ -51,32 +49,32 @@ templ CompareHtml(r1 *report.Report, r2 *report.Report) {
 				Icon: "package",
 			}) {
 				@components.SubSection("Application", 2) {
-					@components.InfoItem("Application Id", r2.Build.ApplicationId)
-					@components.InfoItem("Build Variant", r2.Build.BuildVariant)
-					@components.InfoItem("Version Name", diff(r1.Build.VersionName, r2.Build.VersionName))
-					@components.InfoItem("Version Code", diff(r1.Build.VersionCode, r2.Build.VersionCode))
+					@components.InfoItem("Application Id", r.Build.ApplicationId)
+					@components.InfoItem("Build Variant", r.Build.BuildVariant)
+					@components.InfoItem("Version Name", diff(r.PrevBuild.VersionName, r.Build.VersionName))
+					@components.InfoItem("Version Code", diff(r.PrevBuild.VersionCode, r.Build.VersionCode))
 				}
 				@components.Divider()
 				@components.SubSection("SDK", 2) {
-					@components.InfoItem("Min SDK", diff(r1.Build.MinSdkVersion, r2.Build.MinSdkVersion))
-					@components.InfoItem("Target SDK", diff(r1.Build.TargetSdkVersion, r2.Build.TargetSdkVersion))
-					@components.InfoItem("Compile SDK", diff(r1.Build.CompileSdkVersion, r2.Build.CompileSdkVersion))
+					@components.InfoItem("Min SDK", diff(r.PrevBuild.MinSdkVersion, r.Build.MinSdkVersion))
+					@components.InfoItem("Target SDK", diff(r.PrevBuild.TargetSdkVersion, r.Build.TargetSdkVersion))
+					@components.InfoItem("Compile SDK", diff(r.PrevBuild.CompileSdkVersion, r.Build.CompileSdkVersion))
 				}
 				@components.Divider()
 				@components.SubSection("Git", 2) {
-					@components.InfoItem("Branch", r2.Context.Git.Branch)
-					@components.InfoItem("Tag", r2.Context.Git.Tag)
-					@components.InfoItem("Commit", r2.Context.Git.Commit)
-					@components.InfoItem("Commits after Tag", r2.Context.Git.CommitsAfterTag)
+					@components.InfoItem("Branch", r.Context.Git.Branch)
+					@components.InfoItem("Tag", r.Context.Git.Tag)
+					@components.InfoItem("Commit", r.Context.Git.Commit)
+					@components.InfoItem("Commits after Tag", r.Context.Git.CommitsAfterTag)
 				}
 				@components.Divider()
 				@components.SubSection("File", 2) {
-					@components.InfoItem("Name", r2.Build.AabName)
-					@components.InfoItem("Size", diff(templates.FormatFileSize(r1.Build.AabSize), templates.FormatFileSize(r2.Build.AabSize)))
-					@components.InfoItem("SHA1", r2.Build.AabSha1)
+					@components.InfoItem("Name", r.Build.AabName)
+					@components.InfoItem("Size", diff(templates.FormatFileSize(r.Build.AabSize), templates.FormatFileSize(r.Build.AabSize)))
+					@components.InfoItem("SHA1", r.Build.AabSha1)
 				}
 			}
-			@DependenciesSection(r1, r2)
+			@DependenciesSection(&r)
 			@components.SectionCard(components.SectionCardArg{
 				Name:          "Tool",
 				Icon:          "lamp",
@@ -84,198 +82,92 @@ templ CompareHtml(r1 *report.Report, r2 *report.Report) {
 				IsCollapsed:   true,
 			}) {
 				@components.SubSection("", 2) {
-					@components.InfoItem("Name", r2.Context.Tool.Name)
-					@components.InfoItem("Tool Version", r2.Context.Tool.Version)
-					@components.InfoItem("Build Commit", r2.Context.Tool.BuildCommit)
-					@components.InfoItem("Format Version", r2.Version)
-					@components.InfoItem("Website", r2.Context.Tool.Website)
-					@components.InfoItem("Sources", r2.Context.Tool.Sources)
+					@components.InfoItem("Name", r.Context.Tool.Name)
+					@components.InfoItem("Tool Version", r.Context.Tool.Version)
+					@components.InfoItem("Build Commit", r.Context.Tool.BuildCommit)
+					@components.InfoItem("Format Version", r.Version)
+					@components.InfoItem("Website", r.Context.Tool.Website)
+					@components.InfoItem("Sources", r.Context.Tool.Sources)
 				}
 			}
 		}
 	}
 }
 
-templ DependenciesSection(r1, r2 *report.Report) {
+templ DependenciesSection(r *report.Report) {
 	@components.SectionCard(components.SectionCardArg{
 		Name: "Dependencies",
 		Icon: "blocks",
 		/* IsCollapsed: true, */
 	}) {
 		{{
-	d1 := lo.Map(r1.Build.Dependencies.Compile, func(d report.CoordinatedDependency, _ int) templates.Dep {
-		return parseDep(d.String())
-	})
-	d2 := lo.Map(r2.Build.Dependencies.Compile, func(d report.CoordinatedDependency, _ int) templates.Dep {
-		return parseDep(d.String())
-	})
-	depsNew := findNewDeps(d1, d2)
-	sort.Slice(depsNew, func(i, j int) bool {
-		return depsNew[i].Coordinate < depsNew[j].Coordinate
-	})
-	depsRemoved := findRemovedDeps(d1, d2)
-	sort.Slice(depsRemoved, func(i, j int) bool {
-		return depsRemoved[i].Coordinate < depsRemoved[j].Coordinate
-	})
-	depsUpgraded := findUpgradedDeps(d1, d2)
-	sort.Slice(depsUpgraded, func(i, j int) bool {
-		return depsUpgraded[i].Coordinate < depsUpgraded[j].Coordinate
-	})
-	depsDowngraded := findDowngradedDeps(d1, d2)
-	sort.Slice(depsDowngraded, func(i, j int) bool {
-		return depsDowngraded[i].Coordinate < depsDowngraded[j].Coordinate
-	})
-	depsUnchanged := findUnchangedDeps(d1, d2)
-	sort.Slice(depsUnchanged, func(i, j int) bool {
-		return depsUnchanged[i].Coordinate < depsUnchanged[j].Coordinate
-	})
+			depsNew := r.Build.Dependencies.DiffDependenciesSegment.Added
+			depsRemoved := r.Build.Dependencies.DiffDependenciesSegment.Removed
+			depsUpgraded := r.Build.Dependencies.DiffDependenciesSegment.Upgraded
+			depsDowngraded := r.Build.Dependencies.DiffDependenciesSegment.Downgraded
+			depsChanged := r.Build.Dependencies.DiffDependenciesSegment.Changed
+			depsUnchanged := r.Build.Dependencies.DiffDependenciesSegment.Unchanged
 		}}
 		@components.SubSection(fmt.Sprintf("New (%d)", len(depsNew)), 1) {
 			// @InfoItem("Total", len(depsNew))
 			for _, d := range depsNew {
-				@components.DependencyItemExt(d, "+")
+				@components.DependencyItemExt2(components.MvnDependencyVM{
+					MvnDependencyDiff: d.ToDiff(),
+					Kind:              components.DiffKindAdded,
+				})
 			}
 		}
 		@components.SubSection(fmt.Sprintf("Removed (%d)", len(depsRemoved)), 1) {
 			// @InfoItem("Total", len(depsRemoved))
 			for _, d := range depsRemoved {
-				@components.DependencyItemExt(d, "-")
+				@components.DependencyItemExt2(components.MvnDependencyVM{
+					MvnDependencyDiff: d.ToDiff(),
+					Kind:              components.DiffKindRemoved,
+				})
 			}
 		}
 		@components.SubSection(fmt.Sprintf("Upgraded (%d)", len(depsUpgraded)), 1) {
 			// @InfoItem("Total", len(depsUpgraded))
 			for _, d := range depsUpgraded {
-				@components.DependencyItemExt(d, "^")
+				@components.DependencyItemExt2(components.MvnDependencyVM{
+					MvnDependencyDiff: d.ToDiff(),
+					Kind:              components.DiffKindUpgraded,
+				})
 			}
 		}
 		@components.SubSection(fmt.Sprintf("Downgraded (%d)", len(depsDowngraded)), 1) {
 			// @InfoItem("Total", len(depsDowngraded))
 			for _, d := range depsDowngraded {
-				@components.DependencyItemExt(d, "v")
+				@components.DependencyItemExt2(components.MvnDependencyVM{
+					MvnDependencyDiff: d.ToDiff(),
+					Kind:              components.DiffKindDowngraded,
+				})
+			}
+		}
+		@components.SubSection(fmt.Sprintf("Changed (%d)", len(depsChanged)), 1) {
+			// @InfoItem("Total", len(depsChanged))
+			for _, d := range depsChanged {
+				@components.DependencyItemExt2(components.MvnDependencyVM{
+					MvnDependencyDiff: d.ToDiff(),
+					Kind:              components.DiffKindChanged,
+				})
 			}
 		}
 		@components.SubSection(fmt.Sprintf("Unchanged (%d)", len(depsUnchanged)), 1) {
 			// @InfoItem("Total", len(depsUnchanged))
 			for _, d := range depsUnchanged {
-				@components.DependencyItemExt(d, "")
-			}
-		}
-	}
-}
-
-func parseDep(s string) templates.Dep {
-	parts := strings.Split(s, ":")
-	return templates.Dep{
-		Coordinate: parts[0] + ":" + parts[1],
-		Version:    parts[2],
-	}
-}
-
-func findNewDeps(d1, d2 []templates.Dep) []templates.Dep {
-	depsNew := make([]templates.Dep, 0, len(d2))
-	for _, d := range d2 {
-		_, ok := lo.Find(d1, func(it templates.Dep) bool {
-			return d.EqCoord(it)
-		})
-		if !ok {
-			depsNew = append(depsNew, d)
-		} else {
-			// FIXME quick fix
-			// checking if it has hash version
-			other, _ := lo.Find(d1, func(it templates.Dep) bool {
-				return d.EqCoord(it) &&
-					(it.NonSemver() || d.NonSemver())
-			})
-			if other.Coordinate != "" {
-				depsNew = append(depsNew, templates.Dep{
-					Coordinate: d.Coordinate,
-					Version:    fmt.Sprintf("%s → %s", other.Version, d.Version),
+				@components.DependencyItemExt2(components.MvnDependencyVM{
+					MvnDependencyDiff: d.ToDiff(),
+					Kind:              components.DiffKindUnchanged,
 				})
 			}
 		}
 	}
-	return depsNew
 }
 
-func findRemovedDeps(d1, d2 []templates.Dep) []templates.Dep {
-	depsRemoved := make([]templates.Dep, 0, len(d1))
-	for _, d := range d1 {
-		_, ok := lo.Find(d2, func(it templates.Dep) bool {
-			return d.EqCoord(it)
-		})
-		if !ok {
-			depsRemoved = append(depsRemoved, d)
-		}
-	}
-	return depsRemoved
-}
-
-func findUpgradedDeps(d1, d2 []templates.Dep) []templates.Dep {
-	depsUpgraded := make([]templates.Dep, 0, len(d2))
-	for _, d := range d2 {
-		it, ok := lo.Find(d1, func(it templates.Dep) bool {
-			return d.EqCoord(it)
-		})
-		if ok {
-			ok, err := d.IsLater(it)
-			if err != nil {
-				continue
-			}
-			if ok {
-				depsUpgraded = append(depsUpgraded, templates.Dep{
-					Coordinate: d.Coordinate,
-					Version:    fmt.Sprintf("%s → %s", it.Version, d.Version),
-				})
-			}
-		}
-	}
-	return depsUpgraded
-}
-
-func findDowngradedDeps(d1, d2 []templates.Dep) []templates.Dep {
-	depsDowngraded := make([]templates.Dep, 0, len(d1))
-	for _, d := range d1 {
-		it, ok := lo.Find(d2, func(it templates.Dep) bool {
-			return d.EqCoord(it)
-		})
-		if ok {
-			ok, err := d.IsLater(it)
-			if err != nil {
-				continue
-			}
-			if ok {
-				depsDowngraded = append(depsDowngraded, templates.Dep{
-					Coordinate: it.Coordinate,
-					Version:    fmt.Sprintf("%s → %s", d.Version, it.Version),
-				})
-			}
-		}
-	}
-	return depsDowngraded
-}
-
-func findUnchangedDeps(d1, d2 []templates.Dep) []templates.Dep {
-	depsUnchanged := make([]templates.Dep, 0, len(d1))
-	for _, d := range d1 {
-		it, ok := lo.Find(d2, func(it templates.Dep) bool {
-			return d.EqCoord(it)
-		})
-		if ok {
-			if d.Version == it.Version {
-				depsUnchanged = append(depsUnchanged, d)
-			}
-		}
-	}
-	return depsUnchanged
-}
-
-func diff(v1 any, v2 any) string {
-	s1 := components.Str(v1)
-	s2 := components.Str(v2)
-
+func diff(s1, s2 string) string {
 	if s1 == s2 {
-		return s2
-	} else {
-		return fmt.Sprintf("%s → %s", s1, s2)
+		return s1
 	}
+	return fmt.Sprintf("%s -> %s", s1, s2)
 }

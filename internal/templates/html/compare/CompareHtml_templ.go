@@ -15,12 +15,9 @@ import (
 	"github.com/dector/lampa/internal/templates/components"
 	"github.com/dector/lampa/internal/templates/html"
 	"github.com/dector/lampa/internal/templates/icons"
-	"github.com/samber/lo"
-	"sort"
-	"strings"
 )
 
-func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
+func CompareHtml(r report.Report) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -42,10 +39,10 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 
-		title := fmt.Sprintf("%s %s+%s → %s+%s :: Lampa Report",
-			r2.Build.AppName,
-			r1.Build.VersionName, r1.Build.VersionCode,
-			r2.Build.VersionName, r2.Build.VersionCode,
+		title := fmt.Sprintf("%s %s+%s (since %s+%s) :: Lampa Report",
+			r.Build.AppName,
+			r.Build.VersionName, r.Build.VersionCode,
+			r.PrevBuild.VersionName, r.PrevBuild.VersionCode,
 		)
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -76,22 +73,22 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(r2.Build.AppName)
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(r.Build.AppName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 27, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 24, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span><p class=\"text-lg text-gray-600\">Comparing versions<br>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span><p class=\"text-lg text-gray-600\">Version ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(r1.Build.VersionName)
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(r.Build.VersionName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 31, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 27, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -102,22 +99,22 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(r1.Build.VersionCode)
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(r.Build.VersionCode)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 31, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 27, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, ") <span class=\"mx-2 text-gray-400\">→</span> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, ")<br><span class=\"mx-2 text-gray-400\">(since ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(r2.Build.VersionName)
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(r.PrevBuild.VersionName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 33, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 30, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -128,15 +125,15 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(r2.Build.VersionCode)
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(r.PrevBuild.VersionCode)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 33, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 30, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, ")</p></h1><div class=\"flex flex-col items-center justify-center gap-1 text-sm text-gray-500 my-8\"><p>Lampa report generated</p><p class=\"flex gap-1 items-center justify-center\">on")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "))</span></p></h1><div class=\"flex flex-col items-center justify-center gap-1 text-sm text-gray-500 my-8\"><p>Lampa report generated</p><p class=\"flex gap-1 items-center justify-center\">on")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -145,9 +142,9 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var9 string
-				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templates.FormatGenerationTime(r2.Context.GenerationTime))
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templates.FormatGenerationTime(r.Context.GenerationTime))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 43, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/html/compare/CompareHtml.templ`, Line: 41, Col: 64}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -181,7 +178,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = components.InfoItem("Application Id", r2.Build.ApplicationId).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Application Id", r.Build.ApplicationId).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -189,7 +186,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Build Variant", r2.Build.BuildVariant).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Build Variant", r.Build.BuildVariant).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -197,7 +194,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Version Name", diff(r1.Build.VersionName, r2.Build.VersionName)).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Version Name", diff(r.PrevBuild.VersionName, r.Build.VersionName)).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -205,7 +202,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Version Code", diff(r1.Build.VersionCode, r2.Build.VersionCode)).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Version Code", diff(r.PrevBuild.VersionCode, r.Build.VersionCode)).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -239,7 +236,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = components.InfoItem("Min SDK", diff(r1.Build.MinSdkVersion, r2.Build.MinSdkVersion)).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Min SDK", diff(r.PrevBuild.MinSdkVersion, r.Build.MinSdkVersion)).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -247,7 +244,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Target SDK", diff(r1.Build.TargetSdkVersion, r2.Build.TargetSdkVersion)).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Target SDK", diff(r.PrevBuild.TargetSdkVersion, r.Build.TargetSdkVersion)).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -255,7 +252,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Compile SDK", diff(r1.Build.CompileSdkVersion, r2.Build.CompileSdkVersion)).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Compile SDK", diff(r.PrevBuild.CompileSdkVersion, r.Build.CompileSdkVersion)).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -289,7 +286,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = components.InfoItem("Branch", r2.Context.Git.Branch).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Branch", r.Context.Git.Branch).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -297,7 +294,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Tag", r2.Context.Git.Tag).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Tag", r.Context.Git.Tag).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -305,7 +302,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Commit", r2.Context.Git.Commit).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Commit", r.Context.Git.Commit).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -313,7 +310,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Commits after Tag", r2.Context.Git.CommitsAfterTag).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Commits after Tag", r.Context.Git.CommitsAfterTag).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -347,7 +344,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = components.InfoItem("Name", r2.Build.AabName).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Name", r.Build.AabName).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -355,7 +352,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Size", diff(templates.FormatFileSize(r1.Build.AabSize), templates.FormatFileSize(r2.Build.AabSize))).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Size", diff(templates.FormatFileSize(r.Build.AabSize), templates.FormatFileSize(r.Build.AabSize))).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -363,7 +360,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("SHA1", r2.Build.AabSha1).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("SHA1", r.Build.AabSha1).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -386,7 +383,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = DependenciesSection(r1, r2).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = DependenciesSection(&r).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -418,7 +415,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 							}()
 						}
 						ctx = templ.InitializeContext(ctx)
-						templ_7745c5c3_Err = components.InfoItem("Name", r2.Context.Tool.Name).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Name", r.Context.Tool.Name).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -426,7 +423,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Tool Version", r2.Context.Tool.Version).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Tool Version", r.Context.Tool.Version).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -434,7 +431,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Build Commit", r2.Context.Tool.BuildCommit).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Build Commit", r.Context.Tool.BuildCommit).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -442,7 +439,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Format Version", r2.Version).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Format Version", r.Version).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -450,7 +447,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Website", r2.Context.Tool.Website).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Website", r.Context.Tool.Website).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -458,7 +455,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = components.InfoItem("Sources", r2.Context.Tool.Sources).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.InfoItem("Sources", r.Context.Tool.Sources).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -495,7 +492,7 @@ func CompareHtml(r1 *report.Report, r2 *report.Report) templ.Component {
 	})
 }
 
-func DependenciesSection(r1, r2 *report.Report) templ.Component {
+func DependenciesSection(r *report.Report) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -529,32 +526,12 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 			}
 			ctx = templ.InitializeContext(ctx)
 
-			d1 := lo.Map(r1.Build.Dependencies.Compile, func(d report.CoordinatedDependency, _ int) templates.Dep {
-				return parseDep(d.String())
-			})
-			d2 := lo.Map(r2.Build.Dependencies.Compile, func(d report.CoordinatedDependency, _ int) templates.Dep {
-				return parseDep(d.String())
-			})
-			depsNew := findNewDeps(d1, d2)
-			sort.Slice(depsNew, func(i, j int) bool {
-				return depsNew[i].Coordinate < depsNew[j].Coordinate
-			})
-			depsRemoved := findRemovedDeps(d1, d2)
-			sort.Slice(depsRemoved, func(i, j int) bool {
-				return depsRemoved[i].Coordinate < depsRemoved[j].Coordinate
-			})
-			depsUpgraded := findUpgradedDeps(d1, d2)
-			sort.Slice(depsUpgraded, func(i, j int) bool {
-				return depsUpgraded[i].Coordinate < depsUpgraded[j].Coordinate
-			})
-			depsDowngraded := findDowngradedDeps(d1, d2)
-			sort.Slice(depsDowngraded, func(i, j int) bool {
-				return depsDowngraded[i].Coordinate < depsDowngraded[j].Coordinate
-			})
-			depsUnchanged := findUnchangedDeps(d1, d2)
-			sort.Slice(depsUnchanged, func(i, j int) bool {
-				return depsUnchanged[i].Coordinate < depsUnchanged[j].Coordinate
-			})
+			depsNew := r.Build.Dependencies.DiffDependenciesSegment.Added
+			depsRemoved := r.Build.Dependencies.DiffDependenciesSegment.Removed
+			depsUpgraded := r.Build.Dependencies.DiffDependenciesSegment.Upgraded
+			depsDowngraded := r.Build.Dependencies.DiffDependenciesSegment.Downgraded
+			depsChanged := r.Build.Dependencies.DiffDependenciesSegment.Changed
+			depsUnchanged := r.Build.Dependencies.DiffDependenciesSegment.Unchanged
 			templ_7745c5c3_Var19 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -568,7 +545,10 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 				}
 				ctx = templ.InitializeContext(ctx)
 				for _, d := range depsNew {
-					templ_7745c5c3_Err = components.DependencyItemExt(d, "+").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.DependencyItemExt2(components.MvnDependencyVM{
+						MvnDependencyDiff: d.ToDiff(),
+						Kind:              components.DiffKindAdded,
+					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -596,7 +576,10 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 				}
 				ctx = templ.InitializeContext(ctx)
 				for _, d := range depsRemoved {
-					templ_7745c5c3_Err = components.DependencyItemExt(d, "-").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.DependencyItemExt2(components.MvnDependencyVM{
+						MvnDependencyDiff: d.ToDiff(),
+						Kind:              components.DiffKindRemoved,
+					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -624,7 +607,10 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 				}
 				ctx = templ.InitializeContext(ctx)
 				for _, d := range depsUpgraded {
-					templ_7745c5c3_Err = components.DependencyItemExt(d, "^").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.DependencyItemExt2(components.MvnDependencyVM{
+						MvnDependencyDiff: d.ToDiff(),
+						Kind:              components.DiffKindUpgraded,
+					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -652,7 +638,10 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 				}
 				ctx = templ.InitializeContext(ctx)
 				for _, d := range depsDowngraded {
-					templ_7745c5c3_Err = components.DependencyItemExt(d, "v").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.DependencyItemExt2(components.MvnDependencyVM{
+						MvnDependencyDiff: d.ToDiff(),
+						Kind:              components.DiffKindDowngraded,
+					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -679,15 +668,49 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				for _, d := range depsUnchanged {
-					templ_7745c5c3_Err = components.DependencyItemExt(d, "").Render(ctx, templ_7745c5c3_Buffer)
+				for _, d := range depsChanged {
+					templ_7745c5c3_Err = components.DependencyItemExt2(components.MvnDependencyVM{
+						MvnDependencyDiff: d.ToDiff(),
+						Kind:              components.DiffKindChanged,
+					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = components.SubSection(fmt.Sprintf("Unchanged (%d)", len(depsUnchanged)), 1).Render(templ.WithChildren(ctx, templ_7745c5c3_Var23), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.SubSection(fmt.Sprintf("Changed (%d)", len(depsChanged)), 1).Render(templ.WithChildren(ctx, templ_7745c5c3_Var23), templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var24 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+				if !templ_7745c5c3_IsBuffer {
+					defer func() {
+						templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err == nil {
+							templ_7745c5c3_Err = templ_7745c5c3_BufErr
+						}
+					}()
+				}
+				ctx = templ.InitializeContext(ctx)
+				for _, d := range depsUnchanged {
+					templ_7745c5c3_Err = components.DependencyItemExt2(components.MvnDependencyVM{
+						MvnDependencyDiff: d.ToDiff(),
+						Kind:              components.DiffKindUnchanged,
+					}).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				return nil
+			})
+			templ_7745c5c3_Err = components.SubSection(fmt.Sprintf("Unchanged (%d)", len(depsUnchanged)), 1).Render(templ.WithChildren(ctx, templ_7745c5c3_Var24), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -705,121 +728,11 @@ func DependenciesSection(r1, r2 *report.Report) templ.Component {
 	})
 }
 
-func parseDep(s string) templates.Dep {
-	parts := strings.Split(s, ":")
-	return templates.Dep{
-		Coordinate: parts[0] + ":" + parts[1],
-		Version:    parts[2],
-	}
-}
-
-func findNewDeps(d1, d2 []templates.Dep) []templates.Dep {
-	depsNew := make([]templates.Dep, 0, len(d2))
-	for _, d := range d2 {
-		_, ok := lo.Find(d1, func(it templates.Dep) bool {
-			return d.EqCoord(it)
-		})
-		if !ok {
-			depsNew = append(depsNew, d)
-		} else {
-			// FIXME quick fix
-			// checking if it has hash version
-			other, _ := lo.Find(d1, func(it templates.Dep) bool {
-				return d.EqCoord(it) &&
-					(it.NonSemver() || d.NonSemver())
-			})
-			if other.Coordinate != "" {
-				depsNew = append(depsNew, templates.Dep{
-					Coordinate: d.Coordinate,
-					Version:    fmt.Sprintf("%s → %s", other.Version, d.Version),
-				})
-			}
-		}
-	}
-	return depsNew
-}
-
-func findRemovedDeps(d1, d2 []templates.Dep) []templates.Dep {
-	depsRemoved := make([]templates.Dep, 0, len(d1))
-	for _, d := range d1 {
-		_, ok := lo.Find(d2, func(it templates.Dep) bool {
-			return d.EqCoord(it)
-		})
-		if !ok {
-			depsRemoved = append(depsRemoved, d)
-		}
-	}
-	return depsRemoved
-}
-
-func findUpgradedDeps(d1, d2 []templates.Dep) []templates.Dep {
-	depsUpgraded := make([]templates.Dep, 0, len(d2))
-	for _, d := range d2 {
-		it, ok := lo.Find(d1, func(it templates.Dep) bool {
-			return d.EqCoord(it)
-		})
-		if ok {
-			ok, err := d.IsLater(it)
-			if err != nil {
-				continue
-			}
-			if ok {
-				depsUpgraded = append(depsUpgraded, templates.Dep{
-					Coordinate: d.Coordinate,
-					Version:    fmt.Sprintf("%s → %s", it.Version, d.Version),
-				})
-			}
-		}
-	}
-	return depsUpgraded
-}
-
-func findDowngradedDeps(d1, d2 []templates.Dep) []templates.Dep {
-	depsDowngraded := make([]templates.Dep, 0, len(d1))
-	for _, d := range d1 {
-		it, ok := lo.Find(d2, func(it templates.Dep) bool {
-			return d.EqCoord(it)
-		})
-		if ok {
-			ok, err := d.IsLater(it)
-			if err != nil {
-				continue
-			}
-			if ok {
-				depsDowngraded = append(depsDowngraded, templates.Dep{
-					Coordinate: it.Coordinate,
-					Version:    fmt.Sprintf("%s → %s", d.Version, it.Version),
-				})
-			}
-		}
-	}
-	return depsDowngraded
-}
-
-func findUnchangedDeps(d1, d2 []templates.Dep) []templates.Dep {
-	depsUnchanged := make([]templates.Dep, 0, len(d1))
-	for _, d := range d1 {
-		it, ok := lo.Find(d2, func(it templates.Dep) bool {
-			return d.EqCoord(it)
-		})
-		if ok {
-			if d.Version == it.Version {
-				depsUnchanged = append(depsUnchanged, d)
-			}
-		}
-	}
-	return depsUnchanged
-}
-
-func diff(v1 any, v2 any) string {
-	s1 := components.Str(v1)
-	s2 := components.Str(v2)
-
+func diff(s1, s2 string) string {
 	if s1 == s2 {
-		return s2
-	} else {
-		return fmt.Sprintf("%s → %s", s1, s2)
+		return s1
 	}
+	return fmt.Sprintf("%s -> %s", s1, s2)
 }
 
 var _ = templruntime.GeneratedTemplate
