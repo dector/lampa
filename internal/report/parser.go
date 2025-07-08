@@ -4,7 +4,6 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,12 +13,13 @@ import (
 	"time"
 
 	"github.com/dector/lampa/internal"
-	"github.com/dector/lampa/internal/git"
 	"github.com/dector/lampa/internal/out"
 	"github.com/dector/lampa/pkg/bundles"
 	"github.com/dector/lampa/pkg/gradle"
 
 	gogit "github.com/go-git/go-git/v6"
+	"github.com/go-git/go-git/v6/plumbing"
+	"github.com/go-git/go-git/v6/plumbing/object"
 
 	. "github.com/dector/lampa/internal/globals"
 )
@@ -112,7 +112,7 @@ func parseContext(args ParseFromArgs) (ContextSegment, error) {
 		return result, fmt.Errorf("git not found in PATH: %v", err)
 	}
 
-	git := git.NewGit(args.ProjectDir)
+	// git := git.NewGit(args.ProjectDir)
 
 	repo, err := gogit.PlainOpen(args.ProjectDir)
 	if err != nil {
@@ -138,22 +138,12 @@ func parseContext(args ParseFromArgs) (ContextSegment, error) {
 		}
 	}
 
-	output, err := git.RunWithOutput("describe", "--tags", "--long")
+	closestTag, commitsAfterTag, err := findClosestTag(repo, headRef.Hash())
 	if err == nil {
-		parts := strings.SplitN(strings.TrimSpace(string(output)), "-", 3)
-		if len(parts) == 3 {
-			result.Git.Tag = parts[0]
-			commitsAfterTag, err := strconv.ParseUint(parts[1], 10, 64)
-			if err != nil {
-				out.PrintlnWarn("could not parse commits after tag from %q: %v", parts[1], err)
-			} else {
-				result.Git.CommitsAfterTag = uint(commitsAfterTag)
-			}
-		} else {
-			log.Printf("warning: unexpected format from git describe: %q", string(output))
-		}
+		result.Git.Tag = closestTag
+		result.Git.CommitsAfterTag = commitsAfterTag
 	} else {
-		log.Printf("warning: git describe failed: %v", err)
+		out.PrintlnWarn("failed to find closest tag: %v", err)
 	}
 
 	return result, nil
@@ -245,4 +235,66 @@ func findString(pathToAab string, stringName string) (string, error) {
 	}
 
 	return "", fmt.Errorf("string `%s` not found in AAB file `%s`", stringName, pathToAab)
+}
+
+func findClosestTag(repo *gogit.Repository, commitHash plumbing.Hash) (string, uint, error) {
+	tagRefs, err := repo.Tags()
+	if err != nil {
+		return "", 0, err
+	}
+	defer tagRefs.Close()
+
+	var closestTag string
+	var minDistance uint = ^uint(0)
+
+	commitIter, err := repo.Log(&gogit.LogOptions{From: commitHash})
+	if err != nil {
+		return "", 0, err
+	}
+	defer commitIter.Close()
+
+	commitList := make([]*object.Commit, 0)
+	err = commitIter.ForEach(func(commit *object.Commit) error {
+		commitList = append(commitList, commit)
+		return nil
+	})
+	if err != nil {
+		return "", 0, err
+	}
+
+	err = tagRefs.ForEach(func(ref *plumbing.Reference) error {
+		tagName := ref.Name().Short()
+
+		var tagCommitHash plumbing.Hash
+		if ref.Type() == plumbing.HashReference {
+			tagCommitHash = ref.Hash()
+		} else {
+			tagObj, err := repo.TagObject(ref.Hash())
+			if err != nil {
+				return nil
+			}
+			tagCommitHash = tagObj.Target
+		}
+
+		for i, commit := range commitList {
+			if commit.Hash == tagCommitHash {
+				distance := uint(i)
+				if distance < minDistance {
+					minDistance = distance
+					closestTag = tagName
+				}
+				break
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return "", 0, err
+	}
+
+	if closestTag == "" {
+		return "", 0, fmt.Errorf("no tags found")
+	}
+
+	return closestTag, minDistance, nil
 }
