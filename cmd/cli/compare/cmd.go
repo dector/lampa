@@ -99,7 +99,7 @@ type Dependency struct {
 	Version string
 }
 
-func parseDependencies(report report.Report) ([]Dependency, error) {
+func parseDependencies(report report.StatsReport) ([]Dependency, error) {
 	result := make([]Dependency, 0, len(report.Build.Dependencies.Compile))
 
 	for _, depStr := range report.Build.Dependencies.Compile {
@@ -131,7 +131,7 @@ func checkReportFile(path string) (string, error) {
 	return path, nil
 }
 
-func ReadReportFromFile(file string) (*report.Report, error) {
+func ReadReportFromFile(file string) (*report.StatsReport, error) {
 	data, err := os.ReadFile(file)
 	if err != nil {
 		return nil, fmt.Errorf("could not read %s: %v", file, err)
@@ -150,7 +150,7 @@ func ReadReportFromFile(file string) (*report.Report, error) {
 		return nil, fmt.Errorf("unsupported report version: %s", reportV.Version)
 	}
 
-	var report report.Report
+	var report report.StatsReport
 	if err := json.Unmarshal(data, &report); err != nil {
 		return nil, fmt.Errorf("could not parse %s as report: %v", file, err)
 	}
@@ -172,7 +172,7 @@ func ReadReportFromFile(file string) (*report.Report, error) {
 // 	return dep, report.Context.Git.Commit, err
 // }
 
-func GenerateComparingHtmlReport(r1 *report.Report, r2 *report.Report) (string, error) {
+func GenerateComparingHtmlReport(r1 *report.StatsReport, r2 *report.StatsReport) (string, error) {
 	w := &strings.Builder{}
 
 	r := report.BuildDiffReport(r1, r2)

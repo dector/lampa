@@ -4,17 +4,18 @@ import (
 	"github.com/tiendc/go-deepcopy"
 )
 
-func BuildDiffReport(r1 *Report, r2 *Report) Report {
-	r := Report{
-		Version: DiffReportPrefix + LatestDiffReportVersion,
-		Context: r2.Context,
+func BuildDiffReport(r1 *StatsReport, r2 *StatsReport) DiffReport {
+	r := DiffReport{
+		CommonReport: CommonReport{
+			Version: DiffReportPrefix + LatestDiffReportVersion,
+			Context: r2.Context,
+		},
 	}
 	deepcopy.Copy(&r.PrevBuild, r1.Build)
 	deepcopy.Copy(&r.Build, r2.Build)
 
-	r.PrevBuild.Dependencies.StatsDependenciesSegment.Compile = make([]MvnDependency, 0)
-	r.Build.Dependencies.StatsDependenciesSegment.Compile = make([]MvnDependency, 0)
-	r.Build.Dependencies.DiffDependenciesSegment = buildDependenciesSegment(
+	r.PrevBuild.Dependencies.Compile = make([]MvnDependency, 0)
+	r.Build.Dependencies = buildDependenciesSegment(
 		r1.Build.Dependencies,
 		r2.Build.Dependencies,
 	)
@@ -23,13 +24,13 @@ func BuildDiffReport(r1 *Report, r2 *Report) Report {
 }
 
 func buildDependenciesSegment(
-	deps1 DependenciesSegment,
-	deps2 DependenciesSegment,
+	deps1 StatsDependenciesSegment,
+	deps2 StatsDependenciesSegment,
 ) DiffDependenciesSegment {
 	d := DiffDependenciesSegment{}
 
-	d1Deps := deps1.StatsDependenciesSegment.Compile
-	d2Deps := deps2.StatsDependenciesSegment.Compile
+	d1Deps := deps1.Compile
+	d2Deps := deps2.Compile
 
 	d.Added = findAddedDeps(d1Deps, d2Deps)
 	d.Removed = findRemovedDeps(d1Deps, d2Deps)

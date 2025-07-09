@@ -30,14 +30,16 @@ type ParseFromArgs struct {
 	ProjectDir   string
 }
 
-func ParseFrom(args ParseFromArgs) (Report, error) {
-	result := Report{
-		Version: StatsReportPrefix + LatestStatsReportVersion,
+func ParseFrom(args ParseFromArgs) (StatsReport, error) {
+	result := StatsReport{
+		CommonReport: CommonReport{
+			Version: StatsReportPrefix + LatestStatsReportVersion,
+		},
 	}
 
 	context, err := parseContext(args)
 	if err != nil {
-		return Report{}, err
+		return StatsReport{}, err
 	}
 	result.Context = context
 
@@ -45,7 +47,7 @@ func ParseFrom(args ParseFromArgs) (Report, error) {
 
 	err = analyzeBuild(&result, args)
 	if err != nil {
-		return Report{}, err
+		return StatsReport{}, err
 	}
 
 	out.Info("Fetching dependencies tree")
@@ -54,14 +56,14 @@ func ParseFrom(args ParseFromArgs) (Report, error) {
 		In(args.ProjectDir).
 		Execute("app:dependencies", "--configuration", configurationName)
 	if err != nil {
-		return Report{}, fmt.Errorf("failed to execute gradlew: %v\nOutput:\n%s", err, output)
+		return StatsReport{}, fmt.Errorf("failed to execute gradlew: %v\nOutput:\n%s", err, output)
 	}
 
 	// fmt.Println(string(output))
 
 	tree, err := internal.ParseTreeFromOutput(string(output), configurationName)
 	if err != nil {
-		return Report{}, fmt.Errorf("failed to parse tree: %v", err)
+		return StatsReport{}, fmt.Errorf("failed to parse tree: %v", err)
 	}
 
 	for _, info := range tree.Summary {
@@ -149,7 +151,7 @@ func parseContext(args ParseFromArgs) (ContextSegment, error) {
 	return result, nil
 }
 
-func analyzeBuild(result *Report, args ParseFromArgs) error {
+func analyzeBuild(result *StatsReport, args ParseFromArgs) error {
 	out.Info("Analyzing AAB file")
 
 	result.Build.BuildVariant = args.BuildVariant

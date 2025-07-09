@@ -17,7 +17,7 @@ import (
 	"github.com/dector/lampa/internal/templates/icons"
 )
 
-func CompareHtml(r report.Report) templ.Component {
+func CompareHtml(r report.DiffReport) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -492,7 +492,7 @@ func CompareHtml(r report.Report) templ.Component {
 	})
 }
 
-func DependenciesSection(r *report.Report) templ.Component {
+func DependenciesSection(r *report.DiffReport) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -526,12 +526,12 @@ func DependenciesSection(r *report.Report) templ.Component {
 			}
 			ctx = templ.InitializeContext(ctx)
 
-			depsNew := r.Build.Dependencies.DiffDependenciesSegment.Added
-			depsRemoved := r.Build.Dependencies.DiffDependenciesSegment.Removed
-			depsUpgraded := r.Build.Dependencies.DiffDependenciesSegment.Upgraded
-			depsDowngraded := r.Build.Dependencies.DiffDependenciesSegment.Downgraded
-			depsChanged := r.Build.Dependencies.DiffDependenciesSegment.Changed
-			depsUnchanged := r.Build.Dependencies.DiffDependenciesSegment.Unchanged
+			depsNew := r.Build.Dependencies.Added
+			depsRemoved := r.Build.Dependencies.Removed
+			depsUpgraded := r.Build.Dependencies.Upgraded
+			depsDowngraded := r.Build.Dependencies.Downgraded
+			depsChanged := r.Build.Dependencies.Changed
+			depsUnchanged := r.Build.Dependencies.Unchanged
 			templ_7745c5c3_Var19 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)

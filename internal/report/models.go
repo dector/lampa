@@ -16,16 +16,25 @@ type Report_Version struct {
 	Version string `json:"v"`
 }
 
-type Report struct {
+type CommonReport struct {
 	Version string `json:"v"`
 
 	Context ContextSegment
-
-	Build     BuildSegment
-	PrevBuild BuildSegment
 }
 
-type BuildSegment struct {
+type StatsReport struct {
+	CommonReport
+	Build StatsBuildSegment
+}
+
+type DiffReport struct {
+	CommonReport
+
+	Build     DiffBuildSegment
+	PrevBuild StatsBuildSegment
+}
+
+type CommonBuildSegment struct {
 	AabName string
 	AabSha1 string
 	AabSize string
@@ -41,8 +50,18 @@ type BuildSegment struct {
 	CompileSdkVersion string
 
 	// Locales []string
+}
 
-	Dependencies DependenciesSegment
+type StatsBuildSegment struct {
+	CommonBuildSegment
+
+	Dependencies StatsDependenciesSegment
+}
+
+type DiffBuildSegment struct {
+	CommonBuildSegment
+
+	Dependencies DiffDependenciesSegment
 }
 
 // --- Dependencies ---
@@ -60,11 +79,6 @@ type DiffDependenciesSegment struct {
 
 	Changed   []MvnDependencyDiff
 	Unchanged []MvnDependency
-}
-
-type DependenciesSegment struct {
-	StatsDependenciesSegment
-	DiffDependenciesSegment
 }
 
 type MvnDependencyDiff struct {

@@ -16,7 +16,7 @@ import (
 	"github.com/dector/lampa/internal/templates/icons"
 )
 
-func CollectHtml(r *report.Report) templ.Component {
+func CollectHtml(r *report.StatsReport) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -461,7 +461,7 @@ func CollectHtml(r *report.Report) templ.Component {
 	})
 }
 
-func DependenciesSection(r *report.Report) templ.Component {
+func DependenciesSection(r *report.StatsReport) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

@@ -7,13 +7,25 @@ import (
 	"github.com/dector/lampa/internal/utils"
 )
 
-func (self Report) WriteToFile(file string) error {
+func (self StatsReport) WriteToFile(file string) error {
+	return exportToFile(file, func() ([]byte, error) {
+		return self.ToJsonBytes()
+	})
+}
+
+func (self DiffReport) WriteToFile(file string) error {
+	return exportToFile(file, func() ([]byte, error) {
+		return self.ToJsonBytes()
+	})
+}
+
+func exportToFile(file string, toJson func() ([]byte, error)) error {
 	err := utils.EnsureParentDirExists(file)
 	if err != nil {
 		return err
 	}
 
-	reportJson, err := self.ToJsonBytes()
+	reportJson, err := toJson()
 	if err != nil {
 		return fmt.Errorf("could not marshal report: %v", err)
 	}

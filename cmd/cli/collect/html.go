@@ -11,7 +11,7 @@ import (
 	"github.com/dector/lampa/internal/utils"
 )
 
-func GenerateHtmlReport(r *report.Report) (string, error) {
+func GenerateHtmlReport(r *report.StatsReport) (string, error) {
 	w := &strings.Builder{}
 	err := pages.CollectHtml(r).Render(context.Background(), w)
 	if err != nil {
@@ -20,7 +20,7 @@ func GenerateHtmlReport(r *report.Report) (string, error) {
 	return w.String(), nil
 }
 
-func WriteHtmlReportToFile(report *report.Report, args ExecArgs) error {
+func WriteHtmlReportToFile(report *report.StatsReport, args ExecArgs) error {
 	err := utils.EnsureParentDirExists(args.HtmlReportFile)
 	if err != nil {
 		return err

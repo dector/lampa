@@ -161,7 +161,7 @@ func StepReport(args ExecArgs) error {
 			Msg:             "Generating report...",
 			MsgAfterSuccess: "Generating report: Done.",
 			MsgAfterFail:    "Generating report: Failed.",
-		}, func() (report.Report, error) {
+		}, func() (report.StatsReport, error) {
 			return report.ParseFrom(report.ParseFromArgs{
 				PathToAab:    pathToAab,
 				BuildVariant: args.BuildVariant,
@@ -180,7 +180,7 @@ func StepReport(args ExecArgs) error {
 	return nil
 }
 
-func exportReports(report *report.Report, args ExecArgs) error {
+func exportReports(report *report.StatsReport, args ExecArgs) error {
 	var err error
 
 	// Json Report

@@ -8,7 +8,7 @@ import (
 	"github.com/dector/lampa/internal/templates/icons"
 )
 
-templ CollectHtml(r *report.Report) {
+templ CollectHtml(r *report.StatsReport) {
 	{{
 		title := fmt.Sprintf("%s %s+%s :: Lampa Report", r.Build.AppName, r.Build.VersionName, r.Build.VersionCode)
 	}}
@@ -99,7 +99,7 @@ templ CollectHtml(r *report.Report) {
 	}
 }
 
-templ DependenciesSection(r *report.Report) {
+templ DependenciesSection(r *report.StatsReport) {
 	@components.SectionCard(components.SectionCardArg{
 		Name:        "Dependencies",
 		Icon:        "blocks",
