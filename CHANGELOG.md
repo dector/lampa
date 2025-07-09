@@ -5,13 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+---
 
-## [0.3.1-snapshot] - Unreleased
+
+## [0.3.2-snapshot] - Unreleased
+
+[DIFF v0.3.1 <-> v0.3.2](https://github.com/dector/lampa/compare/v0.3.1...v0.3.2)
+
+
+## [0.3.1] - 2025-07-10
 
 ### Added
 
 - [CHANGELOG.md](CHANGELOG.md) file (#32)
-- Changed Homebrew tap name to `dector/lampa/stable`
+
+### Changed
+
+- Changed Homebrew tap name to `dector/lampa`.
+Now it's a part of another repo: [dector/homebrew-lampa](https://github.com/dector/homebrew-lampa).
+- Using `git-go` library instead of system `git`.
+
+### Refactored
+
+- Reports generation.
+
+[DIFF v0.3.0 <-> v0.3.1](https://github.com/dector/lampa/compare/v0.3.0...v0.3.1)
 
 
 ## [0.3.0] - 2025-07-06
