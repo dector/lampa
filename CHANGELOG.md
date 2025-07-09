@@ -8,12 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
-## [0.3.2-snapshot] - Unreleased
+## [0.3.3-snapshot] - Unreleased
 
-[DIFF v0.3.1 <-> v0.3.2](https://github.com/dector/lampa/compare/v0.3.1...v0.3.2)
+[DIFF v0.3.2 <-> v0.3.3](https://github.com/dector/lampa/compare/v0.3.2...v0.3.3)
 
 
-## [0.3.1] - 2025-07-10
+## [0.3.2] - 2025-07-10
+
 
 ### Added
 
@@ -29,7 +30,11 @@ Now it's a part of another repo: [dector/homebrew-lampa](https://github.com/dect
 
 - Reports generation.
 
-[DIFF v0.3.0 <-> v0.3.1](https://github.com/dector/lampa/compare/v0.3.0...v0.3.1)
+[DIFF v0.3.0 <-> v0.3.2](https://github.com/dector/lampa/compare/v0.3.0...v0.3.2)
+
+
+> [!NOTE]
+> `0.3.1` was skipped accidentally.
 
 
 ## [0.3.0] - 2025-07-06

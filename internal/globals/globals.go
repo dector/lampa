@@ -7,7 +7,7 @@ import (
 )
 
 var G = Globals{
-	Version: "0.3.2",
+	Version: "0.3.3-snapshot",
 }
 
 type Globals struct {
