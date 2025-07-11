@@ -56,7 +56,14 @@ Download latest version from [Releases page](https://github.com/dector/lampa/rel
 
 **or**
 
-for Linux/MacOS use Homebrew:
+use [mise](https://mise.jdx.dev):
+``` shell
+mise use -g ubi:dector/lampa
+```
+
+**or**
+
+for Linux/MacOS use [Homebrew](https://brew.sh):
 
 ``` shell
 brew tap dector/lampa
