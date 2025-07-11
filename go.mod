@@ -7,7 +7,7 @@ require (
 	github.com/a-h/templ v0.3.906
 	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.18.0
-	github.com/go-git/go-git/v6 v6.0.0-20250709171604-d767b7256ade
+	github.com/go-git/go-git/v6 v6.0.0-20250710142515-bd3c27fe9f63
 	github.com/samber/lo v1.51.0
 	github.com/square/exit v1.3.0
 	github.com/tiendc/go-deepcopy v1.6.1
@@ -42,7 +42,7 @@ require (
 	golang.org/x/mod v0.25.0 // indirect
 	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/term v0.32.0 // indirect
 	golang.org/x/tools v0.34.0 // indirect
 )
