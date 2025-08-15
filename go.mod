@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
-	github.com/a-h/templ v0.3.906
+	github.com/a-h/templ v0.3.943
 	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.18.0
 	github.com/go-git/go-git/v6 v6.0.0-20250710142515-bd3c27fe9f63
@@ -37,14 +37,14 @@ require (
 	github.com/natefinch/atomic v1.0.1 // indirect
 	github.com/pjbgf/sha1cd v0.4.0 // indirect
 	github.com/sergi/go-diff v1.4.0 // indirect
-	golang.org/x/crypto v0.39.0 // indirect
+	golang.org/x/crypto v0.40.0 // indirect
 	golang.org/x/exp v0.0.0-20250531010427-b6e5de432a8b // indirect
-	golang.org/x/mod v0.25.0 // indirect
-	golang.org/x/net v0.41.0 // indirect
+	golang.org/x/mod v0.26.0 // indirect
+	golang.org/x/net v0.42.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect
-	golang.org/x/term v0.32.0 // indirect
-	golang.org/x/tools v0.34.0 // indirect
+	golang.org/x/term v0.33.0 // indirect
+	golang.org/x/tools v0.35.0 // indirect
 )
 
 tool github.com/a-h/templ/cmd/templ
