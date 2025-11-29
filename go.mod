@@ -10,7 +10,7 @@ require (
 	github.com/go-git/go-git/v6 v6.0.0-20251111212616-ca553b2c2288
 	github.com/samber/lo v1.52.0
 	github.com/square/exit v1.3.0
-	github.com/tiendc/go-deepcopy v1.7.1
+	github.com/tiendc/go-deepcopy v1.7.2
 	github.com/urfave/cli/v3 v3.6.0
 	golang.org/x/text v0.31.0
 	google.golang.org/protobuf v1.36.10
