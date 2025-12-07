@@ -11,7 +11,7 @@ require (
 	github.com/samber/lo v1.52.0
 	github.com/square/exit v1.3.0
 	github.com/tiendc/go-deepcopy v1.7.1
-	github.com/urfave/cli/v3 v3.6.0
+	github.com/urfave/cli/v3 v3.6.1
 	golang.org/x/text v0.31.0
 	google.golang.org/protobuf v1.36.10
 )
