@@ -13,7 +13,7 @@ require (
 	github.com/tiendc/go-deepcopy v1.7.1
 	github.com/urfave/cli/v3 v3.6.0
 	golang.org/x/text v0.31.0
-	google.golang.org/protobuf v1.36.10
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
