@@ -7,7 +7,7 @@ require (
 	github.com/a-h/templ v0.3.977
 	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.18.0
-	github.com/go-git/go-git/v6 v6.0.0-20251212081956-e83cbb9651e8
+	github.com/go-git/go-git/v6 v6.0.0-20251231065035-29ae690a9f19
 	github.com/samber/lo v1.52.0
 	github.com/square/exit v1.3.0
 	github.com/tiendc/go-deepcopy v1.7.2
@@ -28,7 +28,7 @@ require (
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-git/gcfg/v2 v2.0.2 // indirect
-	github.com/go-git/go-billy/v6 v6.0.0-20251126203821-7f9c95185ee0 // indirect
+	github.com/go-git/go-billy/v6 v6.0.0-20251217170237-e9738f50a3cd // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/kevinburke/ssh_config v1.4.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
