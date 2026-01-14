@@ -85,17 +85,48 @@ func validateOciArgs(args *OciArgs) error {
 	return nil
 }
 
+func parseGradleVersion(projectDir string) (string, error) {
+	wrapperPropsPath := filepath.Join(projectDir, "gradle", "wrapper", "gradle-wrapper.properties")
+	if !utils.FileExists(wrapperPropsPath) {
+		return "", nil
+	}
+
+	props, err := utils.ParsePropertiesFile(wrapperPropsPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse gradle-wrapper.properties: %v", err)
+	}
+
+	distributionUrl, ok := props["distributionUrl"]
+	if !ok {
+		return "", nil
+	}
+
+	gradleVersion, err := utils.ExtractGradleVersion(distributionUrl)
+	if err != nil {
+		return "", fmt.Errorf("failed to extract Gradle version: %v", err)
+	}
+
+	return gradleVersion, nil
+}
+
 func parseVersionsFromProject(projectDir string) (containerfile.Versions, error) {
-	// TODO: Implement version parsing from Gradle project files
-	// This should:
+	versions := containerfile.Versions{}
+
+	// Parse Gradle version
+	gradleVersion, err := parseGradleVersion(projectDir)
+	if err != nil {
+		return versions, err
+	}
+	versions.Gradle = gradleVersion
+
+	// TODO: Implement remaining version parsing
 	// 1. Read build.gradle or build.gradle.kts
 	// 2. Parse compileSdkVersion/compileSdk for AndroidApiLevel
 	// 3. Parse buildToolsVersion for AndroidBuildTools
-	// 4. Read gradle/wrapper/gradle-wrapper.properties for Gradle version
 	// 5. Parse sourceCompatibility/targetCompatibility for JDK version
 	// 6. Use sensible defaults for AndroidCmdlineTools
 
-	return containerfile.Versions{}, fmt.Errorf("version parsing not yet implemented")
+	return versions, nil
 }
 
 func ActionCmdOci(ctx context.Context, cmd *cli.Command) error {
@@ -135,15 +166,29 @@ func generateContainerfileContent(args OciArgs) (string, error) {
 	}
 
 	// Parse versions from the project
-	versions, err := parseVersionsFromProject(args.ProjectDir)
+	parsedVersions, err := parseVersionsFromProject(args.ProjectDir)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse versions from project: %v", err)
 	}
 
-	// Create opts with parsed versions
-	opts := containerfile.ContainerOpts{
-		Image:    "ubuntu:24.04",
-		Versions: versions,
+	// Start with defaults
+	opts := containerfile.NewContainerOpts()
+
+	// Override with parsed versions (only non-empty values)
+	if parsedVersions.Gradle != "" {
+		opts.Versions.Gradle = parsedVersions.Gradle
+	}
+	if parsedVersions.Jdk != "" {
+		opts.Versions.Jdk = parsedVersions.Jdk
+	}
+	if parsedVersions.AndroidApiLevel != "" {
+		opts.Versions.AndroidApiLevel = parsedVersions.AndroidApiLevel
+	}
+	if parsedVersions.AndroidBuildTools != "" {
+		opts.Versions.AndroidBuildTools = parsedVersions.AndroidBuildTools
+	}
+	if parsedVersions.AndroidCmdlineTools != "" {
+		opts.Versions.AndroidCmdlineTools = parsedVersions.AndroidCmdlineTools
 	}
 
 	return containerfile.GenerateContainerfileWithOpts(opts)
