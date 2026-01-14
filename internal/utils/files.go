@@ -57,3 +57,21 @@ func EnsureParentDirExists(path string) error {
 
 	return nil
 }
+
+// ReadFirstLine reads the first non-empty line from a file.
+func ReadFirstLine(path string) (string, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	lines := strings.Split(string(content), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line != "" && !strings.HasPrefix(line, "#") {
+			return line, nil
+		}
+	}
+
+	return "", fmt.Errorf("no non-empty lines found in file")
+}

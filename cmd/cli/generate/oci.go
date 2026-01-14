@@ -109,6 +109,24 @@ func parseGradleVersion(projectDir string) (string, error) {
 	return gradleVersion, nil
 }
 
+func parseJavaVersion(projectDir string) (string, error) {
+	// Try .tool-versions first
+	version, err := utils.ParseJavaVersionFromToolVersions(projectDir)
+	if err != nil {
+		return "", err
+	}
+	if version != "" {
+		return version, nil
+	}
+
+	// Try .java-version
+	version, err = utils.ParseJavaVersionFromJavaVersion(projectDir)
+	if err != nil {
+		return "", err
+	}
+	return version, nil
+}
+
 func parseVersionsFromProject(projectDir string) (containerfile.Versions, error) {
 	versions := containerfile.Versions{}
 
@@ -119,12 +137,17 @@ func parseVersionsFromProject(projectDir string) (containerfile.Versions, error)
 	}
 	versions.Gradle = gradleVersion
 
+	// Parse Java version
+	javaVersion, err := parseJavaVersion(projectDir)
+	if err != nil {
+		return versions, err
+	}
+	versions.Jdk = javaVersion
+
 	// TODO: Implement remaining version parsing
 	// 1. Read build.gradle or build.gradle.kts
 	// 2. Parse compileSdkVersion/compileSdk for AndroidApiLevel
 	// 3. Parse buildToolsVersion for AndroidBuildTools
-	// 5. Parse sourceCompatibility/targetCompatibility for JDK version
-	// 6. Use sensible defaults for AndroidCmdlineTools
 
 	return versions, nil
 }
