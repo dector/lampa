@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/dector/lampa/internal/templates/containerfile"
 	"github.com/dector/lampa/internal/utils"
+	"github.com/dector/lampa/pkg/gradle"
 	"github.com/urfave/cli/v3"
 )
 
@@ -15,6 +17,27 @@ const (
 	OptToDir      = "to-dir"
 	OptProjectDir = "project-dir"
 )
+
+const (
+	androidCompileSdkInitScriptPath = "/tmp/lampa-printCompileSdk.init.gradle"
+	androidCompileSdkTaskName       = "lampaCompileSdk"
+)
+
+const androidCompileSdkInitScript = `allprojects {
+    plugins.withId("com.android.application") {
+        afterEvaluate {
+            def android = extensions.findByName("android")
+            if (android != null && android.compileSdk != null) {
+                tasks.register("lampaCompileSdk") {
+                    doLast {
+                        println("compileSdk=${android.compileSdk}")
+                    }
+                }
+            }
+        }
+    }
+}
+`
 
 type OciArgs struct {
 	ToDir      string
@@ -110,6 +133,8 @@ func parseGradleVersion(projectDir string) (string, error) {
 }
 
 func parseJavaVersion(projectDir string) (string, error) {
+	fmt.Println("Looking for Java version...")
+
 	// Try .tool-versions first
 	version, err := utils.ParseJavaVersionFromToolVersions(projectDir)
 	if err != nil {
@@ -124,6 +149,61 @@ func parseJavaVersion(projectDir string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	return version, nil
+}
+
+func ensureAndroidCompileSdkInitScript() error {
+	// Check if file already exists
+	if utils.FileExists(androidCompileSdkInitScriptPath) {
+		return nil
+	}
+
+	// Create the init script file
+	err := os.WriteFile(androidCompileSdkInitScriptPath, []byte(androidCompileSdkInitScript), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to create Android compile SDK init script: %v", err)
+	}
+
+	return nil
+}
+
+func extractCompileSdkFromOutput(output string) string {
+	lines := strings.Split(output, "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "compileSdk=") {
+			version := strings.TrimPrefix(line, "compileSdk=")
+			return strings.TrimSpace(version)
+		}
+	}
+	return ""
+}
+
+func parseAndroidCompileSdk(projectDir string) (string, error) {
+	fmt.Println("Looking for compileSdk version...")
+
+	// Check if gradlew exists
+	gradlewPath := filepath.Join(projectDir, "gradlew")
+	if !utils.FileExists(gradlewPath) {
+		return "", nil // Not an error, just no gradlew
+	}
+
+	// Ensure init script exists
+	if err := ensureAndroidCompileSdkInitScript(); err != nil {
+		// Log warning but continue - not critical
+		return "", nil
+	}
+
+	// Execute Gradle command
+	g := gradle.In(projectDir)
+	output, err := g.Execute(androidCompileSdkTaskName, "-q", "-I", androidCompileSdkInitScriptPath)
+	if err != nil {
+		// Gradle execution failed - likely not an Android project
+		return "", nil
+	}
+
+	// Parse output
+	version := extractCompileSdkFromOutput(string(output))
 	return version, nil
 }
 
@@ -144,10 +224,15 @@ func parseVersionsFromProject(projectDir string) (containerfile.Versions, error)
 	}
 	versions.Jdk = javaVersion
 
+	// Parse Android compile SDK
+	androidCompileSdk, err := parseAndroidCompileSdk(projectDir)
+	if err != nil {
+		return versions, err
+	}
+	versions.AndroidApiLevel = androidCompileSdk
+
 	// TODO: Implement remaining version parsing
-	// 1. Read build.gradle or build.gradle.kts
-	// 2. Parse compileSdkVersion/compileSdk for AndroidApiLevel
-	// 3. Parse buildToolsVersion for AndroidBuildTools
+	// 1. Parse buildToolsVersion for AndroidBuildTools
 
 	return versions, nil
 }
