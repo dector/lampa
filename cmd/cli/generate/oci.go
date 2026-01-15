@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	OptToDir       = "to-dir"
-	OptProjectDir  = "project-dir"
-	OptFromConfig  = "from-config"
+	OptToDir      = "to-dir"
+	OptProjectDir = "project-dir"
+	OptFromConfig = "from-config"
 )
 
 const (
@@ -438,6 +438,8 @@ func generateContainerfileContent(args OciArgs) (string, error) {
 
 	// Parse and merge config file versions (highest priority)
 	if args.FromConfig != "" {
+		fmt.Println("Config found. Loading versions from it...")
+
 		configVersions, err := parseVersionsFromConfig(args.FromConfig)
 		if err != nil {
 			return "", fmt.Errorf("failed to parse versions from config: %v", err)
