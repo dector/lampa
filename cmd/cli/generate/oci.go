@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/dector/kdly"
 	"github.com/dector/lampa/internal/templates/containerfile"
 	"github.com/dector/lampa/internal/utils"
 	"github.com/dector/lampa/pkg/gradle"
@@ -14,8 +15,9 @@ import (
 )
 
 const (
-	OptToDir      = "to-dir"
-	OptProjectDir = "project-dir"
+	OptToDir       = "to-dir"
+	OptProjectDir  = "project-dir"
+	OptFromConfig  = "from-config"
 )
 
 const (
@@ -42,6 +44,7 @@ const androidCompileSdkInitScript = `allprojects {
 type OciArgs struct {
 	ToDir      string
 	ProjectDir string
+	FromConfig string
 }
 
 func CreateOciCommand() *cli.Command {
@@ -58,6 +61,10 @@ func CreateOciCommand() *cli.Command {
 				Name:  OptProjectDir,
 				Usage: "Gradle project directory to extract versions from",
 			},
+			&cli.StringFlag{
+				Name:  OptFromConfig,
+				Usage: "path to KDL config file with version information",
+			},
 		},
 		Action: ActionCmdOci,
 	}
@@ -73,36 +80,56 @@ func parseOciArgs(cmd *cli.Command) OciArgs {
 		args.ProjectDir = utils.TryResolveFsPath(args.ProjectDir)
 	}
 
+	args.FromConfig = cmd.String(OptFromConfig)
+	if args.FromConfig != "" {
+		args.FromConfig = utils.TryResolveFsPath(args.FromConfig)
+	}
+
 	return args
 }
 
 func validateOciArgs(args *OciArgs) error {
-	// Only validate project-dir if provided
-	if args.ProjectDir == "" {
-		return nil
-	}
-
-	// Check if directory exists and is a directory
-	info, err := os.Stat(args.ProjectDir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return fmt.Errorf("project directory `%s` does not exist", args.ProjectDir)
+	// Validate project-dir if provided
+	if args.ProjectDir != "" {
+		// Check if directory exists and is a directory
+		info, err := os.Stat(args.ProjectDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return fmt.Errorf("project directory `%s` does not exist", args.ProjectDir)
+			}
+			return fmt.Errorf("failed to access project directory `%s`: %v", args.ProjectDir, err)
 		}
-		return fmt.Errorf("failed to access project directory `%s`: %v", args.ProjectDir, err)
-	}
-	if !info.IsDir() {
-		return fmt.Errorf("`%s` is not a directory", args.ProjectDir)
+		if !info.IsDir() {
+			return fmt.Errorf("`%s` is not a directory", args.ProjectDir)
+		}
+
+		// Check if it's a Gradle project root
+		hasSettingsGradle := utils.FileExists(filepath.Join(args.ProjectDir, "settings.gradle"))
+		hasSettingsGradleKts := utils.FileExists(filepath.Join(args.ProjectDir, "settings.gradle.kts"))
+
+		if !hasSettingsGradle && !hasSettingsGradleKts {
+			return fmt.Errorf(
+				"directory `%s` is not a Gradle project root (missing settings.gradle or settings.gradle.kts)",
+				args.ProjectDir,
+			)
+		}
 	}
 
-	// Check if it's a Gradle project root
-	hasSettingsGradle := utils.FileExists(filepath.Join(args.ProjectDir, "settings.gradle"))
-	hasSettingsGradleKts := utils.FileExists(filepath.Join(args.ProjectDir, "settings.gradle.kts"))
+	// Validate from-config if provided
+	if args.FromConfig != "" {
+		// Check if file exists
+		if !utils.FileExists(args.FromConfig) {
+			return fmt.Errorf("config file `%s` does not exist", args.FromConfig)
+		}
 
-	if !hasSettingsGradle && !hasSettingsGradleKts {
-		return fmt.Errorf(
-			"directory `%s` is not a Gradle project root (missing settings.gradle or settings.gradle.kts)",
-			args.ProjectDir,
-		)
+		// Check if it's a file (not a directory)
+		info, err := os.Stat(args.FromConfig)
+		if err != nil {
+			return fmt.Errorf("failed to access config file `%s`: %v", args.FromConfig, err)
+		}
+		if info.IsDir() {
+			return fmt.Errorf("`%s` is a directory, not a file", args.FromConfig)
+		}
 	}
 
 	return nil
@@ -237,6 +264,111 @@ func parseVersionsFromProject(projectDir string) (containerfile.Versions, error)
 	return versions, nil
 }
 
+// parseVersionsFromConfig parses version information from a KDL config file.
+// Expected structure:
+//
+//	generator {
+//	  oci {
+//	    version jdk="21" androidApi="36" androidBuildTools="36.1.0" gradle="9.2.1" androidCmdlineTools="13114758"
+//	  }
+//	}
+func parseVersionsFromConfig(configPath string) (containerfile.Versions, error) {
+	versions := containerfile.Versions{}
+
+	// Read config file
+	content, err := os.ReadFile(configPath)
+	if err != nil {
+		return versions, fmt.Errorf("failed to read config file: %v", err)
+	}
+
+	// Parse KDL document
+	doc, err := kdly.Parse(string(content))
+	if err != nil {
+		return versions, fmt.Errorf("failed to parse KDL config: %v", err)
+	}
+
+	// Navigate to generator.oci.version node
+	versionNode, err := findVersionNode(doc)
+	if err != nil {
+		// Return empty versions if structure not found (all properties optional)
+		// Don't treat as error - just means no versions specified
+		return versions, nil
+	}
+
+	// Extract version properties
+	versions = extractVersionProperties(versionNode)
+
+	return versions, nil
+}
+
+// findVersionNode navigates the KDL document tree to find the version node.
+// Path: generator -> oci -> version
+func findVersionNode(doc *kdly.Document) (*kdly.Node, error) {
+	// Find "generator" node
+	var generatorNode *kdly.Node
+	for i := range doc.Nodes {
+		if doc.Nodes[i].Name == "generator" {
+			generatorNode = &doc.Nodes[i]
+			break
+		}
+	}
+	if generatorNode == nil {
+		return nil, fmt.Errorf("'generator' node not found")
+	}
+
+	// Find "oci" child node
+	var ociNode *kdly.Node
+	for i := range generatorNode.Children {
+		if generatorNode.Children[i].Name == "oci" {
+			ociNode = &generatorNode.Children[i]
+			break
+		}
+	}
+	if ociNode == nil {
+		return nil, fmt.Errorf("'oci' node not found under 'generator'")
+	}
+
+	// Find "version" child node
+	var versionNode *kdly.Node
+	for i := range ociNode.Children {
+		if ociNode.Children[i].Name == "version" {
+			versionNode = &ociNode.Children[i]
+			break
+		}
+	}
+	if versionNode == nil {
+		return nil, fmt.Errorf("'version' node not found under 'generator.oci'")
+	}
+
+	return versionNode, nil
+}
+
+// extractVersionProperties extracts version information from the version node properties.
+func extractVersionProperties(node *kdly.Node) containerfile.Versions {
+	versions := containerfile.Versions{}
+
+	// Iterate through properties
+	for _, prop := range node.Properties {
+		// Extract string value from property (Value.Value is the actual string)
+		strValue := prop.Value.Value
+
+		switch prop.Key {
+		case "jdk":
+			versions.Jdk = strValue
+		case "androidApi":
+			versions.AndroidApiLevel = strValue
+		case "androidBuildTools":
+			versions.AndroidBuildTools = strValue
+		case "gradle":
+			versions.Gradle = strValue
+		case "androidCmdlineTools":
+			versions.AndroidCmdlineTools = strValue
+		}
+	}
+
+	return versions
+}
+
 func ActionCmdOci(ctx context.Context, cmd *cli.Command) error {
 	// Parse arguments
 	args := parseOciArgs(cmd)
@@ -267,36 +399,50 @@ func ActionCmdOci(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
+// mergeVersions merges source versions into target, only overriding non-empty values.
+func mergeVersions(target *containerfile.Versions, source containerfile.Versions) {
+	if source.Gradle != "" {
+		target.Gradle = source.Gradle
+	}
+	if source.Jdk != "" {
+		target.Jdk = source.Jdk
+	}
+	if source.AndroidApiLevel != "" {
+		target.AndroidApiLevel = source.AndroidApiLevel
+	}
+	if source.AndroidBuildTools != "" {
+		target.AndroidBuildTools = source.AndroidBuildTools
+	}
+	if source.AndroidCmdlineTools != "" {
+		target.AndroidCmdlineTools = source.AndroidCmdlineTools
+	}
+}
+
 func generateContainerfileContent(args OciArgs) (string, error) {
-	// If no project dir specified, use default behavior
-	if args.ProjectDir == "" {
+	// If no project dir and no config specified, use default behavior
+	if args.ProjectDir == "" && args.FromConfig == "" {
 		return containerfile.GenerateContainerfile()
 	}
 
-	// Parse versions from the project
-	parsedVersions, err := parseVersionsFromProject(args.ProjectDir)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse versions from project: %v", err)
-	}
-
-	// Start with defaults
+	// Start with defaults (lowest priority)
 	opts := containerfile.NewContainerOpts()
 
-	// Override with parsed versions (only non-empty values)
-	if parsedVersions.Gradle != "" {
-		opts.Versions.Gradle = parsedVersions.Gradle
+	// Parse and merge project-detected versions (middle priority)
+	if args.ProjectDir != "" {
+		projectVersions, err := parseVersionsFromProject(args.ProjectDir)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse versions from project: %v", err)
+		}
+		mergeVersions(&opts.Versions, projectVersions)
 	}
-	if parsedVersions.Jdk != "" {
-		opts.Versions.Jdk = parsedVersions.Jdk
-	}
-	if parsedVersions.AndroidApiLevel != "" {
-		opts.Versions.AndroidApiLevel = parsedVersions.AndroidApiLevel
-	}
-	if parsedVersions.AndroidBuildTools != "" {
-		opts.Versions.AndroidBuildTools = parsedVersions.AndroidBuildTools
-	}
-	if parsedVersions.AndroidCmdlineTools != "" {
-		opts.Versions.AndroidCmdlineTools = parsedVersions.AndroidCmdlineTools
+
+	// Parse and merge config file versions (highest priority)
+	if args.FromConfig != "" {
+		configVersions, err := parseVersionsFromConfig(args.FromConfig)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse versions from config: %v", err)
+		}
+		mergeVersions(&opts.Versions, configVersions)
 	}
 
 	return containerfile.GenerateContainerfileWithOpts(opts)
