@@ -74,7 +74,7 @@ ENV PATH=$JAVA_HOME/bin:$PATH
 # Install Android SDK Command Line Tools
 # -----------------------------------------------------------------------------
 RUN mkdir -p /opt/android-sdk/cmdline-tools && \
-    wget -q https://dl.google.com/android/repository/commandlinetools-linux-$ANDROID_CMDLINE_TOOLS_VERSION_latest.zip \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS_VERSION}_latest.zip \
       -O /tmp/cmdline-tools.zip && \
     unzip -q /tmp/cmdline-tools.zip -d /tmp && \
     mv /tmp/cmdline-tools /opt/android-sdk/cmdline-tools/latest && \
