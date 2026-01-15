@@ -19,10 +19,10 @@ func NewAndroidProject(dir string) AndroidProject {
 	}
 }
 
-func (self AndroidProject) FindAabFile(buildVariant string) (string, error) {
+func (self AndroidProject) FindAabFile(module string, buildVariant string) (string, error) {
 	out.Info("Searching for AAB file")
 
-	relativeBundleDir := path.Join("app", "build", "outputs", "bundle", buildVariant)
+	relativeBundleDir := path.Join(module, "build", "outputs", "bundle", buildVariant)
 	bundleDir := path.Join(self.RootDir, relativeBundleDir)
 
 	info, err := os.Stat(bundleDir)

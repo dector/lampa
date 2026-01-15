@@ -19,6 +19,7 @@ import (
 const (
 	OptProjectDir   = "project"
 	OptReportsDir   = "to-dir"
+	OptModule       = "module"
 	OptBuildVariant = "variant"
 	OptFormat       = "format"
 
@@ -40,6 +41,11 @@ func CreateCliCommand() *cli.Command {
 				Name:  OptReportsDir,
 				Usage: "directory where to put report",
 				Value: ".",
+			},
+			&cli.StringFlag{
+				Name:  OptModule,
+				Usage: "gradle module to use for tasks",
+				Value: "app",
 			},
 			&cli.StringFlag{
 				Name:  OptBuildVariant,
@@ -131,7 +137,7 @@ func StepBuild(args ExecArgs) error {
 			out.Info("Building AAB")
 
 			taskVariant := cases.Title(language.BritishEnglish).String(args.BuildVariant)
-			task := "bundle" + taskVariant
+			task := ":" + args.Module + ":bundle" + taskVariant
 			output, err := gradle.
 				In(args.ProjectDir).
 				Execute(task)
@@ -151,7 +157,7 @@ func StepBuild(args ExecArgs) error {
 func StepReport(args ExecArgs) error {
 	pathToAab, err := android.
 		NewAndroidProject(args.ProjectDir).
-		FindAabFile(args.BuildVariant)
+		FindAabFile(args.Module, args.BuildVariant)
 	if err != nil {
 		return err
 	}
@@ -164,6 +170,7 @@ func StepReport(args ExecArgs) error {
 		}, func() (report.StatsReport, error) {
 			return report.ParseFrom(report.ParseFromArgs{
 				PathToAab:    pathToAab,
+				Module:       args.Module,
 				BuildVariant: args.BuildVariant,
 				ProjectDir:   args.ProjectDir,
 			})

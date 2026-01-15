@@ -26,6 +26,7 @@ import (
 
 type ParseFromArgs struct {
 	PathToAab    string
+	Module       string
 	BuildVariant string
 	ProjectDir   string
 }
@@ -52,9 +53,10 @@ func ParseFrom(args ParseFromArgs) (StatsReport, error) {
 
 	out.Info("Fetching dependencies tree")
 
+	dependenciesTask := ":" + args.Module + ":dependencies"
 	output, err := gradle.
 		In(args.ProjectDir).
-		Execute("app:dependencies", "--configuration", configurationName)
+		Execute(dependenciesTask, "--configuration", configurationName)
 	if err != nil {
 		return StatsReport{}, fmt.Errorf("failed to execute gradlew: %v\nOutput:\n%s", err, output)
 	}
@@ -130,6 +132,14 @@ func parseContext(args ParseFromArgs) (ContextSegment, error) {
 		if refName.IsBranch() {
 			result.Git.Branch = refName.Short()
 		}
+
+		closestTag, commitsAfterTag, err := findClosestTag(repo, headRef.Hash())
+		if err == nil {
+			result.Git.Tag = closestTag
+			result.Git.CommitsAfterTag = commitsAfterTag
+		} else {
+			out.PrintlnWarn("failed to find closest tag: %v", err)
+		}
 	}
 
 	worktree, err := repo.Worktree()
@@ -138,14 +148,6 @@ func parseContext(args ParseFromArgs) (ContextSegment, error) {
 		if err == nil {
 			result.Git.IsDirty = !status.IsClean()
 		}
-	}
-
-	closestTag, commitsAfterTag, err := findClosestTag(repo, headRef.Hash())
-	if err == nil {
-		result.Git.Tag = closestTag
-		result.Git.CommitsAfterTag = commitsAfterTag
-	} else {
-		out.PrintlnWarn("failed to find closest tag: %v", err)
 	}
 
 	return result, nil

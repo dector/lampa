@@ -21,6 +21,7 @@ type ExecArgs struct {
 	JsonReportFile string
 	HtmlReportFile string
 
+	Module       string
 	BuildVariant string
 
 	OverwriteReport bool
@@ -44,6 +45,9 @@ func parseExecArgs(c *cli.Command) ExecArgs {
 	args.ProjectDir = utils.TryResolveFsPath(args.ProjectDir)
 
 	args.ReportsDir = c.String(OptReportsDir)
+
+	args.Module = c.String(OptModule)
+	args.Module = strings.TrimSpace(args.Module)
 
 	args.BuildVariant = c.String(OptBuildVariant)
 	args.BuildVariant = strings.TrimSpace(args.BuildVariant)
