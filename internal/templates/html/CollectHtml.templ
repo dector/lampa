@@ -100,22 +100,53 @@ templ CollectHtml(r *report.StatsReport) {
 }
 
 templ DependenciesSection(r *report.StatsReport) {
+	{{
+		deps := r.Build.Dependencies.Compile
+	}}
 	@components.SectionCard(components.SectionCardArg{
 		Name:        "Dependencies",
 		Icon:        "blocks",
 		IsCollapsed: true,
 	}) {
-		@components.SubSection("Compile-Time", 1) {
-			{{
-				deps := r.Build.Dependencies.Compile
-			}}
-			@components.InfoItem("Total", len(deps))
-			for _, d := range deps {
-				@components.DependencyItem(templates.Dep{
-					Coordinate: fmt.Sprintf("%s:%s", d.Group, d.Name),
-					Version:    d.Version,
-				})
+		<div x-data="{ searchQuery: '', get foundCount() { if (this.searchQuery.length === 0) return 0; let count = 0; document.querySelectorAll('[data-dependency-item]').forEach(el => { if (el.style.display !== 'none') count++; }); return count; } }">
+			@components.SubSection("Compile-Time", 1) {
+				@components.InfoItem("Total", len(deps))
+				// Search bar
+				<div class="flex gap-2">
+					<div class="relative flex-1">
+						<input
+							type="text"
+							x-model="searchQuery"
+							placeholder="Search dependencies..."
+							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+						/>
+					</div>
+					<button
+						x-show="searchQuery.length > 0"
+						x-on:click="searchQuery = ''"
+						class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+					>
+						Reset
+					</button>
+				</div>
+				// Found counter
+				<div x-show="searchQuery.length > 0" class="text-sm text-gray-600">
+					Found: <span x-text="foundCount"></span>
+				</div>
+				// Dependencies list
+				for _, d := range deps {
+					{{
+						coordinate := fmt.Sprintf("%s:%s", d.Group, d.Name)
+						xShowExpr := fmt.Sprintf("searchQuery.length === 0 || '%s %s'.toLowerCase().includes(searchQuery.toLowerCase())", coordinate, d.Version)
+					}}
+					<div x-show={ xShowExpr } data-dependency-item>
+						@components.DependencyItem(templates.Dep{
+							Coordinate: coordinate,
+							Version:    d.Version,
+						})
+					</div>
+				}
 			}
-		}
+		</div>
 	}
 }
