@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/dector/lampa/cmd/cli/collect"
 	"github.com/dector/lampa/cmd/cli/compare"
@@ -35,7 +36,7 @@ func CreateCliCommand() *cli.Command {
 			compare.CreateCliCommand(),
 			generate.CreateCliCommand(),
 			CreateVersionCommand(),
-			// devReportCommand(),
+			devReportCommand(),
 		},
 		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
 			// Set verbosity
@@ -84,6 +85,10 @@ func handleCommandNotFound(ctx context.Context, c *cli.Command, s string) {
 }
 
 func devReportCommand() *cli.Command {
+	if os.Getenv("DEV") != "1" {
+		return &cli.Command{}
+	}
+
 	return &cli.Command{
 		Name: "testhtml",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -91,13 +96,16 @@ func devReportCommand() *cli.Command {
 			http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "text/html")
 
-				r1 := lo.Must(compare.ReadReportFromFile("out/libretube-prev.lampa.json"))
+				// r1 := lo.Must(compare.ReadReportFromFile("out/libretube-prev.lampa.json"))
 				// d := lo.Must(collect.GenerateHtmlReport(r1))
 
-				r2 := lo.Must(compare.ReadReportFromFile("out/libretube-next.lampa.json"))
+				// r2 := lo.Must(compare.ReadReportFromFile("out/libretube-next.lampa.json"))
 				// d := lo.Must(collect.GenerateHtmlReport(r2))
 
-				d := lo.Must(compare.GenerateComparingHtmlReport(r1, r2))
+				// d := lo.Must(compare.GenerateComparingHtmlReport(r1, r2))
+
+				rp := lo.Must(compare.ReadReportFromFile("out/report.lampa.json"))
+				d := lo.Must(collect.GenerateHtmlReport(rp))
 
 				w.Write([]byte(d))
 			})
