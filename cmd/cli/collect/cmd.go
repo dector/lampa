@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dector/lampa/internal/android"
 	"github.com/dector/lampa/internal/out"
 	"github.com/dector/lampa/internal/report"
 	"github.com/dector/lampa/internal/spinner"
 	"github.com/dector/lampa/internal/utils"
+	androidproject "github.com/dector/lampa/pkg/android-project"
 	"github.com/dector/lampa/pkg/gradle"
 
 	"github.com/urfave/cli/v3"
@@ -155,7 +155,7 @@ func StepBuild(args ExecArgs) error {
 }
 
 func StepReport(args ExecArgs) error {
-	pathToAab, err := android.
+	pathToAab, err := androidproject.
 		NewAndroidProject(args.ProjectDir).
 		FindAabFile(args.Module, args.BuildVariant)
 	if err != nil {
