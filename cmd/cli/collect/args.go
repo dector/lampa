@@ -125,17 +125,8 @@ func validateExecArgs(args *ExecArgs) error {
 	}
 
 	// Gradlew
-	gradlewPath := gradle.In(args.ProjectDir).FullPath()
-	info, err = os.Stat(gradlewPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return fmt.Errorf("%s does not exist", gradlewPath)
-		} else {
-			return fmt.Errorf("could not stat %s: %v", gradlewPath, err)
-		}
-	}
-	if info.IsDir() {
-		return fmt.Errorf("%s exists but is a directory, not a file", gradlewPath)
+	if err := gradle.In(args.ProjectDir).EnsureExistsAndIsAFile(); err != nil {
+		return err
 	}
 
 	return nil
