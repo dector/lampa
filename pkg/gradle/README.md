@@ -96,3 +96,11 @@ fmt.Printf("Build successful:\n%s\n", output)
 
 - The target directory must contain a `gradlew` (Gradle Wrapper) executable.
 - The gradlew executable must have execute permissions.
+
+## Contributing
+
+This package is part of the [Lampa](https://github.com/dector/lampa) project. See the main repository for contribution guidelines.
+
+## License
+
+MIT License - see the main Lampa project for details.
