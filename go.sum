@@ -27,6 +27,8 @@ github.com/cyphar/filepath-securejoin v0.6.1/go.mod h1:A8hd4EnAeyujCJRrICiOWqjS1
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/dector/gx v0.0.0-20260118143204-7cf08dabf0af h1:LtwoRHslgYsb4momL6tCHd9sVJdjT2/P7qLDbaJQ1o8=
+github.com/dector/gx v0.0.0-20260118143204-7cf08dabf0af/go.mod h1:gPI/D38vt3d5hbiBb2at7ESza5DCYSySJl9hPBKo0aY=
 github.com/dector/kdly v0.0.0-20251203214240-ff92ab5349fe h1:mD2e6h96qWaZ0r8rrPraDCU9J1yLM+YcDP+Ei08Nb/4=
 github.com/dector/kdly v0.0.0-20251203214240-ff92ab5349fe/go.mod h1:jwmJB4v16YixEIGM/dKIiVc4AEG3uygIdXUr4tg9bqo=
 github.com/emirpasic/gods v1.18.1 h1:FXtiHYKDGKCW2KzwZKx0iC0PQmdlorYgdFG9jPXJ1Bc=

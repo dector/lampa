@@ -1,4 +1,4 @@
-package internal
+package gradledeps
 
 import (
 	"testing"

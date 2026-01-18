@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dector/lampa/internal"
 	"github.com/dector/lampa/internal/out"
 	"github.com/dector/lampa/pkg/bundles"
 	"github.com/dector/lampa/pkg/gradle"
+	"github.com/dector/lampa/pkg/gradle-deps"
 
 	gogit "github.com/go-git/go-git/v6"
 	"github.com/go-git/go-git/v6/plumbing"
@@ -63,7 +63,7 @@ func ParseFrom(args ParseFromArgs) (StatsReport, error) {
 
 	// fmt.Println(string(output))
 
-	tree, err := internal.ParseTreeFromOutput(string(output), configurationName)
+	tree, err := gradledeps.ParseTreeFromOutput(string(output), configurationName)
 	if err != nil {
 		return StatsReport{}, fmt.Errorf("failed to parse tree: %v", err)
 	}
