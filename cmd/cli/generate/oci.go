@@ -10,6 +10,7 @@ import (
 	"github.com/dector/kdly"
 	"github.com/dector/lampa/internal/templates/containerfile"
 	"github.com/dector/lampa/internal/utils"
+	"github.com/dector/lampa/pkg/androidenv"
 	"github.com/dector/lampa/pkg/gradle"
 	"github.com/urfave/cli/v3"
 )
@@ -141,7 +142,7 @@ func parseGradleVersion(projectDir string) (string, error) {
 		return "", nil
 	}
 
-	props, err := utils.ParsePropertiesFile(wrapperPropsPath)
+	props, err := androidenv.ParsePropertiesFile(wrapperPropsPath)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse gradle-wrapper.properties: %v", err)
 	}
@@ -151,7 +152,7 @@ func parseGradleVersion(projectDir string) (string, error) {
 		return "", nil
 	}
 
-	gradleVersion, err := utils.ExtractGradleVersion(distributionUrl)
+	gradleVersion, err := androidenv.ExtractGradleVersion(distributionUrl)
 	if err != nil {
 		return "", fmt.Errorf("failed to extract Gradle version: %v", err)
 	}
@@ -163,7 +164,7 @@ func parseJavaVersion(projectDir string) (string, error) {
 	fmt.Println("Looking for Java version...")
 
 	// Try .tool-versions first
-	version, err := utils.ParseJavaVersionFromToolVersions(projectDir)
+	version, err := androidenv.ParseJavaVersionFromToolVersions(projectDir)
 	if err != nil {
 		return "", err
 	}
@@ -172,7 +173,7 @@ func parseJavaVersion(projectDir string) (string, error) {
 	}
 
 	// Try .java-version
-	version, err = utils.ParseJavaVersionFromJavaVersion(projectDir)
+	version, err = androidenv.ParseJavaVersionFromJavaVersion(projectDir)
 	if err != nil {
 		return "", err
 	}

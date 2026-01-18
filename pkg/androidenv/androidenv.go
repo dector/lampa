@@ -1,4 +1,11 @@
-package utils
+// Package androidenv provides utilities for working with Android/Gradle build environments.
+//
+// This package includes functions for:
+//   - Parsing Java properties files
+//   - Extracting Gradle versions from distribution URLs
+//   - Parsing Java version strings from various sources
+//   - Reading version manager configuration files (.tool-versions, .java-version)
+package androidenv
 
 import (
 	"fmt"
@@ -91,7 +98,7 @@ func ExtractJavaMajorVersion(versionStr string) (string, error) {
 // Returns error for "java@latest"
 func ParseJavaVersionFromToolVersions(projectDir string) (string, error) {
 	toolVersionsPath := filepath.Join(projectDir, ".tool-versions")
-	if !FileExists(toolVersionsPath) {
+	if !fileExists(toolVersionsPath) {
 		return "", nil
 	}
 
@@ -144,14 +151,41 @@ func ParseJavaVersionFromToolVersions(projectDir string) (string, error) {
 // - "temurin64-17.0.10" (jenv style)
 func ParseJavaVersionFromJavaVersion(projectDir string) (string, error) {
 	javaVersionPath := filepath.Join(projectDir, ".java-version")
-	if !FileExists(javaVersionPath) {
+	if !fileExists(javaVersionPath) {
 		return "", nil
 	}
 
-	versionStr, err := ReadFirstLine(javaVersionPath)
+	versionStr, err := readFirstLine(javaVersionPath)
 	if err != nil {
 		return "", nil
 	}
 
 	return ExtractJavaMajorVersion(versionStr)
+}
+
+// fileExists checks if a file exists at the given path.
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+// readFirstLine reads the first non-empty line from a file.
+func readFirstLine(path string) (string, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	lines := strings.Split(string(content), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line != "" && !strings.HasPrefix(line, "#") {
+			return line, nil
+		}
+	}
+
+	return "", fmt.Errorf("no non-empty lines found in file")
 }
