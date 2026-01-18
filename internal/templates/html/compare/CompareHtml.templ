@@ -112,7 +112,7 @@ templ DependenciesSection(r *report.DiffReport) {
 			// @InfoItem("Total", len(depsNew))
 			for _, d := range depsNew {
 				@components.DependencyItemExt2(components.MvnDependencyVM{
-					MvnDependencyDiff: d.ToDiff(),
+					MvnDependencyDiff: d.ToDiff(""),
 					Kind:              components.DiffKindAdded,
 				})
 			}
@@ -121,7 +121,7 @@ templ DependenciesSection(r *report.DiffReport) {
 			// @InfoItem("Total", len(depsRemoved))
 			for _, d := range depsRemoved {
 				@components.DependencyItemExt2(components.MvnDependencyVM{
-					MvnDependencyDiff: d.ToDiff(),
+					MvnDependencyDiff: d.ToDiff(""),
 					Kind:              components.DiffKindRemoved,
 				})
 			}
@@ -130,7 +130,7 @@ templ DependenciesSection(r *report.DiffReport) {
 			// @InfoItem("Total", len(depsUpgraded))
 			for _, d := range depsUpgraded {
 				@components.DependencyItemExt2(components.MvnDependencyVM{
-					MvnDependencyDiff: d.ToDiff(),
+					MvnDependencyDiff: d,
 					Kind:              components.DiffKindUpgraded,
 				})
 			}
@@ -139,7 +139,7 @@ templ DependenciesSection(r *report.DiffReport) {
 			// @InfoItem("Total", len(depsDowngraded))
 			for _, d := range depsDowngraded {
 				@components.DependencyItemExt2(components.MvnDependencyVM{
-					MvnDependencyDiff: d.ToDiff(),
+					MvnDependencyDiff: d,
 					Kind:              components.DiffKindDowngraded,
 				})
 			}
@@ -148,7 +148,7 @@ templ DependenciesSection(r *report.DiffReport) {
 			// @InfoItem("Total", len(depsChanged))
 			for _, d := range depsChanged {
 				@components.DependencyItemExt2(components.MvnDependencyVM{
-					MvnDependencyDiff: d.ToDiff(),
+					MvnDependencyDiff: d,
 					Kind:              components.DiffKindChanged,
 				})
 			}
@@ -157,7 +157,7 @@ templ DependenciesSection(r *report.DiffReport) {
 			// @InfoItem("Total", len(depsUnchanged))
 			for _, d := range depsUnchanged {
 				@components.DependencyItemExt2(components.MvnDependencyVM{
-					MvnDependencyDiff: d.ToDiff(),
+					MvnDependencyDiff: d.ToDiff(""),
 					Kind:              components.DiffKindUnchanged,
 				})
 			}

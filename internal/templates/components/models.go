@@ -1,6 +1,11 @@
 package components
 
-import "github.com/dector/lampa/internal/report"
+import (
+	mavendeps "github.com/dector/lampa/pkg/maven-deps"
+)
+
+// Alias for backward compatibility with templates
+type MvnDependencyDiff = mavendeps.MvnDependencyDiff
 
 type DependencyDiffKind int
 
@@ -15,7 +20,7 @@ const (
 )
 
 type MvnDependencyVM struct {
-	report.MvnDependencyDiff
+	MvnDependencyDiff
 
 	Kind DependencyDiffKind
 }

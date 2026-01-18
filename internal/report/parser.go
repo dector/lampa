@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/dector/lampa/internal/out"
+	mavends "github.com/dector/lampa/pkg/maven-deps"
 	"github.com/dector/lampa/pkg/bundles"
 	"github.com/dector/lampa/pkg/gradle"
 	"github.com/dector/lampa/pkg/gradle-deps"
@@ -69,14 +70,14 @@ func ParseFrom(args ParseFromArgs) (StatsReport, error) {
 	}
 
 	for _, info := range tree.Summary {
-		d := MvnDependency{
+		d := mavends.MvnDependency{
 			Group:   info.GroupID,
 			Name:    info.ArtifactID,
 			Version: info.Version,
 		}
 		result.Build.Dependencies.Compile = append(result.Build.Dependencies.Compile, d)
 	}
-	slices.SortFunc(result.Build.Dependencies.Compile, func(a, b MvnDependency) int {
+	slices.SortFunc(result.Build.Dependencies.Compile, func(a, b mavends.MvnDependency) int {
 		if a.Group > b.Group {
 			return 1
 		} else if a.Group < b.Group {
