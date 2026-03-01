@@ -4,7 +4,7 @@ go 1.25.5
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
-	github.com/a-h/templ v0.3.977
+	github.com/a-h/templ v0.3.1001
 	github.com/briandowns/spinner v1.23.2
 	github.com/dector/gx v0.0.0-20260118143204-7cf08dabf0af
 	github.com/dector/kdly v0.0.0-20251203214240-ff92ab5349fe
