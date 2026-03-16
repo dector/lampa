@@ -11,7 +11,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/go-git/go-git/v6 v6.0.0-20251231065035-29ae690a9f19
 	github.com/magiconair/properties v1.8.10
-	github.com/samber/lo v1.52.0
+	github.com/samber/lo v1.53.0
 	github.com/square/exit v1.3.0
 	github.com/tiendc/go-deepcopy v1.7.2
 	github.com/urfave/cli/v3 v3.6.1
