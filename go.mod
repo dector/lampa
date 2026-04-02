@@ -9,7 +9,7 @@ require (
 	github.com/dector/gx v0.0.0-20260118143204-7cf08dabf0af
 	github.com/dector/kdly v0.0.0-20251203214240-ff92ab5349fe
 	github.com/fatih/color v1.18.0
-	github.com/go-git/go-git/v6 v6.0.0-20251231065035-29ae690a9f19
+	github.com/go-git/go-git/v6 v6.0.0-alpha.1
 	github.com/magiconair/properties v1.8.10
 	github.com/samber/lo v1.52.0
 	github.com/square/exit v1.3.0
