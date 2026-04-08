@@ -35,6 +35,8 @@ github.com/dector/gx v0.0.0-20260118143204-7cf08dabf0af h1:LtwoRHslgYsb4momL6tCH
 github.com/dector/gx v0.0.0-20260118143204-7cf08dabf0af/go.mod h1:gPI/D38vt3d5hbiBb2at7ESza5DCYSySJl9hPBKo0aY=
 github.com/dector/kdly v0.0.0-20251203214240-ff92ab5349fe h1:mD2e6h96qWaZ0r8rrPraDCU9J1yLM+YcDP+Ei08Nb/4=
 github.com/dector/kdly v0.0.0-20251203214240-ff92ab5349fe/go.mod h1:jwmJB4v16YixEIGM/dKIiVc4AEG3uygIdXUr4tg9bqo=
+github.com/dector/kdly v0.0.0-20260216085240-bad894b0852c h1:Io2vrid5baiNChM4S8CKvbdGTU62+XOIETvARDSPJvw=
+github.com/dector/kdly v0.0.0-20260216085240-bad894b0852c/go.mod h1:jwmJB4v16YixEIGM/dKIiVc4AEG3uygIdXUr4tg9bqo=
 github.com/emirpasic/gods v1.18.1 h1:FXtiHYKDGKCW2KzwZKx0iC0PQmdlorYgdFG9jPXJ1Bc=
 github.com/emirpasic/gods v1.18.1/go.mod h1:8tpGGwCnJ5H4r6BWwaV6OrWmMoPhUl5jm/FMNAnJvWQ=
 github.com/fatih/color v1.18.0 h1:S8gINlzdQ840/4pfAwic/ZE0djQEH3wM94VfqLTZcOM=
