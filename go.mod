@@ -4,18 +4,18 @@ go 1.25.5
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
-	github.com/a-h/templ v0.3.977
+	github.com/a-h/templ v0.3.1001
 	github.com/briandowns/spinner v1.23.2
 	github.com/dector/gx v0.0.0-20260118143204-7cf08dabf0af
 	github.com/dector/kdly v0.0.0-20260216085240-bad894b0852c
-	github.com/fatih/color v1.18.0
+	github.com/fatih/color v1.19.0
 	github.com/go-git/go-git/v6 v6.0.0-alpha.1
 	github.com/magiconair/properties v1.8.10
-	github.com/samber/lo v1.52.0
+	github.com/samber/lo v1.53.0
 	github.com/square/exit v1.3.0
 	github.com/tiendc/go-deepcopy v1.7.2
-	github.com/urfave/cli/v3 v3.6.1
-	golang.org/x/text v0.34.0
+	github.com/urfave/cli/v3 v3.8.0
+	golang.org/x/text v0.35.0
 	google.golang.org/protobuf v1.36.11
 )
 
@@ -31,22 +31,22 @@ require (
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-git/gcfg/v2 v2.0.2 // indirect
-	github.com/go-git/go-billy/v6 v6.0.0-20260226131633-45bd0956d66f // indirect
+	github.com/go-git/go-billy/v6 v6.0.0-20260407203733-14bb35b7934c // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/kevinburke/ssh_config v1.6.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
+	github.com/mattn/go-isatty v0.0.21 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
 	github.com/pjbgf/sha1cd v0.5.0 // indirect
 	github.com/sergi/go-diff v1.4.0 // indirect
-	golang.org/x/crypto v0.48.0 // indirect
-	golang.org/x/mod v0.32.0 // indirect
-	golang.org/x/net v0.51.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
-	golang.org/x/term v0.40.0 // indirect
-	golang.org/x/tools v0.41.0 // indirect
+	golang.org/x/crypto v0.49.0 // indirect
+	golang.org/x/mod v0.33.0 // indirect
+	golang.org/x/net v0.52.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/term v0.41.0 // indirect
+	golang.org/x/tools v0.42.0 // indirect
 )
 
 tool github.com/a-h/templ/cmd/templ
