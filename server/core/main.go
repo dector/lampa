@@ -6,18 +6,12 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
+	cfg := DefaultServerConfig()
 
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		_, _ = fmt.Fprint(w, "pong")
-	})
+	http.HandleFunc(cfg.RoutePath, NewRequestEchoHandler(cfg))
 
-	fmt.Println("Server listening on :8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	fmt.Printf("Server listening on %s\n", cfg.ListenAddress)
+	if err := http.ListenAndServe(cfg.ListenAddress, nil); err != nil {
 		panic(err)
 	}
 }
