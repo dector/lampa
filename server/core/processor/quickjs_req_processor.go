@@ -11,13 +11,7 @@ import (
 )
 
 const defaultQuickJSProgram = `function handle(req) {
-  return {
-    statusCode: 200,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: "{\"status\":\"ok\"}",
-  };
+  return Response.json({ status: "ok" });
 }`
 
 // QuickJSReqProcessor processes a request with a QuickJS script.
