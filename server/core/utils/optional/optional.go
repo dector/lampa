@@ -1,4 +1,4 @@
-package main
+package optional
 
 // Optional is a container object which may or may not contain a non-zero value.
 type Optional[T any] struct {

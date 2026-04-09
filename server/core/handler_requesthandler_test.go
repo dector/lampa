@@ -20,7 +20,7 @@ func TestNewRequestHandler_Returns200ByDefault(t *testing.T) {
 	}
 }
 
-func TestNewRequestHandler_DefaultsContentTypeTextPlain(t *testing.T) {
+func TestNewRequestHandler_UsesStarlarkDefaultJSONResponse(t *testing.T) {
 	cfg := DefaultServerConfig()
 	h := NewRequestHandler(cfg)
 
@@ -29,8 +29,11 @@ func TestNewRequestHandler_DefaultsContentTypeTextPlain(t *testing.T) {
 
 	h.ServeHTTP(rr, req)
 
-	if got := rr.Header().Get("Content-Type"); got != "text/plain" {
-		t.Fatalf("unexpected content type: got %q, want %q", got, "text/plain")
+	if got := rr.Header().Get("Content-Type"); got != "application/json" {
+		t.Fatalf("unexpected content type: got %q, want %q", got, "application/json")
+	}
+	if got := rr.Body.String(); got != "{\"status\":\"ok\"}" {
+		t.Fatalf("unexpected body: got %q, want %q", got, "{\"status\":\"ok\"}")
 	}
 }
 

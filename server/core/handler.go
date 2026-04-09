@@ -5,11 +5,12 @@ import (
 	"strconv"
 
 	corehttp "github.com/dector/lampa/server/core/http"
+	"github.com/dector/lampa/server/core/processor"
 )
 
 // NewRequestHandler returns HTTP handler that reads request and returns processed response.
 func NewRequestHandler(cfg ServerConfig) http.HandlerFunc {
-	reqProcessor := NewDefaultReqProcessor()
+	reqProcessor := processor.NewDefaultReqProcessor()
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		request := corehttp.NewHttpRequest(r)
