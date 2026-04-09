@@ -9,18 +9,16 @@ import (
 
 // NewRequestHandler returns HTTP handler that reads request and returns processed response.
 func NewRequestHandler(cfg ServerConfig) http.HandlerFunc {
+	reqProcessor := NewDefaultReqProcessor()
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		request := corehttp.NewHttpRequest(r)
-		response := ProcessRequest(request)
+		response := reqProcessor.Process(request).OrElse(corehttp.HttpResponse{
+			StatusCode: http.StatusNotFound,
+			Headers:    make(http.Header),
+			Body:       nil,
+		})
 		ToNetHTTP(w, response)
-	}
-}
-
-func ProcessRequest(_ corehttp.HttpRequest) corehttp.HttpResponse {
-	return corehttp.HttpResponse{
-		StatusCode: http.StatusOK,
-		Headers:    make(http.Header),
-		Body:       nil,
 	}
 }
 
