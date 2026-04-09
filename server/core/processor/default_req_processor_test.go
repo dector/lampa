@@ -8,24 +8,21 @@ import (
 	"github.com/dector/lampa/server/core/utils/optional"
 )
 
-func TestNewDefaultReqProcessor_IncludesQuickJSAndFallback(t *testing.T) {
+func TestNewDefaultReqProcessor_IncludesQuickJSAndEmptyFallback(t *testing.T) {
 	p := NewDefaultReqProcessor()
 	chain, ok := p.(DefaultReqProcessor)
 	if !ok {
 		t.Fatalf("unexpected processor type: %T", p)
 	}
 
-	if len(chain.processors) != 3 {
-		t.Fatalf("unexpected processor count: got %d, want 3", len(chain.processors))
+	if len(chain.processors) != 2 {
+		t.Fatalf("unexpected processor count: got %d, want 2", len(chain.processors))
 	}
 	if _, ok := chain.processors[0].(QuickJSReqProcessor); !ok {
 		t.Fatalf("processor[0] should be QuickJSReqProcessor, got %T", chain.processors[0])
 	}
-	if _, ok := chain.processors[1].(StarlarkReqProcessor); !ok {
-		t.Fatalf("processor[1] should be StarlarkReqProcessor, got %T", chain.processors[1])
-	}
-	if _, ok := chain.processors[2].(EmptyReqProcessor); !ok {
-		t.Fatalf("processor[2] should be EmptyReqProcessor, got %T", chain.processors[2])
+	if _, ok := chain.processors[1].(EmptyReqProcessor); !ok {
+		t.Fatalf("processor[1] should be EmptyReqProcessor, got %T", chain.processors[1])
 	}
 }
 

@@ -20,7 +20,7 @@ func TestNewRequestHandler_Returns200ByDefault(t *testing.T) {
 	}
 }
 
-func TestNewRequestHandler_UsesStarlarkDefaultJSONResponse(t *testing.T) {
+func TestNewRequestHandler_UsesDefaultJSONResponse(t *testing.T) {
 	cfg := DefaultServerConfig()
 	h := NewRequestHandler(cfg)
 

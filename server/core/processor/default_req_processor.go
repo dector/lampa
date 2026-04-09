@@ -15,7 +15,6 @@ func NewDefaultReqProcessor() ReqProcessor {
 	return DefaultReqProcessor{
 		processors: []ReqProcessor{
 			QuickJSReqProcessor{Script: defaultQuickJSProgram},
-			StarlarkReqProcessor{Script: defaultStarlarkProgram},
 			EmptyReqProcessor{},
 		},
 	}
