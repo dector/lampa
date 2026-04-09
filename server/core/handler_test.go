@@ -6,22 +6,26 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
+type requestEcho struct {
+	Method        string              `json:"method"`
+	URL           string              `json:"url"`
+	Path          string              `json:"path"`
+	RawQuery      string              `json:"raw_query"`
+	Query         map[string][]string `json:"query"`
+	Protocol      string              `json:"protocol"`
+	Host          string              `json:"host"`
+	RemoteAddr    string              `json:"remote_addr"`
+	Headers       map[string][]string `json:"headers"`
+	ContentLength int64               `json:"content_length"`
+	Body          string              `json:"body"`
+}
+
 type echoResponse struct {
-	Request struct {
-		Method        string              `json:"method"`
-		URL           string              `json:"url"`
-		Path          string              `json:"path"`
-		RawQuery      string              `json:"raw_query"`
-		Query         map[string][]string `json:"query"`
-		Protocol      string              `json:"protocol"`
-		Host          string              `json:"host"`
-		RemoteAddr    string              `json:"remote_addr"`
-		Headers       map[string][]string `json:"headers"`
-		ContentLength int64               `json:"content_length"`
-		Body          string              `json:"body"`
-	} `json:"request"`
+	Request requestEcho `json:"request"`
 }
 
 func TestNewRequestEchoHandler_EchoesRequestData(t *testing.T) {
@@ -47,41 +51,27 @@ func TestNewRequestEchoHandler_EchoesRequestData(t *testing.T) {
 		t.Fatalf("decode response JSON: %v", err)
 	}
 
-	if got.Request.Method != http.MethodPost {
-		t.Fatalf("method = %q, want %q", got.Request.Method, http.MethodPost)
+	want := requestEcho{
+		Method:   http.MethodPost,
+		URL:      "http://dector.space/api/echo?tag=go&tag=test",
+		Path:     "/api/echo",
+		RawQuery: "tag=go&tag=test",
+		Query: map[string][]string{
+			"tag": {"go", "test"},
+		},
+		Protocol:   "HTTP/1.1",
+		Host:       "dector.space",
+		RemoteAddr: "203.0.113.10:54321",
+		Headers: map[string][]string{
+			"Content-Type": {"application/json"},
+			"X-Trace-Id":   {"abc123", "def456"},
+		},
+		ContentLength: int64(len(reqBody)),
+		Body:          reqBody,
 	}
-	if got.Request.URL != "/api/echo?tag=go&tag=test" {
-		t.Fatalf("url = %q", got.Request.URL)
-	}
-	if got.Request.Path != "/api/echo" {
-		t.Fatalf("path = %q", got.Request.Path)
-	}
-	if got.Request.RawQuery != "tag=go&tag=test" {
-		t.Fatalf("raw_query = %q", got.Request.RawQuery)
-	}
-	if len(got.Request.Query["tag"]) != 2 || got.Request.Query["tag"][0] != "go" || got.Request.Query["tag"][1] != "test" {
-		t.Fatalf("query[tag] = %#v, want [go test]", got.Request.Query["tag"])
-	}
-	if got.Request.Protocol != "HTTP/1.1" {
-		t.Fatalf("protocol = %q, want HTTP/1.1", got.Request.Protocol)
-	}
-	if got.Request.Host != "dector.space" {
-		t.Fatalf("host = %q, want dector.space", got.Request.Host)
-	}
-	if got.Request.RemoteAddr != "203.0.113.10:54321" {
-		t.Fatalf("remote_addr = %q", got.Request.RemoteAddr)
-	}
-	if got.Request.Headers["Content-Type"][0] != "application/json" {
-		t.Fatalf("headers[Content-Type] = %#v", got.Request.Headers["Content-Type"])
-	}
-	if len(got.Request.Headers["X-Trace-Id"]) != 2 || got.Request.Headers["X-Trace-Id"][0] != "abc123" || got.Request.Headers["X-Trace-Id"][1] != "def456" {
-		t.Fatalf("headers[X-Trace-Id] = %#v", got.Request.Headers["X-Trace-Id"])
-	}
-	if got.Request.ContentLength != int64(len(reqBody)) {
-		t.Fatalf("content_length = %d, want %d", got.Request.ContentLength, len(reqBody))
-	}
-	if got.Request.Body != reqBody {
-		t.Fatalf("body = %q, want %q", got.Request.Body, reqBody)
+
+	if diff := cmp.Diff(want, got.Request); diff != "" {
+		t.Fatalf("request mismatch (-want +got):\n%s", diff)
 	}
 }
 
