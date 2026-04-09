@@ -1,39 +1,45 @@
 package http
 
-import nethttp "net/http"
+import (
+	"bytes"
+	"io"
+	nethttp "net/http"
+	"net/url"
+)
 
 // HttpRequest contains the most common and important request metadata.
 type HttpRequest struct {
-	Method        string              `json:"method"`
-	Scheme        string              `json:"scheme"`
-	Host          string              `json:"host"`
-	Path          string              `json:"path"`
-	RawQuery      string              `json:"rawQuery"`
-	Query         map[string][]string `json:"query"`
-	Headers       map[string]string   `json:"headers"`
-	RemoteAddr    string              `json:"remoteAddr"`
-	UserAgent     string              `json:"userAgent"`
-	Referer       string              `json:"referer"`
-	ContentType   string              `json:"contentType"`
-	ContentLength int64               `json:"contentLength"`
-	Protocol      string              `json:"protocol"`
+	Method  string         `json:"method"`
+	Url     url.URL        `json:"url"`
+	Headers nethttp.Header `json:"headers"`
+	Body    []byte         `json:"body"`
+}
+
+func (r HttpRequest) ContentType() string {
+	return r.Headers.Get("Content-Type")
+}
+
+func (r *HttpRequest) SetContentType(value string) {
+	if r.Headers == nil {
+		r.Headers = make(nethttp.Header)
+	}
+	r.Headers.Set("Content-Type", value)
 }
 
 // NewHttpRequest builds a concise request description from http.Request.
 func NewHttpRequest(r *nethttp.Request) HttpRequest {
+	var requestURL url.URL
+	if r.URL != nil {
+		requestURL = *r.URL
+	}
+
+	body, _ := io.ReadAll(r.Body)
+	r.Body = io.NopCloser(bytes.NewReader(body))
+
 	return HttpRequest{
-		Method:        r.Method,
-		Scheme:        requestScheme(r),
-		Host:          r.Host,
-		Path:          r.URL.Path,
-		RawQuery:      r.URL.RawQuery,
-		Query:         r.URL.Query(),
-		Headers:       firstHeaderValues(r.Header),
-		RemoteAddr:    r.RemoteAddr,
-		UserAgent:     r.UserAgent(),
-		Referer:       r.Referer(),
-		ContentType:   r.Header.Get("Content-Type"),
-		ContentLength: r.ContentLength,
-		Protocol:      r.Proto,
+		Method:  r.Method,
+		Url:     requestURL,
+		Headers: r.Header.Clone(),
+		Body:    body,
 	}
 }

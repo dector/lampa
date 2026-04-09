@@ -1,59 +1,113 @@
 package http
 
 import (
+	"io"
 	nethttp "net/http"
-	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
-func TestNewHttpRequest(t *testing.T) {
-	r := httptest.NewRequest(nethttp.MethodPost, "https://dector.space/api/v1/items?tag=go&tag=http&sort=desc", nil)
-	r.RemoteAddr = "203.0.113.10:54321"
-	r.Header.Set("User-Agent", "lampa-test/1.0")
-	r.Header.Set("Referer", "https://blog.dector.space/page")
-	r.Header.Set("Content-Type", "application/json")
-	r.Header["X-Multi"] = []string{"first", "second"}
-	r.ContentLength = 123
+func TestHttpRequest_ContentType(t *testing.T) {
+	r := HttpRequest{
+		Headers: nethttp.Header{"Content-Type": {"application/json"}},
+	}
+
+	if diff := cmp.Diff("application/json", r.ContentType()); diff != "" {
+		t.Fatalf("ContentType() mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestHttpRequest_SetContentType_InitializesHeaders(t *testing.T) {
+	var r HttpRequest
+
+	r.SetContentType("text/plain")
+
+	if r.Headers == nil {
+		t.Fatal("Headers is nil, expected initialized header map")
+	}
+	if diff := cmp.Diff("text/plain", r.ContentType()); diff != "" {
+		t.Fatalf("ContentType() mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestNewHttpRequest_CopiesMethodURLHeadersBody(t *testing.T) {
+	body := "hello world"
+	r := &nethttp.Request{
+		Method: "POST",
+		URL: &url.URL{
+			Path:     "/api/items",
+			RawQuery: "a=1&b=2",
+		},
+		Header: nethttp.Header{"X-Test": {"v1", "v2"}},
+		Body:   io.NopCloser(strings.NewReader(body)),
+	}
 
 	got := NewHttpRequest(r)
 
-	if got.Method != nethttp.MethodPost {
-		t.Fatalf("Method = %q, want %q", got.Method, nethttp.MethodPost)
+	want := HttpRequest{
+		Method: "POST",
+		Url: url.URL{
+			Path:     "/api/items",
+			RawQuery: "a=1&b=2",
+		},
+		Headers: nethttp.Header{"X-Test": {"v1", "v2"}},
+		Body:    []byte(body),
 	}
-	if got.Scheme != "https" {
-		t.Fatalf("Scheme = %q, want https", got.Scheme)
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Fatalf("NewHttpRequest() mismatch (-want +got):\n%s", diff)
 	}
-	if got.Host != "dector.space" {
-		t.Fatalf("Host = %q, want dector.space", got.Host)
+
+	if got.Headers == nil {
+		t.Fatal("Headers is nil, want copied headers")
 	}
-	if got.Path != "/api/v1/items" {
-		t.Fatalf("Path = %q, want /api/v1/items", got.Path)
+	if diff := cmp.Diff("v1", got.Headers.Get("X-Test")); diff != "" {
+		t.Fatalf("Headers.Get(X-Test) mismatch (-want +got):\n%s", diff)
 	}
-	if got.RawQuery != "tag=go&tag=http&sort=desc" {
-		t.Fatalf("RawQuery = %q", got.RawQuery)
+	if &got.Headers == &r.Header {
+		t.Fatal("Headers should be a clone, but references are identical")
 	}
-	if len(got.Query["tag"]) != 2 || got.Query["tag"][0] != "go" || got.Query["tag"][1] != "http" {
-		t.Fatalf("Query[tag] = %#v, want [go http]", got.Query["tag"])
+
+	got.Headers.Set("X-Test", "changed")
+	if r.Header.Get("X-Test") == "changed" {
+		t.Fatal("mutating copied headers should not mutate original request headers")
 	}
-	if got.Headers["X-Multi"] != "first" {
-		t.Fatalf("Headers[X-Multi] = %q, want first", got.Headers["X-Multi"])
+}
+
+func TestNewHttpRequest_RestoresOriginalRequestBody(t *testing.T) {
+	body := "payload"
+	r := &nethttp.Request{
+		Method: "PUT",
+		URL:    &url.URL{Path: "/upload"},
+		Body:   io.NopCloser(strings.NewReader(body)),
+		Header: make(nethttp.Header),
 	}
-	if got.RemoteAddr != "203.0.113.10:54321" {
-		t.Fatalf("RemoteAddr = %q", got.RemoteAddr)
+
+	_ = NewHttpRequest(r)
+
+	restored, err := io.ReadAll(r.Body)
+	if err != nil {
+		t.Fatalf("reading restored request body failed: %v", err)
 	}
-	if got.UserAgent != "lampa-test/1.0" {
-		t.Fatalf("UserAgent = %q", got.UserAgent)
+	if diff := cmp.Diff([]byte(body), restored); diff != "" {
+		t.Fatalf("restored body mismatch (-want +got):\n%s", diff)
 	}
-	if got.Referer != "https://blog.dector.space/page" {
-		t.Fatalf("Referer = %q", got.Referer)
+}
+
+func TestNewHttpRequest_WithNilURL(t *testing.T) {
+	r := &nethttp.Request{
+		Method: "GET",
+		URL:    nil,
+		Header: make(nethttp.Header),
+		Body:   io.NopCloser(strings.NewReader("")),
 	}
-	if got.ContentType != "application/json" {
-		t.Fatalf("ContentType = %q", got.ContentType)
-	}
-	if got.ContentLength != 123 {
-		t.Fatalf("ContentLength = %d, want 123", got.ContentLength)
-	}
-	if got.Protocol != "HTTP/1.1" {
-		t.Fatalf("Protocol = %q, want HTTP/1.1", got.Protocol)
+
+	got := NewHttpRequest(r)
+
+	if diff := cmp.Diff(url.URL{}, got.Url); diff != "" {
+		t.Fatalf("Url mismatch (-want +got):\n%s", diff)
 	}
 }

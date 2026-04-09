@@ -1,36 +1,54 @@
 package main
 
 import (
-	"encoding/json"
-	"io"
 	"net/http"
+	"strconv"
+
+	corehttp "github.com/dector/lampa/server/core/http"
 )
 
-// NewRequestEchoHandler returns HTTP handler that echoes incoming request data as JSON.
-func NewRequestEchoHandler(cfg ServerConfig) http.HandlerFunc {
+// NewRequestHandler returns HTTP handler that reads request and returns processed response.
+func NewRequestHandler(cfg ServerConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body, _ := io.ReadAll(r.Body)
-		_ = r.Body.Close()
+		request := corehttp.NewHttpRequest(r)
+		response := ProcessRequest(request)
+		ToNetHTTP(w, response)
+	}
+}
 
-		response := map[string]any{
-			"request": map[string]any{
-				"method":         r.Method,
-				"url":            r.URL.String(),
-				"path":           r.URL.Path,
-				"raw_query":      r.URL.RawQuery,
-				"query":          r.URL.Query(),
-				"protocol":       r.Proto,
-				"host":           r.Host,
-				"remote_addr":    r.RemoteAddr,
-				"headers":        r.Header,
-				"content_length": r.ContentLength,
-				"body":           string(body),
-			},
-		}
+func ProcessRequest(_ corehttp.HttpRequest) corehttp.HttpResponse {
+	return corehttp.HttpResponse{
+		StatusCode: http.StatusOK,
+		Headers:    make(http.Header),
+		Body:       nil,
+	}
+}
 
-		w.Header().Set("Content-Type", cfg.ResponseContentType)
-		if err := json.NewEncoder(w).Encode(response); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+func ToNetHTTP(w http.ResponseWriter, response corehttp.HttpResponse) {
+	for name, values := range response.Headers {
+		for _, value := range values {
+			w.Header().Add(name, value)
 		}
+	}
+
+	contentType := response.ContentType()
+	if contentType == "" {
+		contentType = "text/plain"
+	}
+	if contentType != "" {
+		w.Header().Set("Content-Type", contentType)
+	}
+
+	contentLength := int64(len(response.Body))
+	w.Header().Set("Content-Length", strconv.FormatInt(contentLength, 10))
+
+	statusCode := response.StatusCode
+	if statusCode == 0 {
+		statusCode = http.StatusOK
+	}
+
+	w.WriteHeader(statusCode)
+	if len(response.Body) > 0 {
+		_, _ = w.Write(response.Body)
 	}
 }
