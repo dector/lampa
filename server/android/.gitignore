@@ -1,0 +1,25 @@
+# Gradle caches
+.gradle/
+
+# Build outputs
+build/
+**/build/
+
+# Local SDK path (machine-specific)
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Signing keys / secrets
+*.jks
+*.keystore
+keystore.properties
+
+# Logs
+*.log

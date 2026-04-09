@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'space.dector.lampa.server'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "space.dector.lampa.server"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+configurations.all {
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+
+    // Keep Kotlin stdlib aligned when transitive deps pull legacy jdk7/jdk8 artifacts.
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+
+    // Relative path from this module (server/android/app) to built AAR (server/core/build/android)
+    implementation files('../../core/build/android/lampa-server.aar')
+}
