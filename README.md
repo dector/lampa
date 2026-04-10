@@ -37,6 +37,7 @@
   - [Generate JSON report for current version](#generate-json-report-for-current-version)
   - [Generate only HTML report for current version](#generate-only-html-report-for-current-version)
   - [Generate comparative HTML report for two releases](#generate-comparative-html-report-for-two-releases)
+  - [Ping local server](#ping-local-server)
   - [GitHub Action](#github-action)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
@@ -137,6 +138,21 @@ lampa compare build/v0.28.0.json build/v0.28.1.json build/diff.html
 ```
 
 [Sample report](https://dector.space/lampa/github/libre-tube/LibreTube/v0.28.0..v0.28.1.html).
+
+### Ping local server
+
+If you are working with local server tooling, you can verify that a running server
+responds on the control port:
+
+```shell
+lampa server ping
+```
+
+To check a custom port explicitly:
+
+```shell
+lampa server ping --port 46899
+```
 
 ### GitHub Action
 
