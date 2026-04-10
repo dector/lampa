@@ -73,10 +73,13 @@ func TestPingControl(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 			defer cancel()
 
-			err := pingControl(ctx, ts.Client(), ts.URL+"/ping")
+			resp, err := pingControl(ctx, ts.Client(), ts.URL+"/ping")
 			if tt.wantErrPart == "" {
 				if err != nil {
 					t.Fatalf("expected no error, got %v", err)
+				}
+				if got, _ := resp["status"].(string); got != "ok" {
+					t.Fatalf("expected status ok in response, got %q", got)
 				}
 				return
 			}

@@ -17,9 +17,6 @@ const (
 	DefaultControlPort = 8081
 )
 
-type pingResponse struct {
-	Status string `json:"status"`
-}
 
 func createPingCommand() *cli.Command {
 	return &cli.Command{
@@ -45,11 +42,18 @@ func CmdActionPing(ctx context.Context, c *cli.Command) error {
 	url := buildPingURL(port)
 	client := &http.Client{Timeout: 5 * time.Second}
 
-	if err := pingControl(ctx, client, url); err != nil {
+	response, err := pingControl(ctx, client, url)
+	if err != nil {
 		return err
 	}
 
-	fmt.Printf("ok: %s\n", url)
+	formatted, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to format ping response JSON: %w", err)
+	}
+
+	fmt.Printf(">> %s\n", url)
+	fmt.Printf("<< %s\n", string(formatted))
 	return nil
 }
 
@@ -64,15 +68,15 @@ func buildPingURL(port int) string {
 	return fmt.Sprintf("http://localhost:%d/ping", port)
 }
 
-func pingControl(ctx context.Context, client *http.Client, url string) error {
+func pingControl(ctx context.Context, client *http.Client, url string) (map[string]any, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return fmt.Errorf("failed to build ping request: %w", err)
+		return nil, fmt.Errorf("failed to build ping request: %w", err)
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to call control server at %s: %w", url, err)
+		return nil, fmt.Errorf("failed to call control server at %s: %w", url, err)
 	}
 	defer resp.Body.Close()
 
@@ -80,18 +84,20 @@ func pingControl(ctx context.Context, client *http.Client, url string) error {
 		payload, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
 		body := strings.TrimSpace(string(payload))
 		if body == "" {
-			return fmt.Errorf("control server returned HTTP %d", resp.StatusCode)
+			return nil, fmt.Errorf("control server returned HTTP %d", resp.StatusCode)
 		}
-		return fmt.Errorf("control server returned HTTP %d: %s", resp.StatusCode, body)
+		return nil, fmt.Errorf("control server returned HTTP %d: %s", resp.StatusCode, body)
 	}
 
-	var data pingResponse
+	var data map[string]any
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return fmt.Errorf("invalid ping JSON response: %w", err)
-	}
-	if data.Status != "ok" {
-		return fmt.Errorf("unexpected ping status: %q", data.Status)
+		return nil, fmt.Errorf("invalid ping JSON response: %w", err)
 	}
 
-	return nil
+	status, _ := data["status"].(string)
+	if status != "ok" {
+		return nil, fmt.Errorf("unexpected ping status: %q", status)
+	}
+
+	return data, nil
 }
