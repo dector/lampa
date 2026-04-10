@@ -33,8 +33,7 @@ func RunWithControl(cfg ServerConfig, listen func(addr string, h http.Handler) e
 
 	go func() {
 		controlMux := coreapp.BuildControlMux(sharedStore, coreapp.ControlMuxOptions{
-			BasePath:            "/",
-			EnableRootPingAlias: true,
+			BasePath: "/",
 		})
 
 		fmt.Printf("Control server listening on %s\n", cfg.ControlListenAddress)

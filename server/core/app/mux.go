@@ -21,9 +21,10 @@ func BuildControlMux(store processor.ReqProcessorStore, opts ControlMuxOptions) 
 	mux.HandleFunc(ComposeControlPath(opts.BasePath, RoutePing), pingHandler)
 	mux.HandleFunc(ComposeControlPath(opts.BasePath, RouteProcCount), NewControlProcCountHandler(store))
 
-	if opts.EnableRootPingAlias {
-		mux.HandleFunc("/", pingHandler)
-	}
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.NotFound(w, r)
+		return
+	})
 
 	return mux
 }

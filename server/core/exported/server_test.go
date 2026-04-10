@@ -36,6 +36,7 @@ func TestServer_StartAsync_ControlPingEndpoint(t *testing.T) {
 	}()
 
 	assertPingResponse(t, "http://"+controlAddr+"/ping")
+	assertStatusAndBodyContains(t, "http://"+controlAddr+"/", http.StatusNotFound, "404 page not found")
 	assertProcCountResponse(t, "http://"+controlAddr+"/api/v0/proc_count")
 }
 
@@ -59,6 +60,7 @@ func TestServer_StartAsync_ControlPingEndpoint_ResolvesAgainstControlRoutePath(t
 	}()
 
 	assertPingResponse(t, "http://"+controlAddr+"/control/ping")
+	assertStatusAndBodyContains(t, "http://"+controlAddr+"/", http.StatusNotFound, "404 page not found")
 	assertProcCountResponse(t, "http://"+controlAddr+"/control/api/v0/proc_count")
 }
 

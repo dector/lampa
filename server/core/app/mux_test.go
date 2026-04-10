@@ -41,21 +41,16 @@ func TestBuildProxyMux_RegistersConfiguredRoute(t *testing.T) {
 	})
 }
 
-func TestBuildControlMux_BasePathRoot_NoAlias(t *testing.T) {
-	mux := BuildControlMux(nil, ControlMuxOptions{BasePath: "/", EnableRootPingAlias: false})
+func TestBuildControlMux_BasePathRoot(t *testing.T) {
+	mux := BuildControlMux(nil, ControlMuxOptions{BasePath: "/"})
 
 	assertPingEndpoint(t, mux, "/ping")
 	assertProcCountEndpoint(t, mux, "/api/v0/proc_count")
 	assertNotFound(t, mux, "/")
 }
 
-func TestBuildControlMux_BasePathRoot_WithAlias(t *testing.T) {
-	mux := BuildControlMux(nil, ControlMuxOptions{BasePath: "/", EnableRootPingAlias: true})
-	assertPingEndpoint(t, mux, "/")
-}
-
-func TestBuildControlMux_BasePathControl_NoAlias(t *testing.T) {
-	mux := BuildControlMux(nil, ControlMuxOptions{BasePath: "/control", EnableRootPingAlias: false})
+func TestBuildControlMux_BasePathControl(t *testing.T) {
+	mux := BuildControlMux(nil, ControlMuxOptions{BasePath: "/control"})
 
 	assertPingEndpoint(t, mux, "/control/ping")
 	assertProcCountEndpoint(t, mux, "/control/api/v0/proc_count")

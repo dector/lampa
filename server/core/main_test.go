@@ -117,7 +117,7 @@ func TestRunWithControl_RegistersPingHandler(t *testing.T) {
 	}
 }
 
-func TestRunWithControl_RegistersRootAliasForPing(t *testing.T) {
+func TestRunWithControl_DoesNotRegisterRootAliasForPing(t *testing.T) {
 	cfg := DefaultServerConfig()
 	cfg.ListenAddress = "localhost:18094"
 	cfg.ControlListenAddress = "localhost:18095"
@@ -127,7 +127,14 @@ func TestRunWithControl_RegistersRootAliasForPing(t *testing.T) {
 	err := RunWithControl(cfg, func(addr string, h http.Handler) error {
 		switch addr {
 		case cfg.ControlListenAddress:
-			assertControlPingEndpoint(t, h, "/")
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			rr := httptest.NewRecorder()
+			h.ServeHTTP(rr, req)
+
+			if rr.Code != http.StatusNotFound {
+				t.Fatalf("unexpected status code: got %d, want %d", rr.Code, http.StatusNotFound)
+			}
+
 			close(controlChecked)
 			return nil
 		case cfg.ListenAddress:

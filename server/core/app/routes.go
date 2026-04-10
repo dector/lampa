@@ -16,8 +16,6 @@ const (
 type ControlMuxOptions struct {
 	// BasePath is control API prefix, e.g. "/" or "/control".
 	BasePath string
-	// EnableRootPingAlias exposes "/" as an alias for ping endpoint.
-	EnableRootPingAlias bool
 }
 
 // ComposeControlPath joins control base path and route using consistent rules.

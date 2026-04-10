@@ -273,8 +273,7 @@ func (s *Server) startLocked() error {
 	}, sharedStore)
 
 	controlMux := app.BuildControlMux(sharedStore, app.ControlMuxOptions{
-		BasePath:            cfg.ControlRoutePath,
-		EnableRootPingAlias: false,
+		BasePath: cfg.ControlRoutePath,
 	})
 
 	s.proxyHTTPServer = &http.Server{
