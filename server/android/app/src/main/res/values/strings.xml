@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Lampa Server Control</string>
+
+    <string name="notification_channel_name">Server control</string>
+    <string name="notification_channel_description">Controls and shows Lampa server state</string>
+    <string name="notification_title">Lampa server</string>
+    <string name="notification_state_running">Server is running</string>
+    <string name="notification_state_stopped">Server is stopped</string>
+    <string name="notification_action_turn_on">Turn ON</string>
+    <string name="notification_action_turn_off">Turn OFF</string>
+    <string name="notification_permission_banner">Notification permission is required for visible server status. Tap to open settings.</string>
 </resources>
