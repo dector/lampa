@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"path"
 	"sync"
 	"time"
 
@@ -291,11 +290,11 @@ func (s *Server) startLocked() error {
 }
 
 func controlPingPath(controlBasePath string) string {
-	return path.Join(controlBasePath, "ping")
+	return app.ComposeControlPath(controlBasePath, app.RoutePing)
 }
 
 func controlProcCountPath(controlBasePath string) string {
-	return path.Join(controlBasePath, "api/v0/proc_count")
+	return app.ComposeControlPath(controlBasePath, app.RouteProcCount)
 }
 
 func (s *Server) runServers() error {
