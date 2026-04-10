@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -79,6 +80,49 @@ func TestRunWithControl_StartsBothServers(t *testing.T) {
 	}
 	if got := calls.Load(); got != 2 {
 		t.Fatalf("unexpected listen calls: got %d, want %d", got, 2)
+	}
+}
+
+func TestRunWithControl_RegistersPingHandler(t *testing.T) {
+	cfg := DefaultServerConfig()
+	cfg.ListenAddress = "localhost:18090"
+	cfg.ControlListenAddress = "localhost:18091"
+
+	controlChecked := make(chan struct{})
+
+	err := RunWithControl(cfg, func(addr string, h http.Handler) error {
+		switch addr {
+		case cfg.ControlListenAddress:
+			req := httptest.NewRequest(http.MethodGet, "/ping", nil)
+			rr := httptest.NewRecorder()
+			h.ServeHTTP(rr, req)
+
+			if rr.Code != http.StatusOK {
+				t.Fatalf("unexpected status code: got %d, want %d", rr.Code, http.StatusOK)
+			}
+			if got, want := rr.Body.String(), `{"status":"ok"}`; got != want {
+				t.Fatalf("unexpected body: got %q, want %q", got, want)
+			}
+			if got := rr.Header().Get("Content-Type"); !strings.HasPrefix(got, "application/json") {
+				t.Fatalf("unexpected content type: got %q", got)
+			}
+
+			close(controlChecked)
+			return nil
+		case cfg.ListenAddress:
+			select {
+			case <-controlChecked:
+				return nil
+			case <-time.After(250 * time.Millisecond):
+				return errors.New("timeout waiting for control handler check")
+			}
+		default:
+			return errors.New("unexpected listen address")
+		}
+	})
+
+	if err != nil {
+		t.Fatalf("RunWithControl returned unexpected error: %v", err)
 	}
 }
 

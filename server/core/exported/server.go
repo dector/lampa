@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"path"
 	"sync"
 	"time"
 
@@ -271,11 +272,12 @@ func (s *Server) startLocked() error {
 	}))
 
 	controlMux := http.NewServeMux()
-	controlMux.HandleFunc(cfg.ControlRoutePath, func(w http.ResponseWriter, _ *http.Request) {
+	pingHandler := func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"status":"ok"}`))
-	})
+	}
+	controlMux.HandleFunc(controlPingPath(cfg.ControlRoutePath), pingHandler)
 
 	s.proxyHTTPServer = &http.Server{
 		Addr:    cfg.ProxyListenAddress,
@@ -287,6 +289,10 @@ func (s *Server) startLocked() error {
 	}
 
 	return nil
+}
+
+func controlPingPath(controlBasePath string) string {
+	return path.Join(controlBasePath, "ping")
 }
 
 func (s *Server) runServers() error {

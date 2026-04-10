@@ -27,11 +27,14 @@ func RunWithControl(cfg ServerConfig, listen func(addr string, h http.Handler) e
 
 	go func() {
 		controlMux := http.NewServeMux()
-		controlMux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
+		pingHandler := func(w http.ResponseWriter, _ *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"status":"ok"}`))
-		})
+		}
+		controlMux.HandleFunc("/ping", pingHandler)
+		// Keep temporary backward-compatible alias.
+		controlMux.HandleFunc("/", pingHandler)
 
 		fmt.Printf("Control server listening on %s\n", cfg.ControlListenAddress)
 		errCh <- listen(cfg.ControlListenAddress, controlMux)
