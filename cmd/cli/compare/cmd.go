@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	lampa "github.com/dector/lampa/internal"
 	"github.com/dector/lampa/internal/report"
 	"github.com/dector/lampa/internal/templates/html/compare"
 
@@ -22,6 +23,8 @@ func CreateCliCommand() *cli.Command {
 }
 
 func ActionCmdCompare(context context.Context, cmd *cli.Command) error {
+	lampa.PrintHeader()
+
 	if cmd.NArg() != 3 {
 		return fmt.Errorf("usage: lampa report1.json report2.json out.html")
 	}

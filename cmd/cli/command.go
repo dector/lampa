@@ -10,6 +10,7 @@ import (
 	"github.com/dector/lampa/cmd/cli/compare"
 	"github.com/dector/lampa/cmd/cli/generate"
 	"github.com/dector/lampa/cmd/cli/server"
+	lampa "github.com/dector/lampa/internal"
 	"github.com/dector/lampa/internal/out"
 
 	. "github.com/dector/lampa/internal/globals"
@@ -74,7 +75,12 @@ func CreateVersionCommand() *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, c *cli.Command) error {
-			// Empty command because it's handled on the top
+			if c.Bool("short") {
+				fmt.Printf("%s\n", G.Version)
+				return nil
+			}
+
+			fmt.Printf("%s+%s\n", G.Version, G.BuildCommit)
 			return nil
 		},
 	}
@@ -94,6 +100,8 @@ func devReportCommand() *cli.Command {
 	return &cli.Command{
 		Name: "testhtml",
 		Action: func(ctx context.Context, c *cli.Command) error {
+			lampa.PrintHeader()
+
 			srv := &http.Server{Addr: ":8080"}
 			http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "text/html")

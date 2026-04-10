@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	lampa "github.com/dector/lampa/internal"
 	"github.com/dector/lampa/internal/out"
 	"github.com/dector/lampa/internal/report"
 	"github.com/dector/lampa/internal/spinner"
@@ -73,6 +74,8 @@ func CreateCliCommand() *cli.Command {
 }
 
 func CmdActionCollect(ctx context.Context, cmd *cli.Command) error {
+	lampa.PrintHeader()
+
 	args := parseExecArgs(cmd)
 	err := validateExecArgs(&args)
 	if err != nil {

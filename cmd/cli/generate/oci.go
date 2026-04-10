@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/dector/kdly"
+	lampa "github.com/dector/lampa/internal"
 	"github.com/dector/lampa/internal/templates/containerfile"
 	"github.com/dector/lampa/internal/utils"
 	"github.com/dector/lampa/pkg/androidenv"
@@ -371,6 +372,8 @@ func extractVersionProperties(node *kdly.Node) containerfile.Versions {
 }
 
 func ActionCmdOci(ctx context.Context, cmd *cli.Command) error {
+	lampa.PrintHeader()
+
 	// Parse arguments
 	args := parseOciArgs(cmd)
 
