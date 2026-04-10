@@ -5,7 +5,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -14,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import exported.Server;
+import exported.ServerConfig;
 
 public class ServerForegroundService extends Service {
     public static final String ACTION_START_SERVER = "space.dector.lampa.server.action.START_SERVER";
@@ -21,12 +24,19 @@ public class ServerForegroundService extends Service {
     public static final String ACTION_TOGGLE_SERVER = "space.dector.lampa.server.action.TOGGLE_SERVER";
     public static final String ACTION_SERVER_STATE_CHANGED = "space.dector.lampa.server.action.SERVER_STATE_CHANGED";
     public static final String EXTRA_IS_RUNNING = "space.dector.lampa.server.extra.IS_RUNNING";
+    public static final String EXTRA_PROXY_ENDPOINT = "space.dector.lampa.server.extra.PROXY_ENDPOINT";
+    public static final String EXTRA_CONTROL_ENDPOINT = "space.dector.lampa.server.extra.CONTROL_ENDPOINT";
 
     private static final String CHANNEL_ID = "server_control_channel_v2";
     private static final int NOTIFICATION_ID = 1001;
     private static final String TAG = "ServerForegroundService";
+    private static final String PREFS_SERVER_STATE = "space.dector.lampa.server.prefs.SERVER_STATE";
+    private static final String PREF_IS_RUNNING = "is_running";
+    private static final String PREF_PROXY_ENDPOINT = "proxy_endpoint";
+    private static final String PREF_CONTROL_ENDPOINT = "control_endpoint";
 
-    private final Server server = new Server();
+    private final ServerConfig serverConfig = ServerRuntimeConfig.toServerConfig();
+    private final Server server = new Server(serverConfig);
 
     @Override
     public void onCreate() {
@@ -64,7 +74,9 @@ public class ServerForegroundService extends Service {
 
         String result = server.startAsync();
         if (!result.isEmpty()) {
-            Log.e(TAG, "Failed to start server: " + result);
+            Log.e(TAG, "Failed to start server: " + result
+                    + " | proxy=" + serverConfig.getProxyListenAddress()
+                    + " control=" + serverConfig.getControlListenAddress());
             updateNotification("Start failed");
         }
     }
@@ -88,10 +100,42 @@ public class ServerForegroundService extends Service {
     }
 
     private void notifyServerStateChanged() {
+        boolean isRunning = server.isRunning();
+        String proxyEndpoint = serverConfig.getProxyListenAddress();
+        String controlEndpoint = serverConfig.getControlListenAddress();
+
+        persistState(this, isRunning, proxyEndpoint, controlEndpoint);
+
         Intent stateIntent = new Intent(ACTION_SERVER_STATE_CHANGED)
                 .setPackage(getPackageName())
-                .putExtra(EXTRA_IS_RUNNING, server.isRunning());
+                .putExtra(EXTRA_IS_RUNNING, isRunning)
+                .putExtra(EXTRA_PROXY_ENDPOINT, proxyEndpoint)
+                .putExtra(EXTRA_CONTROL_ENDPOINT, controlEndpoint);
         sendBroadcast(stateIntent);
+    }
+
+    public static boolean lastKnownIsRunning(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_SERVER_STATE, Context.MODE_PRIVATE);
+        return prefs.getBoolean(PREF_IS_RUNNING, false);
+    }
+
+    public static String lastKnownProxyEndpoint(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_SERVER_STATE, Context.MODE_PRIVATE);
+        return prefs.getString(PREF_PROXY_ENDPOINT, ServerRuntimeConfig.proxyEndpoint());
+    }
+
+    public static String lastKnownControlEndpoint(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_SERVER_STATE, Context.MODE_PRIVATE);
+        return prefs.getString(PREF_CONTROL_ENDPOINT, ServerRuntimeConfig.controlEndpoint());
+    }
+
+    private static void persistState(Context context, boolean isRunning, String proxyEndpoint, String controlEndpoint) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_SERVER_STATE, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putBoolean(PREF_IS_RUNNING, isRunning)
+                .putString(PREF_PROXY_ENDPOINT, proxyEndpoint)
+                .putString(PREF_CONTROL_ENDPOINT, controlEndpoint)
+                .apply();
     }
 
     private Notification buildNotification(boolean isRunning, @Nullable String extraMessage) {

@@ -19,11 +19,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
-import exported.Server;
 
 public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButton;
     private TextView notificationPermissionBanner;
+    private TextView proxyEndpointText;
+    private TextView controlEndpointText;
     private boolean suppressToggleCallback;
 
     private final BroadcastReceiver serverStateReceiver = new BroadcastReceiver() {
@@ -34,7 +35,11 @@ public class MainActivity extends AppCompatActivity {
             }
 
             boolean isRunning = intent.getBooleanExtra(ServerForegroundService.EXTRA_IS_RUNNING, false);
+            String proxyEndpoint = intent.getStringExtra(ServerForegroundService.EXTRA_PROXY_ENDPOINT);
+            String controlEndpoint = intent.getStringExtra(ServerForegroundService.EXTRA_CONTROL_ENDPOINT);
+
             setToggleCheckedSafely(isRunning);
+            bindEndpoints(proxyEndpoint, controlEndpoint);
         }
     };
 
@@ -45,11 +50,17 @@ public class MainActivity extends AppCompatActivity {
 
         toggleButton = findViewById(R.id.serverToggleButton);
         notificationPermissionBanner = findViewById(R.id.notificationPermissionBanner);
+        proxyEndpointText = findViewById(R.id.proxyEndpointText);
+        controlEndpointText = findViewById(R.id.controlEndpointText);
 
         toggleButton.setOnCheckedChangeListener(this::onToggleChanged);
         notificationPermissionBanner.setOnClickListener(v -> openNotificationSettings());
 
-        syncToggleWithServerState();
+        bindEndpoints(
+                ServerForegroundService.lastKnownProxyEndpoint(this),
+                ServerForegroundService.lastKnownControlEndpoint(this)
+        );
+        setToggleCheckedSafely(ServerForegroundService.lastKnownIsRunning(this));
     }
 
     @Override
@@ -68,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        syncToggleWithServerState();
         updateNotificationPermissionBanner();
     }
 
@@ -101,8 +111,16 @@ public class MainActivity extends AppCompatActivity {
         startActivity(fallbackIntent);
     }
 
-    private void syncToggleWithServerState() {
-        setToggleCheckedSafely(new Server().isRunning());
+    private void bindEndpoints(String proxyEndpoint, String controlEndpoint) {
+        String proxy = (proxyEndpoint == null || proxyEndpoint.isEmpty())
+                ? ServerRuntimeConfig.proxyEndpoint()
+                : proxyEndpoint;
+        String control = (controlEndpoint == null || controlEndpoint.isEmpty())
+                ? ServerRuntimeConfig.controlEndpoint()
+                : controlEndpoint;
+
+        proxyEndpointText.setText(getString(R.string.proxy_endpoint_value, proxy));
+        controlEndpointText.setText(getString(R.string.control_endpoint_value, control));
     }
 
     private void setToggleCheckedSafely(boolean checked) {

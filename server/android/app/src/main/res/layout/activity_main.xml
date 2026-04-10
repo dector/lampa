@@ -16,22 +16,39 @@
         android:textColor="#5C4300"
         android:visibility="gone" />
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
         android:padding="24dp">
 
         <ToggleButton
             android:id="@+id/serverToggleButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:checked="false"
             android:minWidth="180dp"
             android:textOff="OFF"
             android:textOn="ON"
             android:textSize="24sp" />
-    </FrameLayout>
+
+        <TextView
+            android:id="@+id/proxyEndpointText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/proxy_endpoint_default"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/controlEndpointText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/control_endpoint_default"
+            android:textSize="16sp" />
+    </LinearLayout>
 
 </LinearLayout>

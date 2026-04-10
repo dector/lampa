@@ -9,4 +9,9 @@
     <string name="notification_action_turn_on">Turn ON</string>
     <string name="notification_action_turn_off">Turn OFF</string>
     <string name="notification_permission_banner">Notification permission is required for visible server status. Tap to open settings.</string>
+
+    <string name="proxy_endpoint_default">Proxy: localhost:8080</string>
+    <string name="control_endpoint_default">Control: localhost:8081</string>
+    <string name="proxy_endpoint_value">Proxy: %1$s</string>
+    <string name="control_endpoint_value">Control: %1$s</string>
 </resources>
