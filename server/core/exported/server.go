@@ -267,15 +267,15 @@ func (s *Server) startLocked() error {
 
 	sharedStore := processor.NewDefaultReqProcessorStore()
 
-	proxyMux := http.NewServeMux()
-	proxyMux.HandleFunc(cfg.ProxyRoutePath, app.NewRequestHandlerWithStore(app.ServerConfig{
+	proxyMux := app.BuildProxyMux(app.ServerConfig{
 		ListenAddress: cfg.ProxyListenAddress,
 		RoutePath:     cfg.ProxyRoutePath,
-	}, sharedStore))
+	}, sharedStore)
 
-	controlMux := http.NewServeMux()
-	controlMux.HandleFunc(controlPingPath(cfg.ControlRoutePath), app.NewControlPingHandler(sharedStore))
-	controlMux.HandleFunc(controlProcCountPath(cfg.ControlRoutePath), app.NewControlProcCountHandler(sharedStore))
+	controlMux := app.BuildControlMux(sharedStore, app.ControlMuxOptions{
+		BasePath:            cfg.ControlRoutePath,
+		EnableRootPingAlias: false,
+	})
 
 	s.proxyHTTPServer = &http.Server{
 		Addr:    cfg.ProxyListenAddress,
@@ -287,14 +287,6 @@ func (s *Server) startLocked() error {
 	}
 
 	return nil
-}
-
-func controlPingPath(controlBasePath string) string {
-	return app.ComposeControlPath(controlBasePath, app.RoutePing)
-}
-
-func controlProcCountPath(controlBasePath string) string {
-	return app.ComposeControlPath(controlBasePath, app.RouteProcCount)
 }
 
 func (s *Server) runServers() error {

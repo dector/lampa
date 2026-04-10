@@ -16,8 +16,7 @@ func RunProxy(cfg ServerConfig, listen func(addr string, h http.Handler) error) 
 }
 
 func RunProxyWithStore(cfg ServerConfig, store processor.ReqProcessorStore, listen func(addr string, h http.Handler) error) error {
-	mux := http.NewServeMux()
-	mux.HandleFunc(cfg.RoutePath, NewRequestHandlerWithStore(cfg, store))
+	mux := coreapp.BuildProxyMux(cfg, store)
 
 	fmt.Printf("Server listening on %s\n", cfg.ListenAddress)
 	return listen(cfg.ListenAddress, mux)
@@ -33,12 +32,10 @@ func RunWithControl(cfg ServerConfig, listen func(addr string, h http.Handler) e
 	}()
 
 	go func() {
-		controlMux := http.NewServeMux()
-		pingHandler := coreapp.NewControlPingHandler(sharedStore)
-		controlMux.HandleFunc(coreapp.RoutePing, pingHandler)
-		controlMux.HandleFunc(coreapp.RouteProcCount, coreapp.NewControlProcCountHandler(sharedStore))
-		// Keep temporary backward-compatible alias.
-		controlMux.HandleFunc("/", pingHandler)
+		controlMux := coreapp.BuildControlMux(sharedStore, coreapp.ControlMuxOptions{
+			BasePath:            "/",
+			EnableRootPingAlias: true,
+		})
 
 		fmt.Printf("Control server listening on %s\n", cfg.ControlListenAddress)
 		errCh <- listen(cfg.ControlListenAddress, controlMux)
