@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"path"
 	"strings"
 	"testing"
 	"time"
@@ -60,6 +61,51 @@ func TestServer_StartAsync_ControlPingEndpoint_ResolvesAgainstControlRoutePath(t
 
 	assertPingResponse(t, "http://"+controlAddr+"/control/ping")
 	assertProcCountResponse(t, "http://"+controlAddr+"/control/api/v0/proc_count")
+}
+
+func TestControlRoutePaths_ComposeUsingPathJoinSemantics(t *testing.T) {
+	tests := []struct {
+		name        string
+		controlBase string
+	}{
+		{name: "root", controlBase: "/"},
+		{name: "nested", controlBase: "/control"},
+		{name: "nested_with_trailing_slash", controlBase: "/control/"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, want := controlPingPath(tt.controlBase), path.Join(tt.controlBase, "ping"); got != want {
+				t.Fatalf("unexpected ping path: got %q, want %q", got, want)
+			}
+			if got, want := controlProcCountPath(tt.controlBase), path.Join(tt.controlBase, "api/v0/proc_count"); got != want {
+				t.Fatalf("unexpected proc_count path: got %q, want %q", got, want)
+			}
+		})
+	}
+}
+
+func TestServer_StartAsync_ProxyRoutePathRegistration(t *testing.T) {
+	proxyAddr := reserveAddress(t)
+	controlAddr := reserveAddress(t)
+
+	srv := NewServerWithConfig(&ServerConfig{
+		ProxyListenAddress:   proxyAddr,
+		ProxyRoutePath:       "/proxy",
+		ControlListenAddress: controlAddr,
+	})
+
+	if err := srv.StartAsync(); err != "" {
+		t.Fatalf("StartAsync returned unexpected error: %s", err)
+	}
+	defer func() {
+		if err := srv.Stop(); err != "" {
+			t.Fatalf("Stop returned unexpected error: %s", err)
+		}
+	}()
+
+	assertStatusAndBodyContains(t, "http://"+proxyAddr+"/proxy", http.StatusNotFound, "Not Found")
+	assertStatusAndBodyContains(t, "http://"+proxyAddr+"/", http.StatusNotFound, "404 page not found")
 }
 
 func assertPingResponse(t *testing.T, url string) {
@@ -124,6 +170,28 @@ func assertProcCountResponse(t *testing.T, url string) {
 	}
 	if got := resp.Header.Get("Content-Type"); !strings.HasPrefix(got, "application/json") {
 		t.Fatalf("unexpected content type: got %q", got)
+	}
+}
+
+func assertStatusAndBodyContains(t *testing.T, url string, wantStatus int, wantBodySubstring string) {
+	t.Helper()
+
+	resp, err := waitForGet(url)
+	if err != nil {
+		t.Fatalf("failed to call endpoint %q: %v", url, err)
+	}
+	defer resp.Body.Close()
+
+	if got := resp.StatusCode; got != wantStatus {
+		t.Fatalf("unexpected status code: got %d, want %d", got, wantStatus)
+	}
+
+	payload, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("failed to read response body: %v", err)
+	}
+	if got := string(payload); !strings.Contains(got, wantBodySubstring) {
+		t.Fatalf("unexpected response body: got %q, expected it to contain %q", got, wantBodySubstring)
 	}
 }
 

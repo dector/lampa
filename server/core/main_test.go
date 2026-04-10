@@ -97,31 +97,37 @@ func TestRunWithControl_RegistersPingHandler(t *testing.T) {
 	err := RunWithControl(cfg, func(addr string, h http.Handler) error {
 		switch addr {
 		case cfg.ControlListenAddress:
-			req := httptest.NewRequest(http.MethodGet, "/ping", nil)
-			rr := httptest.NewRecorder()
-			h.ServeHTTP(rr, req)
+			assertControlPingEndpoint(t, h, "/ping")
+			close(controlChecked)
+			return nil
+		case cfg.ListenAddress:
+			select {
+			case <-controlChecked:
+				return nil
+			case <-time.After(250 * time.Millisecond):
+				return errors.New("timeout waiting for control handler check")
+			}
+		default:
+			return errors.New("unexpected listen address")
+		}
+	})
 
-			if rr.Code != http.StatusOK {
-				t.Fatalf("unexpected status code: got %d, want %d", rr.Code, http.StatusOK)
-			}
-			var payload map[string]any
-			if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
-				t.Fatalf("failed to parse response body as JSON: %v", err)
-			}
-			if got, want := payload["status"], "ok"; got != want {
-				t.Fatalf("unexpected status: got %v, want %v", got, want)
-			}
-			responses, ok := payload["responses"].(map[string]any)
-			if !ok {
-				t.Fatalf("unexpected responses shape: %#v", payload["responses"])
-			}
-			if got, want := responses["count"], float64(2); got != want {
-				t.Fatalf("unexpected responses.count: got %v, want %v", got, want)
-			}
-			if got := rr.Header().Get("Content-Type"); !strings.HasPrefix(got, "application/json") {
-				t.Fatalf("unexpected content type: got %q", got)
-			}
+	if err != nil {
+		t.Fatalf("RunWithControl returned unexpected error: %v", err)
+	}
+}
 
+func TestRunWithControl_RegistersRootAliasForPing(t *testing.T) {
+	cfg := DefaultServerConfig()
+	cfg.ListenAddress = "localhost:18094"
+	cfg.ControlListenAddress = "localhost:18095"
+
+	controlChecked := make(chan struct{})
+
+	err := RunWithControl(cfg, func(addr string, h http.Handler) error {
+		switch addr {
+		case cfg.ControlListenAddress:
+			assertControlPingEndpoint(t, h, "/")
 			close(controlChecked)
 			return nil
 		case cfg.ListenAddress:
@@ -202,6 +208,35 @@ func TestRunWithControl_PropagatesError(t *testing.T) {
 
 	if !errors.Is(err, wantErr) {
 		t.Fatalf("unexpected error: got %v, want %v", err, wantErr)
+	}
+}
+
+func assertControlPingEndpoint(t *testing.T, h http.Handler, requestPath string) {
+	t.Helper()
+
+	req := httptest.NewRequest(http.MethodGet, requestPath, nil)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("unexpected status code: got %d, want %d", rr.Code, http.StatusOK)
+	}
+	var payload map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := payload["status"], "ok"; got != want {
+		t.Fatalf("unexpected status: got %v, want %v", got, want)
+	}
+	responses, ok := payload["responses"].(map[string]any)
+	if !ok {
+		t.Fatalf("unexpected responses shape: %#v", payload["responses"])
+	}
+	if got, want := responses["count"], float64(2); got != want {
+		t.Fatalf("unexpected responses.count: got %v, want %v", got, want)
+	}
+	if got := rr.Header().Get("Content-Type"); !strings.HasPrefix(got, "application/json") {
+		t.Fatalf("unexpected content type: got %q", got)
 	}
 }
 
