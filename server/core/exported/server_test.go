@@ -1,6 +1,7 @@
 package exported
 
 import (
+	"encoding/json"
 	"io"
 	"net"
 	"net/http"
@@ -76,8 +77,19 @@ func assertPingResponse(t *testing.T, url string) {
 	if err != nil {
 		t.Fatalf("failed to read response body: %v", err)
 	}
-	if got, want := string(payload), `{"status":"ok"}`; got != want {
-		t.Fatalf("unexpected response body: got %q, want %q", got, want)
+	var body map[string]any
+	if err := json.Unmarshal(payload, &body); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := body["status"], "ok"; got != want {
+		t.Fatalf("unexpected status: got %v, want %v", got, want)
+	}
+	responses, ok := body["responses"].(map[string]any)
+	if !ok {
+		t.Fatalf("unexpected responses shape: %#v", body["responses"])
+	}
+	if got, want := responses["count"], float64(2); got != want {
+		t.Fatalf("unexpected responses.count: got %v, want %v", got, want)
 	}
 	if got := resp.Header.Get("Content-Type"); !strings.HasPrefix(got, "application/json") {
 		t.Fatalf("unexpected content type: got %q", got)

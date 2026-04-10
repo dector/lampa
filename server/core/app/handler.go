@@ -9,8 +9,13 @@ import (
 )
 
 // NewRequestHandler returns HTTP handler that reads request and returns processed response.
-func NewRequestHandler(_ ServerConfig) http.HandlerFunc {
-	reqProcessor := processor.NewDefaultReqProcessor()
+func NewRequestHandler(cfg ServerConfig) http.HandlerFunc {
+	return NewRequestHandlerWithStore(cfg, nil)
+}
+
+// NewRequestHandlerWithStore returns HTTP handler that reads request and returns processed response.
+func NewRequestHandlerWithStore(_ ServerConfig, processorStore processor.ReqProcessorStore) http.HandlerFunc {
+	reqProcessor := processor.NewDefaultReqProcessorWithStore(processorStore)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		request := corehttp.NewHttpRequest(r)

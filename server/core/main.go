@@ -8,30 +8,33 @@ import (
 	"strings"
 
 	coreapp "github.com/dector/lampa/server/core/app"
+	"github.com/dector/lampa/server/core/processor"
 )
 
 func RunProxy(cfg ServerConfig, listen func(addr string, h http.Handler) error) error {
+	return RunProxyWithStore(cfg, nil, listen)
+}
+
+func RunProxyWithStore(cfg ServerConfig, store processor.ReqProcessorStore, listen func(addr string, h http.Handler) error) error {
 	mux := http.NewServeMux()
-	mux.HandleFunc(cfg.RoutePath, NewRequestHandler(cfg))
+	mux.HandleFunc(cfg.RoutePath, NewRequestHandlerWithStore(cfg, store))
 
 	fmt.Printf("Server listening on %s\n", cfg.ListenAddress)
 	return listen(cfg.ListenAddress, mux)
 }
 
 func RunWithControl(cfg ServerConfig, listen func(addr string, h http.Handler) error) error {
+	sharedStore := processor.NewDefaultReqProcessorStore()
+
 	errCh := make(chan error, 2)
 
 	go func() {
-		errCh <- RunProxy(cfg, listen)
+		errCh <- RunProxyWithStore(cfg, sharedStore, listen)
 	}()
 
 	go func() {
 		controlMux := http.NewServeMux()
-		pingHandler := func(w http.ResponseWriter, _ *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"status":"ok"}`))
-		}
+		pingHandler := coreapp.NewControlPingHandler(sharedStore)
 		controlMux.HandleFunc("/ping", pingHandler)
 		// Keep temporary backward-compatible alias.
 		controlMux.HandleFunc("/", pingHandler)

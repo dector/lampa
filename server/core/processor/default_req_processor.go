@@ -9,32 +9,38 @@ type EndpointProcessors map[string]ReqProcessor
 
 // DefaultReqProcessor processes request with a chain of processors.
 type DefaultReqProcessor struct {
-	processors EndpointProcessors
-	fallback   ReqProcessor
+	store ReqProcessorStore
 }
 
 // NewDefaultReqProcessor creates default request processor chain.
 func NewDefaultReqProcessor() ReqProcessor {
-	return DefaultReqProcessor{
-		processors: EndpointProcessors{
-			"/": QuickJSReqProcessor{Script: okJsProcessor},
-		},
-		fallback: StaticReqProcessor{StatusCode: 404, Body: []byte("Not Found")},
+	return NewDefaultReqProcessorWithStore(nil)
+}
+
+// NewDefaultReqProcessorWithStore creates default request processor chain using provided store.
+func NewDefaultReqProcessorWithStore(store ReqProcessorStore) ReqProcessor {
+	if store == nil {
+		store = NewDefaultReqProcessorStore()
 	}
+
+	return DefaultReqProcessor{store: store}
 }
 
 func (p DefaultReqProcessor) Process(request corehttp.HttpRequest) optional.Optional[corehttp.HttpResponse] {
-	if endpointProcessor, ok := p.processors[request.Url.Path]; ok {
-		response := endpointProcessor.Process(request)
-		if response.IsPresent() {
-			return response
+	if p.store != nil {
+		if endpointProcessor, ok := p.store.EndpointProcessor(request.Url.Path); ok {
+			response := endpointProcessor.Process(request)
+			if response.IsPresent() {
+				return response
+			}
 		}
-	}
 
-	if p.fallback != nil {
-		response := p.fallback.Process(request)
-		if response.IsPresent() {
-			return response
+		fallback := p.store.FallbackProcessor()
+		if fallback != nil {
+			response := fallback.Process(request)
+			if response.IsPresent() {
+				return response
+			}
 		}
 	}
 

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/dector/lampa/server/core/app"
+	"github.com/dector/lampa/server/core/processor"
 )
 
 var (
@@ -265,19 +266,16 @@ func (s *Server) startLocked() error {
 	cfg := mergeConfig(defaultConfig(), &s.config)
 	s.config = cfg
 
+	sharedStore := processor.NewDefaultReqProcessorStore()
+
 	proxyMux := http.NewServeMux()
-	proxyMux.HandleFunc(cfg.ProxyRoutePath, app.NewRequestHandler(app.ServerConfig{
+	proxyMux.HandleFunc(cfg.ProxyRoutePath, app.NewRequestHandlerWithStore(app.ServerConfig{
 		ListenAddress: cfg.ProxyListenAddress,
 		RoutePath:     cfg.ProxyRoutePath,
-	}))
+	}, sharedStore))
 
 	controlMux := http.NewServeMux()
-	pingHandler := func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"status":"ok"}`))
-	}
-	controlMux.HandleFunc(controlPingPath(cfg.ControlRoutePath), pingHandler)
+	controlMux.HandleFunc(controlPingPath(cfg.ControlRoutePath), app.NewControlPingHandler(sharedStore))
 
 	s.proxyHTTPServer = &http.Server{
 		Addr:    cfg.ProxyListenAddress,

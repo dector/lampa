@@ -15,11 +15,11 @@ func TestNewDefaultReqProcessor_IncludesRootQuickJSAndStaticFallback(t *testing.
 		t.Fatalf("unexpected processor type: %T", p)
 	}
 
-	if len(chain.processors) != 1 {
-		t.Fatalf("unexpected processor count: got %d, want 1", len(chain.processors))
+	if chain.store == nil {
+		t.Fatal("expected non-nil processor store")
 	}
 
-	rootProcessor, ok := chain.processors["/"]
+	rootProcessor, ok := chain.store.EndpointProcessor("/")
 	if !ok {
 		t.Fatal("expected processor for root endpoint '/'")
 	}
@@ -27,9 +27,9 @@ func TestNewDefaultReqProcessor_IncludesRootQuickJSAndStaticFallback(t *testing.
 		t.Fatalf("processor['/'] should be QuickJSReqProcessor, got %T", rootProcessor)
 	}
 
-	fallback, ok := chain.fallback.(StaticReqProcessor)
+	fallback, ok := chain.store.FallbackProcessor().(StaticReqProcessor)
 	if !ok {
-		t.Fatalf("fallback should be StaticReqProcessor, got %T", chain.fallback)
+		t.Fatalf("fallback should be StaticReqProcessor, got %T", chain.store.FallbackProcessor())
 	}
 	if fallback.StatusCode != 404 {
 		t.Fatalf("unexpected static status code: got %d, want 404", fallback.StatusCode)
@@ -41,10 +41,12 @@ func TestNewDefaultReqProcessor_IncludesRootQuickJSAndStaticFallback(t *testing.
 
 func TestDefaultReqProcessor_FallbackBehavior(t *testing.T) {
 	chain := DefaultReqProcessor{
-		processors: EndpointProcessors{
-			"/": noneReqProcessor{},
-		},
-		fallback: StaticReqProcessor{StatusCode: 404, Body: []byte("Not Found")},
+		store: NewInMemoryReqProcessorStore(
+			EndpointProcessors{
+				"/": noneReqProcessor{},
+			},
+			StaticReqProcessor{StatusCode: 404, Body: []byte("Not Found")},
+		),
 	}
 
 	response := chain.Process(corehttp.HttpRequest{Url: url.URL{Path: "/"}})

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -103,8 +104,19 @@ func TestRunWithControl_RegistersPingHandler(t *testing.T) {
 			if rr.Code != http.StatusOK {
 				t.Fatalf("unexpected status code: got %d, want %d", rr.Code, http.StatusOK)
 			}
-			if got, want := rr.Body.String(), `{"status":"ok"}`; got != want {
-				t.Fatalf("unexpected body: got %q, want %q", got, want)
+			var payload map[string]any
+			if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+				t.Fatalf("failed to parse response body as JSON: %v", err)
+			}
+			if got, want := payload["status"], "ok"; got != want {
+				t.Fatalf("unexpected status: got %v, want %v", got, want)
+			}
+			responses, ok := payload["responses"].(map[string]any)
+			if !ok {
+				t.Fatalf("unexpected responses shape: %#v", payload["responses"])
+			}
+			if got, want := responses["count"], float64(2); got != want {
+				t.Fatalf("unexpected responses.count: got %v, want %v", got, want)
 			}
 			if got := rr.Header().Get("Content-Type"); !strings.HasPrefix(got, "application/json") {
 				t.Fatalf("unexpected content type: got %q", got)
