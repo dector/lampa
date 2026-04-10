@@ -36,6 +36,7 @@ func TestServer_StartAsync_ControlPingEndpoint(t *testing.T) {
 	}()
 
 	assertPingResponse(t, "http://"+controlAddr+"/ping")
+	assertProcCountResponse(t, "http://"+controlAddr+"/api/v0/proc_count")
 }
 
 func TestServer_StartAsync_ControlPingEndpoint_ResolvesAgainstControlRoutePath(t *testing.T) {
@@ -58,6 +59,7 @@ func TestServer_StartAsync_ControlPingEndpoint_ResolvesAgainstControlRoutePath(t
 	}()
 
 	assertPingResponse(t, "http://"+controlAddr+"/control/ping")
+	assertProcCountResponse(t, "http://"+controlAddr+"/control/api/v0/proc_count")
 }
 
 func assertPingResponse(t *testing.T, url string) {
@@ -90,6 +92,35 @@ func assertPingResponse(t *testing.T, url string) {
 	}
 	if got, want := responses["count"], float64(2); got != want {
 		t.Fatalf("unexpected responses.count: got %v, want %v", got, want)
+	}
+	if got := resp.Header.Get("Content-Type"); !strings.HasPrefix(got, "application/json") {
+		t.Fatalf("unexpected content type: got %q", got)
+	}
+}
+
+func assertProcCountResponse(t *testing.T, url string) {
+	t.Helper()
+
+	resp, err := waitForGet(url)
+	if err != nil {
+		t.Fatalf("failed to call control proc_count endpoint: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if got, want := resp.StatusCode, http.StatusOK; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	payload, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("failed to read response body: %v", err)
+	}
+	var body map[string]any
+	if err := json.Unmarshal(payload, &body); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := body["count"], float64(2); got != want {
+		t.Fatalf("unexpected count: got %v, want %v", got, want)
 	}
 	if got := resp.Header.Get("Content-Type"); !strings.HasPrefix(got, "application/json") {
 		t.Fatalf("unexpected content type: got %q", got)

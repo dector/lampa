@@ -18,19 +18,34 @@ func NewControlPingHandler(store processor.ReqProcessorStore) http.HandlerFunc {
 			responsesCount = store.ResponsesCount()
 		}
 
-		payload, err := json.Marshal(map[string]any{
+		writeJSON(w, http.StatusOK, map[string]any{
 			"status": "ok",
 			"responses": map[string]any{
 				"count": responsesCount,
 			},
 		})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(payload)
 	}
+}
+
+// NewControlProcCountHandler returns count of currently configured processors.
+func NewControlProcCountHandler(store processor.ReqProcessorStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		count := 0
+		if store != nil {
+			count = store.ResponsesCount()
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"count": count})
+	}
+}
+
+func writeJSON(w http.ResponseWriter, statusCode int, payload any) {
+	encoded, err := json.Marshal(payload)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	_, _ = w.Write(encoded)
 }

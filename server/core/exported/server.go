@@ -276,6 +276,7 @@ func (s *Server) startLocked() error {
 
 	controlMux := http.NewServeMux()
 	controlMux.HandleFunc(controlPingPath(cfg.ControlRoutePath), app.NewControlPingHandler(sharedStore))
+	controlMux.HandleFunc(controlProcCountPath(cfg.ControlRoutePath), app.NewControlProcCountHandler(sharedStore))
 
 	s.proxyHTTPServer = &http.Server{
 		Addr:    cfg.ProxyListenAddress,
@@ -291,6 +292,10 @@ func (s *Server) startLocked() error {
 
 func controlPingPath(controlBasePath string) string {
 	return path.Join(controlBasePath, "ping")
+}
+
+func controlProcCountPath(controlBasePath string) string {
+	return path.Join(controlBasePath, "api/v0/proc_count")
 }
 
 func (s *Server) runServers() error {

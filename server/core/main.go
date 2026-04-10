@@ -36,6 +36,7 @@ func RunWithControl(cfg ServerConfig, listen func(addr string, h http.Handler) e
 		controlMux := http.NewServeMux()
 		pingHandler := coreapp.NewControlPingHandler(sharedStore)
 		controlMux.HandleFunc("/ping", pingHandler)
+		controlMux.HandleFunc("/api/v0/proc_count", coreapp.NewControlProcCountHandler(sharedStore))
 		// Keep temporary backward-compatible alias.
 		controlMux.HandleFunc("/", pingHandler)
 

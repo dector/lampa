@@ -141,6 +141,53 @@ func TestRunWithControl_RegistersPingHandler(t *testing.T) {
 	}
 }
 
+func TestRunWithControl_RegistersProcCountHandler(t *testing.T) {
+	cfg := DefaultServerConfig()
+	cfg.ListenAddress = "localhost:18092"
+	cfg.ControlListenAddress = "localhost:18093"
+
+	controlChecked := make(chan struct{})
+
+	err := RunWithControl(cfg, func(addr string, h http.Handler) error {
+		switch addr {
+		case cfg.ControlListenAddress:
+			req := httptest.NewRequest(http.MethodGet, "/api/v0/proc_count", nil)
+			rr := httptest.NewRecorder()
+			h.ServeHTTP(rr, req)
+
+			if rr.Code != http.StatusOK {
+				t.Fatalf("unexpected status code: got %d, want %d", rr.Code, http.StatusOK)
+			}
+			var payload map[string]any
+			if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+				t.Fatalf("failed to parse response body as JSON: %v", err)
+			}
+			if got, want := payload["count"], float64(2); got != want {
+				t.Fatalf("unexpected count: got %v, want %v", got, want)
+			}
+			if got := rr.Header().Get("Content-Type"); !strings.HasPrefix(got, "application/json") {
+				t.Fatalf("unexpected content type: got %q", got)
+			}
+
+			close(controlChecked)
+			return nil
+		case cfg.ListenAddress:
+			select {
+			case <-controlChecked:
+				return nil
+			case <-time.After(250 * time.Millisecond):
+				return errors.New("timeout waiting for control handler check")
+			}
+		default:
+			return errors.New("unexpected listen address")
+		}
+	})
+
+	if err != nil {
+		t.Fatalf("RunWithControl returned unexpected error: %v", err)
+	}
+}
+
 func TestRunWithControl_PropagatesError(t *testing.T) {
 	cfg := DefaultServerConfig()
 	wantErr := errors.New("proxy listen failed")
