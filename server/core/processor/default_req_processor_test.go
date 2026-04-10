@@ -8,38 +8,55 @@ import (
 	"github.com/dector/lampa/server/core/utils/optional"
 )
 
-func TestNewDefaultReqProcessor_IncludesQuickJSAndEmptyFallback(t *testing.T) {
+func TestNewDefaultReqProcessor_IncludesRootQuickJSAndStaticFallback(t *testing.T) {
 	p := NewDefaultReqProcessor()
 	chain, ok := p.(DefaultReqProcessor)
 	if !ok {
 		t.Fatalf("unexpected processor type: %T", p)
 	}
 
-	if len(chain.processors) != 2 {
-		t.Fatalf("unexpected processor count: got %d, want 2", len(chain.processors))
+	if len(chain.processors) != 1 {
+		t.Fatalf("unexpected processor count: got %d, want 1", len(chain.processors))
 	}
-	if _, ok := chain.processors[0].(QuickJSReqProcessor); !ok {
-		t.Fatalf("processor[0] should be QuickJSReqProcessor, got %T", chain.processors[0])
+
+	rootProcessor, ok := chain.processors["/"]
+	if !ok {
+		t.Fatal("expected processor for root endpoint '/'")
 	}
-	if _, ok := chain.processors[1].(EmptyReqProcessor); !ok {
-		t.Fatalf("processor[1] should be EmptyReqProcessor, got %T", chain.processors[1])
+	if _, ok := rootProcessor.(QuickJSReqProcessor); !ok {
+		t.Fatalf("processor['/'] should be QuickJSReqProcessor, got %T", rootProcessor)
+	}
+
+	fallback, ok := chain.fallback.(StaticReqProcessor)
+	if !ok {
+		t.Fatalf("fallback should be StaticReqProcessor, got %T", chain.fallback)
+	}
+	if fallback.StatusCode != 404 {
+		t.Fatalf("unexpected static status code: got %d, want 404", fallback.StatusCode)
+	}
+	if string(fallback.Body) != "Not Found" {
+		t.Fatalf("unexpected static body: got %q, want %q", string(fallback.Body), "Not Found")
 	}
 }
 
 func TestDefaultReqProcessor_FallbackBehavior(t *testing.T) {
 	chain := DefaultReqProcessor{
-		processors: []ReqProcessor{
-			noneReqProcessor{},
-			EmptyReqProcessor{},
+		processors: EndpointProcessors{
+			"/": noneReqProcessor{},
 		},
+		fallback: StaticReqProcessor{StatusCode: 404, Body: []byte("Not Found")},
 	}
 
 	response := chain.Process(corehttp.HttpRequest{Url: url.URL{Path: "/"}})
 	if !response.IsPresent() {
 		t.Fatal("expected Some response from fallback")
 	}
-	if got := response.OrElse(corehttp.HttpResponse{}).StatusCode; got != 200 {
-		t.Fatalf("unexpected status code: got %d, want 200", got)
+	got := response.OrElse(corehttp.HttpResponse{})
+	if got.StatusCode != 404 {
+		t.Fatalf("unexpected status code: got %d, want 404", got.StatusCode)
+	}
+	if string(got.Body) != "Not Found" {
+		t.Fatalf("unexpected body: got %q, want %q", string(got.Body), "Not Found")
 	}
 }
 

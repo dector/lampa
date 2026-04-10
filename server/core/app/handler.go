@@ -15,7 +15,7 @@ func NewRequestHandler(_ ServerConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request := corehttp.NewHttpRequest(r)
 		response := reqProcessor.Process(request).OrElse(corehttp.HttpResponse{
-			StatusCode: http.StatusNotFound,
+			StatusCode: http.StatusInternalServerError,
 			Headers:    make(http.Header),
 			Body:       nil,
 		})

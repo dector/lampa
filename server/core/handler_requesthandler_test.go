@@ -49,7 +49,10 @@ func TestNewRequestHandler_AcceptsConfiguredRoute(t *testing.T) {
 
 	mux.ServeHTTP(rr, req)
 
-	if rr.Code != http.StatusOK {
-		t.Fatalf("unexpected status code on configured route: got %d, want %d", rr.Code, http.StatusOK)
+	if rr.Code != http.StatusNotFound {
+		t.Fatalf("unexpected status code on configured route: got %d, want %d", rr.Code, http.StatusNotFound)
+	}
+	if got := rr.Body.String(); got != "Not Found" {
+		t.Fatalf("unexpected body on configured route: got %q, want %q", got, "Not Found")
 	}
 }

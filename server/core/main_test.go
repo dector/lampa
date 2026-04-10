@@ -31,8 +31,11 @@ func TestRunProxy_PassesAddressAndRegistersHandler(t *testing.T) {
 		rr := httptest.NewRecorder()
 		h.ServeHTTP(rr, req)
 
-		if rr.Code != http.StatusOK {
-			t.Fatalf("unexpected status code: got %d, want %d", rr.Code, http.StatusOK)
+		if rr.Code != http.StatusNotFound {
+			t.Fatalf("unexpected status code: got %d, want %d", rr.Code, http.StatusNotFound)
+		}
+		if got := rr.Body.String(); got != "Not Found" {
+			t.Fatalf("unexpected body: got %q, want %q", got, "Not Found")
 		}
 
 		return nil

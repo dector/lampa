@@ -10,7 +10,7 @@ import (
 	"modernc.org/quickjs"
 )
 
-const defaultQuickJSProgram = `function handle(req) {
+const okJsProcessor = `function handle(req) {
   return Response.json({ status: "ok" });
 }`
 
@@ -31,7 +31,7 @@ type QuickJSReqProcessor struct {
 func (p QuickJSReqProcessor) Process(request corehttp.HttpRequest) optional.Optional[corehttp.HttpResponse] {
 	script := p.Script
 	if strings.TrimSpace(script) == "" {
-		script = defaultQuickJSProgram
+		script = okJsProcessor
 	}
 
 	vm, err := quickjs.NewVM()
