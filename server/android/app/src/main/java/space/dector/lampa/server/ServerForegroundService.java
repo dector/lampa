@@ -19,6 +19,8 @@ public class ServerForegroundService extends Service {
     public static final String ACTION_START_SERVER = "space.dector.lampa.server.action.START_SERVER";
     public static final String ACTION_STOP_SERVER = "space.dector.lampa.server.action.STOP_SERVER";
     public static final String ACTION_TOGGLE_SERVER = "space.dector.lampa.server.action.TOGGLE_SERVER";
+    public static final String ACTION_SERVER_STATE_CHANGED = "space.dector.lampa.server.action.SERVER_STATE_CHANGED";
+    public static final String EXTRA_IS_RUNNING = "space.dector.lampa.server.extra.IS_RUNNING";
 
     private static final String CHANNEL_ID = "server_control_channel_v2";
     private static final int NOTIFICATION_ID = 1001;
@@ -31,6 +33,7 @@ public class ServerForegroundService extends Service {
         super.onCreate();
         createNotificationChannel();
         startForeground(NOTIFICATION_ID, buildNotification(server.isRunning(), null));
+        notifyServerStateChanged();
     }
 
     @Override
@@ -50,6 +53,7 @@ public class ServerForegroundService extends Service {
         }
 
         updateNotification(null);
+        notifyServerStateChanged();
         return START_STICKY;
     }
 
@@ -81,6 +85,13 @@ public class ServerForegroundService extends Service {
         Notification notification = buildNotification(server.isRunning(), extraMessage);
         NotificationManager manager = getSystemService(NotificationManager.class);
         manager.notify(NOTIFICATION_ID, notification);
+    }
+
+    private void notifyServerStateChanged() {
+        Intent stateIntent = new Intent(ACTION_SERVER_STATE_CHANGED)
+                .setPackage(getPackageName())
+                .putExtra(EXTRA_IS_RUNNING, server.isRunning());
+        sendBroadcast(stateIntent);
     }
 
     private Notification buildNotification(boolean isRunning, @Nullable String extraMessage) {

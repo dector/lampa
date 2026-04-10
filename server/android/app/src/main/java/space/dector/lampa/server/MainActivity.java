@@ -1,7 +1,10 @@
 package space.dector.lampa.server;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -14,6 +17,7 @@ import android.widget.ToggleButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 
 import exported.Server;
 
@@ -21,6 +25,18 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleButton;
     private TextView notificationPermissionBanner;
     private boolean suppressToggleCallback;
+
+    private final BroadcastReceiver serverStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!ServerForegroundService.ACTION_SERVER_STATE_CHANGED.equals(intent.getAction())) {
+                return;
+            }
+
+            boolean isRunning = intent.getBooleanExtra(ServerForegroundService.EXTRA_IS_RUNNING, false);
+            setToggleCheckedSafely(isRunning);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +50,19 @@ public class MainActivity extends AppCompatActivity {
         notificationPermissionBanner.setOnClickListener(v -> openNotificationSettings());
 
         syncToggleWithServerState();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        IntentFilter intentFilter = new IntentFilter(ServerForegroundService.ACTION_SERVER_STATE_CHANGED);
+        ContextCompat.registerReceiver(this, serverStateReceiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(serverStateReceiver);
     }
 
     @Override
@@ -73,8 +102,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void syncToggleWithServerState() {
+        setToggleCheckedSafely(new Server().isRunning());
+    }
+
+    private void setToggleCheckedSafely(boolean checked) {
         suppressToggleCallback = true;
-        toggleButton.setChecked(new Server().isRunning());
+        toggleButton.setChecked(checked);
         suppressToggleCallback = false;
     }
 
