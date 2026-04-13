@@ -27,6 +27,7 @@ const (
 
 	kindStatic = "static"
 	kindJS     = "js"
+	kindSeq    = "seq"
 
 	defaultProcessorKind = kindStatic
 )
@@ -76,7 +77,7 @@ func newSetCommand(name string, usage string) *cli.Command {
 			},
 			&cli.StringFlag{
 				Name:  OptKind,
-				Usage: "processor kind (static|js)",
+				Usage: "processor kind (static|seq|js)",
 				Value: defaultProcessorKind,
 			},
 			&cli.StringFlag{
@@ -86,17 +87,17 @@ func newSetCommand(name string, usage string) *cli.Command {
 			},
 			&cli.IntFlag{
 				Name:  OptResponseStatus,
-				Usage: "response status code",
+				Usage: "response status code (static only; seq uses --response.status-N, N starts at 1 with no gaps)",
 				Value: http.StatusOK,
 			},
 			&cli.StringFlag{
 				Name:  OptResponseContent,
-				Usage: "response content preset: json|text|html|raw",
+				Usage: "response content preset: json|text|html|raw (static only; seq uses --response.content-N)",
 				Value: "text",
 			},
 			&cli.StringFlag{
 				Name:  OptResponseBody,
-				Usage: "response body string (required for --kind static)",
+				Usage: "response body string (required for --kind static; seq uses required --response.body-N per step)",
 			},
 			&cli.StringFlag{
 				Name:  OptScript,
@@ -108,7 +109,7 @@ func newSetCommand(name string, usage string) *cli.Command {
 			},
 			&cli.StringSliceFlag{
 				Name:  OptResponseHeader,
-				Usage: "additional response header in Name:Value format (repeatable)",
+				Usage: "additional response header in Name:Value format (repeatable; seq uses --response.header-N)",
 			},
 		},
 		Action: CmdActionSet,
@@ -116,7 +117,7 @@ func newSetCommand(name string, usage string) *cli.Command {
 }
 
 func CmdActionSet(ctx context.Context, c *cli.Command) error {
-	payload, err := buildSetRequestFromCommand(c)
+	payload, err := buildSetRequestFromCommandWithRawArgv(c, os.Args[1:])
 	if err != nil {
 		return err
 	}
@@ -141,6 +142,10 @@ func CmdActionSet(ctx context.Context, c *cli.Command) error {
 }
 
 func buildSetRequestFromCommand(c *cli.Command) (procSetRequest, error) {
+	return buildSetRequestFromCommandWithRawArgv(c, nil)
+}
+
+func buildSetRequestFromCommandWithRawArgv(c *cli.Command, rawArgv []string) (procSetRequest, error) {
 	port := c.Int(OptPort)
 	if err := validatePort(port); err != nil {
 		return procSetRequest{}, err
@@ -167,6 +172,11 @@ func buildSetRequestFromCommand(c *cli.Command) (procSetRequest, error) {
 
 	if err := validateSetInput(kind, endpoint, status, body, script); err != nil {
 		return procSetRequest{}, err
+	}
+	if kind == kindSeq {
+		if _, err := parseSeqStepInputsFromRawArgv(rawArgv); err != nil {
+			return procSetRequest{}, err
+		}
 	}
 
 	payload := procSetRequest{
@@ -200,8 +210,8 @@ func buildSetRequestFromCommand(c *cli.Command) (procSetRequest, error) {
 
 func validateSetInput(kind, endpoint string, status int, body string, script string) error {
 	kind = strings.TrimSpace(kind)
-	if kind != kindStatic && kind != kindJS {
-		return fmt.Errorf("invalid kind %q: expected %q or %q", kind, kindStatic, kindJS)
+	if kind != kindStatic && kind != kindJS && kind != kindSeq {
+		return fmt.Errorf("invalid kind %q: expected %q, %q, or %q", kind, kindStatic, kindJS, kindSeq)
 	}
 
 	endpoint = strings.TrimSpace(endpoint)

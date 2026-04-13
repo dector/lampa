@@ -160,6 +160,7 @@ lampa server ping --port 46899
 
 You can configure endpoint processors via control API.
 
+Supported kinds: `static|seq|js` (`static` by default).
 Static example:
 
 ```shell
@@ -194,6 +195,39 @@ Static content presets:
 
 If you pass `--response.header 'Content-Type:...'`, it overrides the preset.
 
+Sequence processor (`--kind seq`) uses indexed per-step flags:
+- `--response.body-N` (required per step)
+- `--response.status-N` (optional, default `200`)
+- `--response.content-N` (optional, default `text`)
+- `--response.header-N` (optional, repeatable)
+- `N` is 1-based and must be contiguous (`1,2,3...`)
+
+Minimal sequence:
+
+```shell
+lampa server set \
+  --kind seq \
+  --endpoint /flaky \
+  --response.body-1 'temporary error' \
+  --response.body-2 'recovered'
+```
+
+Practical full sequence:
+
+```shell
+lampa server set \
+  --kind seq \
+  --endpoint /flaky \
+  --response.status-1 500 \
+  --response.content-1 text \
+  --response.body-1 'fail once' \
+  --response.header-1 'X-Step:1' \
+  --response.status-2 200 \
+  --response.content-2 json \
+  --response.body-2 '{"ok":true}' \
+  --response.header-2 'Cache-Control:no-store'
+```
+
 JS processor example:
 
 ```shell
@@ -209,7 +243,11 @@ From file:
 lampa server set --kind js --endpoint /dynamic --script-file ./handler.js
 ```
 
-`--kind` supports: `static|js` (`static` by default).
+Common mistakes:
+- Missing `--response.body-N` for a declared step.
+- Index gaps such as `--response.body-1` and `--response.body-3` without step 2.
+- Invalid step suffixes (`-0`, negative, non-numeric).
+- Malformed headers (must be `Name:Value`).
 
 Set default fallback passthrough processor:
 
