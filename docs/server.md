@@ -100,6 +100,27 @@ More JS request-processing script samples: [`docs/server/response-js.md`](./serv
 
 ---
 
+## 3) Set default fallback proxy processor (passthrough)
+
+Use this to forward any unmatched endpoint to an upstream server.
+
+```bash
+lampa server proxy set-default \
+  --kind pass \
+  --server http://localhost:3000
+```
+
+Custom control port:
+
+```bash
+lampa server proxy set-default \
+  --port 46899 \
+  --kind pass \
+  --server http://localhost:3000
+```
+
+---
+
 ## Flags
 
 Required:
@@ -109,12 +130,14 @@ Required:
 
 Optional:
 - `--port` (default `8081`)
-- `--kind` (`static|js`, default `static`)
+- `--kind` (`static|js`, default `static`) for `set`/`proxy set`
 - `--response.status` (default `200`, valid `100..599`, static only)
 - `--response.content` (`json|text|html|raw`, default `text`, static only)
 - `--response.header` (repeatable `Name:Value`, static only)
 - `--script` (inline JS, js only)
 - `--script-file` (path to JS file, js only)
+- `--kind pass` for `proxy set-default`
+- `--server <url>` for `proxy set-default` (required)
 
 Content presets:
 - `json` -> `application/json`
@@ -135,6 +158,8 @@ lampa server ping
 lampa server proxy set --endpoint /x --response.body '...'
 # or JS:
 # lampa server set --kind js --endpoint /x --script 'function handle(req){ ... }'
+# or set default passthrough:
+# lampa server proxy set-default --kind pass --server http://localhost:3000
 ```
 3. If needed, use `-v` to print full control response JSON:
 ```bash

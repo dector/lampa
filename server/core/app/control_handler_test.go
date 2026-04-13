@@ -184,3 +184,73 @@ func TestControlProcSetHandler_InvalidStatus(t *testing.T) {
 		t.Fatalf("unexpected error payload: got %v, want %v", got, want)
 	}
 }
+
+func TestControlProcSetDefaultHandler_Success(t *testing.T) {
+	store := processor.NewInMemoryReqProcessorStore(nil, nil)
+	handler := NewControlProcSetDefaultHandler(store)
+
+	body := []byte(`{"kind":"pass","server":"http://example.local:8080"}`)
+	req := httptest.NewRequest(http.MethodPost, RouteProcSetDefault, bytes.NewReader(body))
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusOK; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := payload["status"], "ok"; got != want {
+		t.Fatalf("unexpected status payload: got %v, want %v", got, want)
+	}
+	if got, want := payload["kind"], "pass"; got != want {
+		t.Fatalf("unexpected kind payload: got %v, want %v", got, want)
+	}
+
+	fallback := store.FallbackProcessor()
+	proc, ok := fallback.(processor.PassthroughReqProcessor)
+	if !ok {
+		t.Fatalf("unexpected fallback processor type: %T", fallback)
+	}
+	if got, want := proc.Server, "http://example.local:8080"; got != want {
+		t.Fatalf("unexpected fallback server: got %q, want %q", got, want)
+	}
+}
+
+func TestControlProcSetDefaultHandler_InvalidKind(t *testing.T) {
+	store := processor.NewInMemoryReqProcessorStore(nil, nil)
+	handler := NewControlProcSetDefaultHandler(store)
+
+	body := []byte(`{"kind":"static","server":"http://example.local:8080"}`)
+	req := httptest.NewRequest(http.MethodPost, RouteProcSetDefault, bytes.NewReader(body))
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusBadRequest; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+}
+
+func TestControlProcSetDefaultHandler_InvalidServer(t *testing.T) {
+	store := processor.NewInMemoryReqProcessorStore(nil, nil)
+	handler := NewControlProcSetDefaultHandler(store)
+
+	body := []byte(`{"kind":"pass","server":"example.local:8080"}`)
+	req := httptest.NewRequest(http.MethodPost, RouteProcSetDefault, bytes.NewReader(body))
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusBadRequest; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := payload["error"], "invalid server"; got != want {
+		t.Fatalf("unexpected error payload: got %v, want %v", got, want)
+	}
+}

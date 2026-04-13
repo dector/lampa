@@ -59,6 +59,7 @@ func createProxyCommand() *cli.Command {
 		Usage: "proxy processor operations",
 		Commands: []*cli.Command{
 			newSetCommand("set", "set endpoint processor"),
+			createSetDefaultCommand(),
 		},
 	}
 }

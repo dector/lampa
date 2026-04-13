@@ -12,6 +12,8 @@ const (
 	RouteProcCount = "/api/v0/proc_count"
 	// RouteProcSet is control endpoint that sets endpoint processor runtime config.
 	RouteProcSet = "/api/v0/proc/set"
+	// RouteProcSetDefault is control endpoint that sets fallback/default processor runtime config.
+	RouteProcSetDefault = "/api/v0/proc/default/set"
 )
 
 // ControlMuxOptions defines control routes mounting behavior.

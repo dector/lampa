@@ -210,6 +210,16 @@ lampa server set --kind js --endpoint /dynamic --script-file ./handler.js
 
 `--kind` supports: `static|js` (`static` by default).
 
+Set default fallback passthrough processor:
+
+```shell
+lampa server proxy set-default \
+  --kind pass \
+  --server http://localhost:3000
+```
+
+`set-default` accepts only `--kind pass` and requires full upstream URL in `--server`.
+
 > Note: runtime configuration is in-memory only and is not persisted across server restarts.
 
 ### GitHub Action

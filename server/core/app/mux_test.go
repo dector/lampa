@@ -47,6 +47,7 @@ func TestBuildControlMux_BasePathRoot(t *testing.T) {
 	assertPingEndpoint(t, mux, "/ping")
 	assertProcCountEndpoint(t, mux, "/api/v0/proc_count")
 	assertProcSetEndpoint(t, mux, "/api/v0/proc/set")
+	assertProcSetDefaultEndpoint(t, mux, "/api/v0/proc/default/set")
 	assertNotFound(t, mux, "/")
 }
 
@@ -56,6 +57,7 @@ func TestBuildControlMux_BasePathControl(t *testing.T) {
 	assertPingEndpoint(t, mux, "/control/ping")
 	assertProcCountEndpoint(t, mux, "/control/api/v0/proc_count")
 	assertProcSetEndpoint(t, mux, "/control/api/v0/proc/set")
+	assertProcSetDefaultEndpoint(t, mux, "/control/api/v0/proc/default/set")
 	assertNotFound(t, mux, "/ping")
 	assertNotFound(t, mux, "/")
 }
@@ -118,6 +120,16 @@ func assertProcCountEndpoint(t *testing.T, h http.Handler, requestPath string) {
 }
 
 func assertProcSetEndpoint(t *testing.T, h http.Handler, requestPath string) {
+	t.Helper()
+	assertMethodNotAllowed(t, h, requestPath)
+}
+
+func assertProcSetDefaultEndpoint(t *testing.T, h http.Handler, requestPath string) {
+	t.Helper()
+	assertMethodNotAllowed(t, h, requestPath)
+}
+
+func assertMethodNotAllowed(t *testing.T, h http.Handler, requestPath string) {
 	t.Helper()
 
 	req := httptest.NewRequest(http.MethodGet, requestPath, nil)

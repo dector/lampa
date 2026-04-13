@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/dector/lampa/server/core/processor"
@@ -12,6 +13,10 @@ import (
 const (
 	controlStatusOK    = "ok"
 	controlStatusError = "error"
+
+	controlProcKindStatic = "static"
+	controlProcKindJS     = "js"
+	controlProcKindPass   = "pass"
 )
 
 // ControlProcSetRequest defines payload for processor upsert.
@@ -33,6 +38,12 @@ type ControlStaticResponse struct {
 // ControlJSProcessorInput defines JS processor config for kind="js".
 type ControlJSProcessorInput struct {
 	Script string `json:"script"`
+}
+
+// ControlProcSetDefaultRequest defines payload for fallback/default processor update.
+type ControlProcSetDefaultRequest struct {
+	Kind   string `json:"kind"`
+	Server string `json:"server"`
 }
 
 // NewControlPingHandler returns control ping handler.
@@ -94,7 +105,7 @@ func NewControlProcSetHandler(store processor.ReqProcessorStore) http.HandlerFun
 		}
 
 		switch strings.TrimSpace(payload.Kind) {
-		case "static":
+		case controlProcKindStatic:
 			staticResponse := payload.Response
 			headers := staticResponse.Headers.Clone()
 			if headers == nil {
@@ -109,7 +120,7 @@ func NewControlProcSetHandler(store processor.ReqProcessorStore) http.HandlerFun
 				Headers:    headers,
 				Body:       []byte(staticResponse.Body),
 			})
-		case "js":
+		case controlProcKindJS:
 			store.SetEndpointProcessor(payload.Endpoint, processor.QuickJSReqProcessor{
 				Script: payload.JS.Script,
 			})
@@ -126,6 +137,44 @@ func NewControlProcSetHandler(store processor.ReqProcessorStore) http.HandlerFun
 	}
 }
 
+// NewControlProcSetDefaultHandler sets fallback/default processor in runtime store.
+func NewControlProcSetDefaultHandler(store processor.ReqProcessorStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			writeControlError(w, http.StatusMethodNotAllowed, "method not allowed")
+			return
+		}
+
+		if store == nil {
+			writeControlError(w, http.StatusInternalServerError, "processor store is not configured")
+			return
+		}
+
+		var payload ControlProcSetDefaultRequest
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&payload); err != nil {
+			writeControlError(w, http.StatusBadRequest, "invalid request json")
+			return
+		}
+
+		if err := validateControlProcSetDefaultRequest(payload); err != nil {
+			writeControlError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		serverURL := strings.TrimSpace(payload.Server)
+		store.SetFallbackProcessor(processor.PassthroughReqProcessor{Server: serverURL})
+
+		writeJSON(w, http.StatusOK, map[string]any{
+			"status": controlStatusOK,
+			"kind":   controlProcKindPass,
+			"server": serverURL,
+		})
+	}
+}
+
 func validateControlProcSetRequest(payload ControlProcSetRequest) error {
 	endpoint := strings.TrimSpace(payload.Endpoint)
 	if endpoint == "" || !strings.HasPrefix(endpoint, "/") {
@@ -133,13 +182,13 @@ func validateControlProcSetRequest(payload ControlProcSetRequest) error {
 	}
 
 	switch strings.TrimSpace(payload.Kind) {
-	case "static":
+	case controlProcKindStatic:
 		status := payload.Response.Status
 		if status < 100 || status > 599 {
 			return fmt.Errorf("invalid status")
 		}
 		return nil
-	case "js":
+	case controlProcKindJS:
 		if payload.JS == nil || strings.TrimSpace(payload.JS.Script) == "" {
 			return fmt.Errorf("invalid js script")
 		}
@@ -147,6 +196,22 @@ func validateControlProcSetRequest(payload ControlProcSetRequest) error {
 	default:
 		return fmt.Errorf("invalid kind")
 	}
+}
+
+func validateControlProcSetDefaultRequest(payload ControlProcSetDefaultRequest) error {
+	if strings.TrimSpace(payload.Kind) != controlProcKindPass {
+		return fmt.Errorf("invalid kind")
+	}
+
+	parsedServer, err := url.Parse(strings.TrimSpace(payload.Server))
+	if err != nil {
+		return fmt.Errorf("invalid server")
+	}
+	if parsedServer.Scheme == "" || parsedServer.Host == "" {
+		return fmt.Errorf("invalid server")
+	}
+
+	return nil
 }
 
 func writeControlError(w http.ResponseWriter, statusCode int, message string) {
