@@ -1,13 +1,19 @@
 package proxy
 
-import "github.com/urfave/cli/v3"
+import (
+	"github.com/dector/lampa/cmd/cli/server"
+	"github.com/urfave/cli/v3"
+)
 
 // CreateCliCommand creates top-level proxy command tree.
 func CreateCliCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "proxy",
-		Usage: "proxy operations",
+		Usage: "proxy control operations",
 		Commands: []*cli.Command{
+			server.CreatePingCliCommand(),
+			server.CreateSetCliCommand(),
+			server.CreateSetDefaultCliCommand(),
 			createLogsCommand(),
 		},
 	}

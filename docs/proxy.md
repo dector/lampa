@@ -1,4 +1,4 @@
-# Server CLI (LLM Agent Quick Reference)
+# Proxy CLI (LLM Agent Quick Reference)
 
 Use these commands when the Lampa server is already running.
 
@@ -10,20 +10,20 @@ Use these commands when the Lampa server is already running.
 ## Defaults
 - Control host: `localhost`
 - Control port: `8081`
-- Command namespace: `lampa server ...` and `lampa proxy ...`
+- Command namespace: `lampa proxy ...`
 
 ---
 
 ## 1) Health check
 
 ```bash
-lampa server ping
+lampa proxy ping
 ```
 
 Custom control port:
 
 ```bash
-lampa server ping --port 46899
+lampa proxy ping --port 46899
 ```
 
 Expected: JSON with `status: "ok"`.
@@ -32,18 +32,12 @@ Expected: JSON with `status: "ok"`.
 
 ## 2) Set proxy response/processor
 
-Two equivalent forms are supported:
-
-```bash
-lampa server set ...
-# or
-lampa server proxy set ...
-```
+Use `lampa proxy set ...` for endpoint processor configuration.
 
 ### Minimal static
 
 ```bash
-lampa server set \
+lampa proxy set \
   --endpoint /hello \
   --response.body 'hello'
 ```
@@ -51,7 +45,7 @@ lampa server set \
 ### Static JSON response
 
 ```bash
-lampa server proxy set \
+lampa proxy set \
   --endpoint /example \
   --response.status 200 \
   --response.content json \
@@ -61,7 +55,7 @@ lampa server proxy set \
 ### Static with custom headers
 
 ```bash
-lampa server proxy set \
+lampa proxy set \
   --endpoint /example \
   --response.body 'ok' \
   --response.header 'X-Debug:1' \
@@ -72,7 +66,7 @@ lampa server proxy set \
 If `Content-Type` is passed explicitly, it overrides `--response.content` preset.
 
 ```bash
-lampa server set \
+lampa proxy set \
   --endpoint /example \
   --response.content json \
   --response.header 'Content-Type:text/plain' \
@@ -90,7 +84,7 @@ Use indexed flags with 1-based step suffixes:
 Minimal sequence:
 
 ```bash
-lampa server set \
+lampa proxy set \
   --kind seq \
   --endpoint /flaky \
   --response.body-1 'temporary error' \
@@ -100,7 +94,7 @@ lampa server set \
 Full sequence with per-step status/content/headers:
 
 ```bash
-lampa server set \
+lampa proxy set \
   --kind seq \
   --endpoint /flaky \
   --response.status-1 500 \
@@ -116,7 +110,7 @@ lampa server set \
 Mixed defaults + explicit override:
 
 ```bash
-lampa server set \
+lampa proxy set \
   --kind seq \
   --endpoint /hello \
   --response.body-1 'hello' \
@@ -133,7 +127,7 @@ Sequence constraints:
 ### JS processor
 
 ```bash
-lampa server set \
+lampa proxy set \
   --kind js \
   --endpoint /dynamic \
   --script 'function handle(req){ return Response.json({ path: req.url, ok: true }); }'
@@ -142,7 +136,7 @@ lampa server set \
 From file:
 
 ```bash
-lampa server set \
+lampa proxy set \
   --kind js \
   --endpoint /dynamic \
   --script-file ./handler.js
@@ -157,7 +151,7 @@ More JS request-processing script samples: [`docs/server/response-js.md`](./serv
 Use this to forward any unmatched endpoint to an upstream server.
 
 ```bash
-lampa server proxy set-default \
+lampa proxy set-default \
   --kind pass \
   --server http://localhost:3000
 ```
@@ -165,7 +159,7 @@ lampa server proxy set-default \
 Custom control port:
 
 ```bash
-lampa server proxy set-default \
+lampa proxy set-default \
   --port 46899 \
   --kind pass \
   --server http://localhost:3000
@@ -247,7 +241,7 @@ Required:
 Optional:
 - `--port` (default `8081`)
 - `-n` (for `lampa proxy logs get-all`, must be `>0`)
-- `--kind` (`static|seq|js`, default `static`) for `set`/`proxy set`
+- `--kind` (`static|seq|js`, default `static`) for `set`
 - `--response.status` (default `200`, valid `100..599`, static only)
 - `--response.content` (`json|text|html|raw`, default `text`, static only)
 - `--response.header` (repeatable `Name:Value`, static only)
@@ -274,19 +268,19 @@ Content presets:
 
 1. Verify control API first:
 ```bash
-lampa server ping
+lampa proxy ping
 ```
 2. Apply endpoint response/processor:
 ```bash
-lampa server proxy set --endpoint /x --response.body '...'
+lampa proxy set --endpoint /x --response.body '...'
 # or JS:
-# lampa server set --kind js --endpoint /x --script 'function handle(req){ ... }'
+# lampa proxy set --kind js --endpoint /x --script 'function handle(req){ ... }'
 # or set default passthrough:
-# lampa server proxy set-default --kind pass --server http://localhost:3000
+# lampa proxy set-default --kind pass --server http://localhost:3000
 ```
 3. If needed, use `-v` to print full control response JSON:
 ```bash
-lampa -v server proxy set --endpoint /x --response.body '...'
+lampa -v proxy set --endpoint /x --response.body '...'
 ```
 
 ---

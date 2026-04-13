@@ -1,13 +1,13 @@
 # JS request processor scripts (`--kind js`)
 
-This page shows how JS processors work in `lampa server set --kind js` and provides runnable examples from simple to advanced.
+This page shows how JS processors work in `lampa proxy set --kind js` and provides runnable examples from simple to advanced.
 
 ## Quick start
 
 Inline script:
 
 ```bash
-lampa server set \
+lampa proxy set \
   --kind js \
   --endpoint /dynamic \
   --script 'function handle(req){ return Response.text("ok"); }'
@@ -16,7 +16,7 @@ lampa server set \
 Script from file:
 
 ```bash
-lampa server set \
+lampa proxy set \
   --kind js \
   --endpoint /dynamic \
   --script-file ./handler.js

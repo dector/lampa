@@ -13,3 +13,18 @@ func CreateCliCommand() *cli.Command {
 		},
 	}
 }
+
+// CreatePingCliCommand exports ping command constructor for reuse by other namespaces.
+func CreatePingCliCommand() *cli.Command {
+	return createPingCommand()
+}
+
+// CreateSetCliCommand exports set command constructor for reuse by other namespaces.
+func CreateSetCliCommand() *cli.Command {
+	return createSetCommand()
+}
+
+// CreateSetDefaultCliCommand exports set-default command constructor for reuse by other namespaces.
+func CreateSetDefaultCliCommand() *cli.Command {
+	return createSetDefaultCommand()
+}

@@ -147,13 +147,13 @@ If you are working with local server tooling, you can verify that a running serv
 responds on the control port:
 
 ```shell
-lampa server ping
+lampa proxy ping
 ```
 
 To check a custom port explicitly:
 
 ```shell
-lampa server ping --port 46899
+lampa proxy ping --port 46899
 ```
 
 ### Set proxy response processor
@@ -164,23 +164,23 @@ Supported kinds: `static|seq|js` (`static` by default).
 Static example:
 
 ```shell
-lampa server proxy set \
+lampa proxy set \
   --endpoint /example \
   --response.status 200 \
   --response.content json \
   --response.body '{"ok":true}'
 ```
 
-`lampa server set` is also supported as a shortcut:
+Minimal form:
 
 ```shell
-lampa server set --endpoint /example --response.body 'hello'
+lampa proxy set --endpoint /example --response.body 'hello'
 ```
 
 Static optional repeatable headers:
 
 ```shell
-lampa server proxy set \
+lampa proxy set \
   --endpoint /example \
   --response.body 'hello' \
   --response.header 'X-Debug:1' \
@@ -205,7 +205,7 @@ Sequence processor (`--kind seq`) uses indexed per-step flags:
 Minimal sequence:
 
 ```shell
-lampa server set \
+lampa proxy set \
   --kind seq \
   --endpoint /flaky \
   --response.body-1 'temporary error' \
@@ -215,7 +215,7 @@ lampa server set \
 Practical full sequence:
 
 ```shell
-lampa server set \
+lampa proxy set \
   --kind seq \
   --endpoint /flaky \
   --response.status-1 500 \
@@ -231,7 +231,7 @@ lampa server set \
 JS processor example:
 
 ```shell
-lampa server set \
+lampa proxy set \
   --kind js \
   --endpoint /dynamic \
   --script 'function handle(req){ return Response.json({ok:true, path:req.url}); }'
@@ -240,7 +240,7 @@ lampa server set \
 From file:
 
 ```shell
-lampa server set --kind js --endpoint /dynamic --script-file ./handler.js
+lampa proxy set --kind js --endpoint /dynamic --script-file ./handler.js
 ```
 
 Common mistakes:
@@ -252,7 +252,7 @@ Common mistakes:
 Set default fallback passthrough processor:
 
 ```shell
-lampa server proxy set-default \
+lampa proxy set-default \
   --kind pass \
   --server http://localhost:3000
 ```
