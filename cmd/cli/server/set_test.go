@@ -140,6 +140,131 @@ func TestBuildSetRequestFromCommand_ContentTypeOverride(t *testing.T) {
 	}
 }
 
+func TestBuildSetRequestFromCommand_SeqRequest(t *testing.T) {
+	cmd := newSetCommand("set", "set endpoint processor")
+	args := []string{
+		"set",
+		"--kind", "seq",
+		"--endpoint", "/flaky",
+		"--response.status-1", "500",
+		"--response.content-1", "text",
+		"--response.body-1", "fail once",
+		"--response.header-1", "X-Step:1",
+		"--response.content-2", "json",
+		"--response.body-2", `{"ok":true}`,
+		"--response.header-2", "Content-Type:text/custom",
+	}
+	_ = cmd.Run(context.Background(), args)
+
+	payload, err := buildSetRequestFromCommand(cmd)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got, want := payload.Kind, "seq"; got != want {
+		t.Fatalf("unexpected kind: got %q, want %q", got, want)
+	}
+	if got, want := payload.Endpoint, "/flaky"; got != want {
+		t.Fatalf("unexpected endpoint: got %q, want %q", got, want)
+	}
+	if payload.Response != nil {
+		t.Fatal("expected static response payload to be omitted for seq kind")
+	}
+	if len(payload.Sequence) != 2 {
+		t.Fatalf("unexpected sequence length: got %d, want 2", len(payload.Sequence))
+	}
+
+	step1 := payload.Sequence[0].Response
+	if got, want := step1.Status, 500; got != want {
+		t.Fatalf("unexpected step1 status: got %d, want %d", got, want)
+	}
+	if got, want := step1.ContentType, "text/plain"; got != want {
+		t.Fatalf("unexpected step1 content type: got %q, want %q", got, want)
+	}
+	if got, want := step1.Headers.Get("X-Step"), "1"; got != want {
+		t.Fatalf("unexpected step1 header X-Step: got %q, want %q", got, want)
+	}
+
+	step2 := payload.Sequence[1].Response
+	if got, want := step2.Status, 200; got != want {
+		t.Fatalf("unexpected step2 status default: got %d, want %d", got, want)
+	}
+	if got, want := step2.ContentType, "text/custom"; got != want {
+		t.Fatalf("unexpected step2 content type: got %q, want %q", got, want)
+	}
+	if got, want := step2.Headers.Get("Content-Type"), "text/custom"; got != want {
+		t.Fatalf("unexpected step2 content-type header override: got %q, want %q", got, want)
+	}
+}
+
+func TestBuildSetRequestFromCommand_SeqValidationErrors(t *testing.T) {
+	tests := []struct {
+		name        string
+		args        []string
+		wantErrPart string
+	}{
+		{
+			name: "missing body per step",
+			args: []string{
+				"set",
+				"--kind", "seq",
+				"--endpoint", "/flaky",
+				"--response.body-1", "ok",
+				"--response.status-2", "500",
+			},
+			wantErrPart: "step 2: missing response body",
+		},
+		{
+			name: "invalid status per step",
+			args: []string{
+				"set",
+				"--kind", "seq",
+				"--endpoint", "/flaky",
+				"--response.body-1", "ok",
+				"--response.status-2", "99",
+				"--response.body-2", "bad",
+			},
+			wantErrPart: "step 2: invalid status 99",
+		},
+		{
+			name: "invalid content per step",
+			args: []string{
+				"set",
+				"--kind", "seq",
+				"--endpoint", "/flaky",
+				"--response.body-1", "ok",
+				"--response.content-1", "xml",
+			},
+			wantErrPart: "step 1: invalid response content",
+		},
+		{
+			name: "invalid header per step",
+			args: []string{
+				"set",
+				"--kind", "seq",
+				"--endpoint", "/flaky",
+				"--response.body-1", "ok",
+				"--response.header-1", "NoColon",
+			},
+			wantErrPart: "step 1: invalid response header",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := newSetCommand("set", "set endpoint processor")
+			_ = cmd.Run(context.Background(), tt.args)
+
+			_, err := buildSetRequestFromCommand(cmd)
+			if err == nil {
+				t.Fatalf("expected error containing %q, got nil", tt.wantErrPart)
+			}
+			if !strings.Contains(err.Error(), tt.wantErrPart) {
+				t.Fatalf("expected error containing %q, got %q", tt.wantErrPart, err.Error())
+			}
+		})
+	}
+}
+
 func TestValidateSetInput(t *testing.T) {
 	if err := validateSetInput("static", "/ok", 200, "body", ""); err != nil {
 		t.Fatalf("expected no error, got %v", err)
