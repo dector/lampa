@@ -55,6 +55,12 @@ type ControlProcSetDefaultRequest struct {
 	Server string `json:"server"`
 }
 
+// ControlProcSequenceResetRequest defines payload for sequence index reset.
+type ControlProcSequenceResetRequest struct {
+	Endpoint string `json:"endpoint"`
+	Index    *int   `json:"index,omitempty"`
+}
+
 // NewControlPingHandler returns control ping handler.
 //
 // store is shared with proxy request handler and reserved for control APIs that
@@ -126,6 +132,97 @@ func NewControlProxyLogsHandler(logs logstore.Store) http.HandlerFunc {
 			"total":     logs.Count(),
 			"sizeBytes": logs.SizeBytes(),
 			"entries":   entries,
+		})
+	}
+}
+
+// NewControlProcSequenceHandler returns current sequence processor runtime state for endpoint.
+func NewControlProcSequenceHandler(store processor.ReqProcessorStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			writeControlError(w, http.StatusMethodNotAllowed, "method not allowed")
+			return
+		}
+
+		if store == nil {
+			writeControlError(w, http.StatusInternalServerError, "processor store is not configured")
+			return
+		}
+
+		endpoint := strings.TrimSpace(r.URL.Query().Get("endpoint"))
+		if endpoint == "" || !strings.HasPrefix(endpoint, "/") {
+			writeControlError(w, http.StatusBadRequest, "invalid endpoint")
+			return
+		}
+
+		seq, statusCode, err := resolveSequenceProcessor(store, endpoint)
+		if err != nil {
+			writeControlError(w, statusCode, err.Error())
+			return
+		}
+
+		state := seq.Snapshot()
+		writeJSON(w, http.StatusOK, map[string]any{
+			"status":    controlStatusOK,
+			"endpoint":  endpoint,
+			"kind":      controlProcKindSeq,
+			"size":      state.Size,
+			"nextIndex": state.NextIndex,
+		})
+	}
+}
+
+// NewControlProcSequenceResetHandler resets sequence processor next index for endpoint.
+func NewControlProcSequenceResetHandler(store processor.ReqProcessorStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			writeControlError(w, http.StatusMethodNotAllowed, "method not allowed")
+			return
+		}
+
+		if store == nil {
+			writeControlError(w, http.StatusInternalServerError, "processor store is not configured")
+			return
+		}
+
+		var payload ControlProcSequenceResetRequest
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&payload); err != nil {
+			writeControlError(w, http.StatusBadRequest, "invalid request json")
+			return
+		}
+
+		endpoint := strings.TrimSpace(payload.Endpoint)
+		if endpoint == "" || !strings.HasPrefix(endpoint, "/") {
+			writeControlError(w, http.StatusBadRequest, "invalid endpoint")
+			return
+		}
+
+		seq, statusCode, err := resolveSequenceProcessor(store, endpoint)
+		if err != nil {
+			writeControlError(w, statusCode, err.Error())
+			return
+		}
+
+		index := 0
+		if payload.Index != nil {
+			index = *payload.Index
+		}
+		if err := seq.Reset(index); err != nil {
+			writeControlError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		state := seq.Snapshot()
+		writeJSON(w, http.StatusOK, map[string]any{
+			"status":    controlStatusOK,
+			"endpoint":  endpoint,
+			"kind":      controlProcKindSeq,
+			"size":      state.Size,
+			"nextIndex": state.NextIndex,
 		})
 	}
 }
@@ -219,6 +316,20 @@ func NewControlProcSetDefaultHandler(store processor.ReqProcessorStore) http.Han
 			"server": serverURL,
 		})
 	}
+}
+
+func resolveSequenceProcessor(store processor.ReqProcessorStore, endpoint string) (*processor.SequenceReqProcessor, int, error) {
+	proc, ok := store.EndpointProcessor(endpoint)
+	if !ok {
+		return nil, http.StatusNotFound, fmt.Errorf("processor not found")
+	}
+
+	seq, ok := proc.(*processor.SequenceReqProcessor)
+	if !ok {
+		return nil, http.StatusBadRequest, fmt.Errorf("processor is not sequence")
+	}
+
+	return seq, http.StatusOK, nil
 }
 
 func validateControlProcSetRequest(payload ControlProcSetRequest) error {

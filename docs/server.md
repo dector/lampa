@@ -202,6 +202,41 @@ Response includes:
 
 ---
 
+## 5) Sequence processor introspection/reset (control API)
+
+For endpoints configured with a `seq` processor, you can inspect and reset the runtime pointer.
+
+Get sequence state:
+
+```bash
+curl 'http://localhost:8081/api/v0/proc/sequence?endpoint=/flaky'
+```
+
+Reset sequence index (defaults to `0`):
+
+```bash
+curl -X POST 'http://localhost:8081/api/v0/proc/sequence/reset' \
+  -H 'Content-Type: application/json' \
+  -d '{"endpoint":"/flaky"}'
+```
+
+Reset to a specific step index:
+
+```bash
+curl -X POST 'http://localhost:8081/api/v0/proc/sequence/reset' \
+  -H 'Content-Type: application/json' \
+  -d '{"endpoint":"/flaky","index":1}'
+```
+
+Response fields:
+- `status`
+- `endpoint`
+- `kind` (`seq`)
+- `size` (steps count)
+- `nextIndex` (next step to be used)
+
+---
+
 ## Flags
 
 Required:

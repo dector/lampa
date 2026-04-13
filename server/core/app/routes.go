@@ -14,6 +14,10 @@ const (
 	RouteProcSet = "/api/v0/proc/set"
 	// RouteProcSetDefault is control endpoint that sets fallback/default processor runtime config.
 	RouteProcSetDefault = "/api/v0/proc/default/set"
+	// RouteProcSequence is control endpoint that returns sequence processor runtime state.
+	RouteProcSequence = "/api/v0/proc/sequence"
+	// RouteProcSequenceReset is control endpoint that resets sequence processor index.
+	RouteProcSequenceReset = "/api/v0/proc/sequence/reset"
 	// RouteProxyLogs is control endpoint that returns latest proxy request/response logs.
 	RouteProxyLogs = "/api/v0/proxy/logs"
 )

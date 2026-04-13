@@ -91,6 +91,42 @@ func TestSequenceReqProcessor_Process_HandlesInvalidCurrentIndex(t *testing.T) {
 	}
 }
 
+func TestSequenceReqProcessor_Snapshot(t *testing.T) {
+	p := &SequenceReqProcessor{
+		Processors: []ReqProcessor{
+			StaticReqProcessor{StatusCode: 200, Body: []byte("first")},
+			StaticReqProcessor{StatusCode: 201, Body: []byte("second")},
+		},
+		CurrentIndex: 99,
+	}
+
+	state := p.Snapshot()
+	if got, want := state.Size, 2; got != want {
+		t.Fatalf("unexpected size: got %d, want %d", got, want)
+	}
+	if got, want := state.NextIndex, 0; got != want {
+		t.Fatalf("unexpected next index: got %d, want %d", got, want)
+	}
+}
+
+func TestSequenceReqProcessor_Reset(t *testing.T) {
+	p := NewSequenceReqProcessor([]ReqProcessor{
+		StaticReqProcessor{StatusCode: 200, Body: []byte("first")},
+		StaticReqProcessor{StatusCode: 201, Body: []byte("second")},
+	})
+
+	if err := p.Reset(1); err != nil {
+		t.Fatalf("unexpected reset error: %v", err)
+	}
+	if got, want := p.Snapshot().NextIndex, 1; got != want {
+		t.Fatalf("unexpected next index after reset: got %d, want %d", got, want)
+	}
+
+	if err := p.Reset(2); err == nil {
+		t.Fatal("expected reset error for out-of-bounds index")
+	}
+}
+
 var _ ReqProcessor = (*sequenceNoneReqProcessor)(nil)
 
 type sequenceNoneReqProcessor struct{}

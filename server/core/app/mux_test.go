@@ -48,6 +48,8 @@ func TestBuildControlMux_BasePathRoot(t *testing.T) {
 	assertProcCountEndpoint(t, mux, "/api/v0/proc_count")
 	assertProcSetEndpoint(t, mux, "/api/v0/proc/set")
 	assertProcSetDefaultEndpoint(t, mux, "/api/v0/proc/default/set")
+	assertProcSequenceEndpoint(t, mux, "/api/v0/proc/sequence")
+	assertProcSequenceResetEndpoint(t, mux, "/api/v0/proc/sequence/reset")
 	assertProxyLogsEndpoint(t, mux, "/api/v0/proxy/logs")
 	assertNotFound(t, mux, "/")
 }
@@ -59,6 +61,8 @@ func TestBuildControlMux_BasePathControl(t *testing.T) {
 	assertProcCountEndpoint(t, mux, "/control/api/v0/proc_count")
 	assertProcSetEndpoint(t, mux, "/control/api/v0/proc/set")
 	assertProcSetDefaultEndpoint(t, mux, "/control/api/v0/proc/default/set")
+	assertProcSequenceEndpoint(t, mux, "/control/api/v0/proc/sequence")
+	assertProcSequenceResetEndpoint(t, mux, "/control/api/v0/proc/sequence/reset")
 	assertProxyLogsEndpoint(t, mux, "/control/api/v0/proxy/logs")
 	assertNotFound(t, mux, "/ping")
 	assertNotFound(t, mux, "/")
@@ -127,6 +131,34 @@ func assertProcSetEndpoint(t *testing.T, h http.Handler, requestPath string) {
 }
 
 func assertProcSetDefaultEndpoint(t *testing.T, h http.Handler, requestPath string) {
+	t.Helper()
+	assertMethodNotAllowed(t, h, requestPath)
+}
+
+func assertProcSequenceEndpoint(t *testing.T, h http.Handler, requestPath string) {
+	t.Helper()
+
+	req := httptest.NewRequest(http.MethodGet, requestPath, nil)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusInternalServerError; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := payload["status"], "error"; got != want {
+		t.Fatalf("unexpected status: got %v, want %v", got, want)
+	}
+	if got, want := payload["error"], "processor store is not configured"; got != want {
+		t.Fatalf("unexpected error payload: got %v, want %v", got, want)
+	}
+}
+
+func assertProcSequenceResetEndpoint(t *testing.T, h http.Handler, requestPath string) {
 	t.Helper()
 	assertMethodNotAllowed(t, h, requestPath)
 }

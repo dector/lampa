@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	corehttp "github.com/dector/lampa/server/core/http"
 	"github.com/dector/lampa/server/core/logstore"
 	"github.com/dector/lampa/server/core/processor"
 )
@@ -237,6 +238,90 @@ func TestControlProcSetHandler_Seq_InvalidPayload(t *testing.T) {
 			t.Fatalf("unexpected error payload: got %v, want %v", got, want)
 		}
 	})
+}
+
+func TestControlProcSequenceHandler_Success(t *testing.T) {
+	store := processor.NewInMemoryReqProcessorStore(nil, nil)
+	seq := processor.NewSequenceReqProcessor([]processor.ReqProcessor{
+		processor.StaticReqProcessor{StatusCode: 200, Body: []byte("first")},
+		processor.StaticReqProcessor{StatusCode: 201, Body: []byte("second")},
+	})
+	store.SetEndpointProcessor("/seq", seq)
+
+	_ = seq.Process(corehttp.HttpRequest{})
+
+	handler := NewControlProcSequenceHandler(store)
+	req := httptest.NewRequest(http.MethodGet, RouteProcSequence+"?endpoint=/seq", nil)
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusOK; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := payload["kind"], "seq"; got != want {
+		t.Fatalf("unexpected kind payload: got %v, want %v", got, want)
+	}
+	if got, want := payload["nextIndex"], float64(1); got != want {
+		t.Fatalf("unexpected nextIndex payload: got %v, want %v", got, want)
+	}
+}
+
+func TestControlProcSequenceResetHandler_Success(t *testing.T) {
+	store := processor.NewInMemoryReqProcessorStore(nil, nil)
+	seq := processor.NewSequenceReqProcessor([]processor.ReqProcessor{
+		processor.StaticReqProcessor{StatusCode: 200, Body: []byte("first")},
+		processor.StaticReqProcessor{StatusCode: 201, Body: []byte("second")},
+	})
+	store.SetEndpointProcessor("/seq", seq)
+
+	if err := seq.Reset(1); err != nil {
+		t.Fatalf("prepare reset: %v", err)
+	}
+
+	handler := NewControlProcSequenceResetHandler(store)
+	body := []byte(`{"endpoint":"/seq"}`)
+	req := httptest.NewRequest(http.MethodPost, RouteProcSequenceReset, bytes.NewReader(body))
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusOK; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	if got, want := seq.Snapshot().NextIndex, 0; got != want {
+		t.Fatalf("unexpected next index after reset: got %d, want %d", got, want)
+	}
+}
+
+func TestControlProcSequenceResetHandler_InvalidIndex(t *testing.T) {
+	store := processor.NewInMemoryReqProcessorStore(nil, nil)
+	seq := processor.NewSequenceReqProcessor([]processor.ReqProcessor{
+		processor.StaticReqProcessor{StatusCode: 200, Body: []byte("first")},
+	})
+	store.SetEndpointProcessor("/seq", seq)
+
+	handler := NewControlProcSequenceResetHandler(store)
+	body := []byte(`{"endpoint":"/seq","index":2}`)
+	req := httptest.NewRequest(http.MethodPost, RouteProcSequenceReset, bytes.NewReader(body))
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusBadRequest; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := payload["error"], "invalid index"; got != want {
+		t.Fatalf("unexpected error payload: got %v, want %v", got, want)
+	}
 }
 
 func TestControlProcSetHandler_BadJSON(t *testing.T) {

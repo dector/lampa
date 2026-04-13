@@ -261,6 +261,19 @@ lampa server proxy set-default \
 
 > Note: runtime configuration is in-memory only and is not persisted across server restarts.
 
+For `seq` processors, control API also supports introspection/reset:
+
+```text
+GET  /api/v0/proc/sequence?endpoint=/your-endpoint
+POST /api/v0/proc/sequence/reset
+```
+
+Reset payload example:
+
+```json
+{"endpoint":"/your-endpoint","index":0}
+```
+
 ### Get proxy request/response logs
 
 You can fetch latest in-memory proxy logs via control CLI:
