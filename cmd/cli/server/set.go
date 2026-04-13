@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -21,14 +22,20 @@ const (
 	OptResponseContent = "response.content"
 	OptResponseBody    = "response.body"
 	OptResponseHeader  = "response.header"
+	OptScript          = "script"
+	OptScriptFile      = "script-file"
 
-	defaultProcessorKind = "static"
+	kindStatic = "static"
+	kindJS     = "js"
+
+	defaultProcessorKind = kindStatic
 )
 
 type procSetRequest struct {
-	Kind     string                `json:"kind"`
-	Endpoint string                `json:"endpoint"`
-	Response procSetStaticResponse `json:"response"`
+	Kind     string                 `json:"kind"`
+	Endpoint string                 `json:"endpoint"`
+	Response *procSetStaticResponse `json:"response,omitempty"`
+	JS       *procSetJSConfig       `json:"js,omitempty"`
 }
 
 type procSetStaticResponse struct {
@@ -36,6 +43,10 @@ type procSetStaticResponse struct {
 	ContentType string      `json:"contentType,omitempty"`
 	Headers     http.Header `json:"headers,omitempty"`
 	Body        string      `json:"body"`
+}
+
+type procSetJSConfig struct {
+	Script string `json:"script"`
 }
 
 func createSetCommand() *cli.Command {
@@ -64,7 +75,7 @@ func newSetCommand(name string, usage string) *cli.Command {
 			},
 			&cli.StringFlag{
 				Name:  OptKind,
-				Usage: "processor kind (static)",
+				Usage: "processor kind (static|js)",
 				Value: defaultProcessorKind,
 			},
 			&cli.StringFlag{
@@ -83,9 +94,16 @@ func newSetCommand(name string, usage string) *cli.Command {
 				Value: "text",
 			},
 			&cli.StringFlag{
-				Name:     OptResponseBody,
-				Usage:    "response body string",
-				Required: true,
+				Name:  OptResponseBody,
+				Usage: "response body string (required for --kind static)",
+			},
+			&cli.StringFlag{
+				Name:  OptScript,
+				Usage: "inline JS script for --kind js",
+			},
+			&cli.StringFlag{
+				Name:  OptScriptFile,
+				Usage: "path to JS file for --kind js",
 			},
 			&cli.StringSliceFlag{
 				Name:  OptResponseHeader,
@@ -133,44 +151,56 @@ func buildSetRequestFromCommand(c *cli.Command) (procSetRequest, error) {
 	content := strings.TrimSpace(c.String(OptResponseContent))
 	body := c.String(OptResponseBody)
 	rawHeaders := c.StringSlice(OptResponseHeader)
+	scriptInline := c.String(OptScript)
+	scriptFile := strings.TrimSpace(c.String(OptScriptFile))
 
 	headers, err := parseRawHeaders(rawHeaders)
 	if err != nil {
 		return procSetRequest{}, err
 	}
 
-	if err := validateSetInput(kind, endpoint, status); err != nil {
-		return procSetRequest{}, err
-	}
-
-	presetContentType, err := contentPresetToContentType(content)
+	script, err := resolveScriptInput(scriptInline, scriptFile)
 	if err != nil {
 		return procSetRequest{}, err
 	}
-	if headers.Get("Content-Type") == "" && presetContentType != "" {
-		headers.Set("Content-Type", presetContentType)
+
+	if err := validateSetInput(kind, endpoint, status, body, script); err != nil {
+		return procSetRequest{}, err
 	}
 
-	contentType := strings.TrimSpace(headers.Get("Content-Type"))
-	if contentType == "" {
-		contentType = ""
-	}
-
-	return procSetRequest{
+	payload := procSetRequest{
 		Kind:     kind,
 		Endpoint: endpoint,
-		Response: procSetStaticResponse{
+	}
+
+	switch kind {
+	case kindStatic:
+		presetContentType, err := contentPresetToContentType(content)
+		if err != nil {
+			return procSetRequest{}, err
+		}
+		if headers.Get("Content-Type") == "" && presetContentType != "" {
+			headers.Set("Content-Type", presetContentType)
+		}
+
+		contentType := strings.TrimSpace(headers.Get("Content-Type"))
+		payload.Response = &procSetStaticResponse{
 			Status:      status,
 			ContentType: contentType,
 			Headers:     headers,
 			Body:        body,
-		},
-	}, nil
+		}
+	case kindJS:
+		payload.JS = &procSetJSConfig{Script: script}
+	}
+
+	return payload, nil
 }
 
-func validateSetInput(kind, endpoint string, status int) error {
-	if strings.TrimSpace(kind) != defaultProcessorKind {
-		return fmt.Errorf("invalid kind %q: only %q is supported", kind, defaultProcessorKind)
+func validateSetInput(kind, endpoint string, status int, body string, script string) error {
+	kind = strings.TrimSpace(kind)
+	if kind != kindStatic && kind != kindJS {
+		return fmt.Errorf("invalid kind %q: expected %q or %q", kind, kindStatic, kindJS)
 	}
 
 	endpoint = strings.TrimSpace(endpoint)
@@ -178,11 +208,40 @@ func validateSetInput(kind, endpoint string, status int) error {
 		return fmt.Errorf("invalid endpoint %q: must start with /", endpoint)
 	}
 
-	if status < 100 || status > 599 {
-		return fmt.Errorf("invalid status %d: must be between 100 and 599", status)
+	switch kind {
+	case kindStatic:
+		if status < 100 || status > 599 {
+			return fmt.Errorf("invalid status %d: must be between 100 and 599", status)
+		}
+		if strings.TrimSpace(body) == "" {
+			return fmt.Errorf("missing response body for kind %q", kindStatic)
+		}
+	case kindJS:
+		if strings.TrimSpace(script) == "" {
+			return fmt.Errorf("missing script for kind %q", kindJS)
+		}
 	}
 
 	return nil
+}
+
+func resolveScriptInput(scriptInline string, scriptFile string) (string, error) {
+	inline := strings.TrimSpace(scriptInline)
+	file := strings.TrimSpace(scriptFile)
+
+	if inline != "" && file != "" {
+		return "", fmt.Errorf("%s and %s cannot be used together", OptScript, OptScriptFile)
+	}
+
+	if file == "" {
+		return scriptInline, nil
+	}
+
+	content, err := os.ReadFile(file)
+	if err != nil {
+		return "", fmt.Errorf("failed to read %s %q: %w", OptScriptFile, file, err)
+	}
+	return string(content), nil
 }
 
 func contentPresetToContentType(content string) (string, error) {

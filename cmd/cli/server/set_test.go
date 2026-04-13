@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -98,6 +100,9 @@ func TestBuildSetRequestFromCommand(t *testing.T) {
 	if got, want := payload.Endpoint, "/example"; got != want {
 		t.Fatalf("unexpected endpoint: got %q, want %q", got, want)
 	}
+	if payload.Response == nil {
+		t.Fatal("expected static response payload")
+	}
 	if got, want := payload.Response.Status, 201; got != want {
 		t.Fatalf("unexpected response status: got %d, want %d", got, want)
 	}
@@ -127,23 +132,35 @@ func TestBuildSetRequestFromCommand_ContentTypeOverride(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+	if payload.Response == nil {
+		t.Fatal("expected static response payload")
+	}
 	if got, want := payload.Response.ContentType, "text/custom"; got != want {
 		t.Fatalf("unexpected response contentType: got %q, want %q", got, want)
 	}
 }
 
 func TestValidateSetInput(t *testing.T) {
-	if err := validateSetInput("static", "/ok", 200); err != nil {
+	if err := validateSetInput("static", "/ok", 200, "body", ""); err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
-	if err := validateSetInput("dynamic", "/ok", 200); err == nil {
+	if err := validateSetInput("js", "/ok", 0, "", "function handle(req){return null;}"); err != nil {
+		t.Fatalf("expected no error for js kind, got %v", err)
+	}
+	if err := validateSetInput("dynamic", "/ok", 200, "body", ""); err == nil {
 		t.Fatal("expected kind validation error, got nil")
 	}
-	if err := validateSetInput("static", "bad", 200); err == nil {
+	if err := validateSetInput("static", "bad", 200, "body", ""); err == nil {
 		t.Fatal("expected endpoint validation error, got nil")
 	}
-	if err := validateSetInput("static", "/ok", 99); err == nil {
+	if err := validateSetInput("static", "/ok", 99, "body", ""); err == nil {
 		t.Fatal("expected status validation error, got nil")
+	}
+	if err := validateSetInput("static", "/ok", 200, "", ""); err == nil {
+		t.Fatal("expected static body validation error, got nil")
+	}
+	if err := validateSetInput("js", "/ok", 0, "", ""); err == nil {
+		t.Fatal("expected js script validation error, got nil")
 	}
 }
 
@@ -212,7 +229,7 @@ func TestSetControl(t *testing.T) {
 			response, err := setControl(ctx, ts.Client(), ts.URL+"/api/v0/proc/set", procSetRequest{
 				Kind:     "static",
 				Endpoint: "/example",
-				Response: procSetStaticResponse{Status: 200, Body: "ok"},
+				Response: &procSetStaticResponse{Status: 200, Body: "ok"},
 			})
 
 			if tt.wantErrPart == "" {
@@ -279,8 +296,90 @@ func TestSetControl_RequestEncoding(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	_, err := setControl(ctx, ts.Client(), ts.URL, procSetRequest{Kind: "static", Endpoint: "/example", Response: procSetStaticResponse{Status: 200, Body: "ok"}})
+	_, err := setControl(ctx, ts.Client(), ts.URL, procSetRequest{Kind: "static", Endpoint: "/example", Response: &procSetStaticResponse{Status: 200, Body: "ok"}})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestBuildSetRequestFromCommand_JS_InlineScript(t *testing.T) {
+	cmd := newSetCommand("set", "set endpoint processor")
+	_ = cmd.Run(context.Background(), []string{
+		"set",
+		"--kind", "js",
+		"--endpoint", "/js",
+		"--script", "function handle(req){ return Response.json({ok:true}); }",
+	})
+
+	payload, err := buildSetRequestFromCommand(cmd)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got, want := payload.Kind, "js"; got != want {
+		t.Fatalf("unexpected kind: got %q, want %q", got, want)
+	}
+	if payload.Response != nil {
+		t.Fatal("expected static response to be omitted for js kind")
+	}
+	if payload.JS == nil || strings.TrimSpace(payload.JS.Script) == "" {
+		t.Fatal("expected js script payload")
+	}
+}
+
+func TestBuildSetRequestFromCommand_JS_ScriptFile(t *testing.T) {
+	tmpDir := t.TempDir()
+	scriptPath := filepath.Join(tmpDir, "handler.js")
+	script := "function handle(req){ return Response.text('ok'); }"
+	if err := os.WriteFile(scriptPath, []byte(script), 0o644); err != nil {
+		t.Fatalf("write script: %v", err)
+	}
+
+	cmd := newSetCommand("set", "set endpoint processor")
+	_ = cmd.Run(context.Background(), []string{
+		"set",
+		"--kind", "js",
+		"--endpoint", "/js",
+		"--script-file", scriptPath,
+	})
+
+	payload, err := buildSetRequestFromCommand(cmd)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if payload.JS == nil {
+		t.Fatal("expected js payload")
+	}
+	if got, want := payload.JS.Script, script; got != want {
+		t.Fatalf("unexpected script payload: got %q, want %q", got, want)
+	}
+}
+
+func TestBuildSetRequestFromCommand_JS_ScriptConflict(t *testing.T) {
+	cmd := newSetCommand("set", "set endpoint processor")
+	_ = cmd.Run(context.Background(), []string{
+		"set",
+		"--kind", "js",
+		"--endpoint", "/js",
+		"--script", "function handle(req){return null;}",
+		"--script-file", "handler.js",
+	})
+
+	_, err := buildSetRequestFromCommand(cmd)
+	if err == nil {
+		t.Fatal("expected conflict validation error, got nil")
+	}
+}
+
+func TestBuildSetRequestFromCommand_JS_MissingScript(t *testing.T) {
+	cmd := newSetCommand("set", "set endpoint processor")
+	_ = cmd.Run(context.Background(), []string{
+		"set",
+		"--kind", "js",
+		"--endpoint", "/js",
+	})
+
+	_, err := buildSetRequestFromCommand(cmd)
+	if err == nil {
+		t.Fatal("expected missing script error, got nil")
 	}
 }

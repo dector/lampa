@@ -4,7 +4,7 @@ Use these commands when the Lampa server is already running.
 
 ## Purpose
 - Check control plane health.
-- Configure static responses for proxy endpoints at runtime.
+- Configure static or JS processors for proxy endpoints at runtime.
 
 ## Defaults
 - Control host: `localhost`
@@ -29,7 +29,7 @@ Expected: JSON with `status: "ok"`.
 
 ---
 
-## 2) Set static proxy response
+## 2) Set proxy response/processor
 
 Two equivalent forms are supported:
 
@@ -39,7 +39,7 @@ lampa server set ...
 lampa server proxy set ...
 ```
 
-### Minimal
+### Minimal static
 
 ```bash
 lampa server set \
@@ -47,7 +47,7 @@ lampa server set \
   --response.body 'hello'
 ```
 
-### JSON response
+### Static JSON response
 
 ```bash
 lampa server proxy set \
@@ -57,7 +57,7 @@ lampa server proxy set \
   --response.body '{"ok":true}'
 ```
 
-### With custom headers
+### Static with custom headers
 
 ```bash
 lampa server proxy set \
@@ -67,7 +67,7 @@ lampa server proxy set \
   --response.header 'Cache-Control:no-store'
 ```
 
-### Content-Type override
+### Static Content-Type override
 If `Content-Type` is passed explicitly, it overrides `--response.content` preset.
 
 ```bash
@@ -78,20 +78,41 @@ lampa server set \
   --response.body 'forced text'
 ```
 
+### JS processor
+
+```bash
+lampa server set \
+  --kind js \
+  --endpoint /dynamic \
+  --script 'function handle(req){ return Response.json({ path: req.url, ok: true }); }'
+```
+
+From file:
+
+```bash
+lampa server set \
+  --kind js \
+  --endpoint /dynamic \
+  --script-file ./handler.js
+```
+
 ---
 
 ## Flags
 
 Required:
 - `--endpoint` (must start with `/`)
-- `--response.body`
+- for `--kind static`: `--response.body`
+- for `--kind js`: `--script` or `--script-file`
 
 Optional:
 - `--port` (default `8081`)
-- `--kind` (currently only `static`)
-- `--response.status` (default `200`, valid `100..599`)
-- `--response.content` (`json|text|html|raw`, default `text`)
-- `--response.header` (repeatable `Name:Value`)
+- `--kind` (`static|js`, default `static`)
+- `--response.status` (default `200`, valid `100..599`, static only)
+- `--response.content` (`json|text|html|raw`, default `text`, static only)
+- `--response.header` (repeatable `Name:Value`, static only)
+- `--script` (inline JS, js only)
+- `--script-file` (path to JS file, js only)
 
 Content presets:
 - `json` -> `application/json`
@@ -107,9 +128,11 @@ Content presets:
 ```bash
 lampa server ping
 ```
-2. Apply endpoint response:
+2. Apply endpoint response/processor:
 ```bash
 lampa server proxy set --endpoint /x --response.body '...'
+# or JS:
+# lampa server set --kind js --endpoint /x --script 'function handle(req){ ... }'
 ```
 3. If needed, use `-v` to print full control response JSON:
 ```bash

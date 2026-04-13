@@ -38,7 +38,7 @@
   - [Generate only HTML report for current version](#generate-only-html-report-for-current-version)
   - [Generate comparative HTML report for two releases](#generate-comparative-html-report-for-two-releases)
   - [Ping local server](#ping-local-server)
-  - [Set static proxy response](#set-static-proxy-response)
+  - [Set proxy response processor](#set-proxy-response-processor)
   - [GitHub Action](#github-action)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
@@ -155,11 +155,11 @@ To check a custom port explicitly:
 lampa server ping --port 46899
 ```
 
-### Set static proxy response
+### Set proxy response processor
 
-You can configure an endpoint to always return a static response via control API.
+You can configure endpoint processors via control API.
 
-Basic example:
+Static example:
 
 ```shell
 lampa server proxy set \
@@ -175,7 +175,7 @@ lampa server proxy set \
 lampa server set --endpoint /example --response.body 'hello'
 ```
 
-Optional repeatable headers:
+Static optional repeatable headers:
 
 ```shell
 lampa server proxy set \
@@ -185,13 +185,30 @@ lampa server proxy set \
   --response.header 'Cache-Control:no-store'
 ```
 
-Content presets:
+Static content presets:
 - `json` -> `application/json`
 - `text` -> `text/plain`
 - `html` -> `text/html`
 - `raw` -> no auto `Content-Type`
 
 If you pass `--response.header 'Content-Type:...'`, it overrides the preset.
+
+JS processor example:
+
+```shell
+lampa server set \
+  --kind js \
+  --endpoint /dynamic \
+  --script 'function handle(req){ return Response.json({ok:true, path:req.url}); }'
+```
+
+From file:
+
+```shell
+lampa server set --kind js --endpoint /dynamic --script-file ./handler.js
+```
+
+`--kind` supports: `static|js` (`static` by default).
 
 > Note: runtime configuration is in-memory only and is not persisted across server restarts.
 
