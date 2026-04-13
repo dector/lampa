@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `server ping` command to verify control server availability (including `--port` override).
+- `server set` / `server proxy set` command to upsert static endpoint responses via control API (`/api/v0/proc/set`).
 - `/ping` server endpoint and Android adb-forward verification flow documentation.
 
 [DIFF v0.3.2 <-> v0.3.3](https://github.com/dector/lampa/compare/v0.3.2...v0.3.3)

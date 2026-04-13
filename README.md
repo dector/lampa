@@ -38,6 +38,7 @@
   - [Generate only HTML report for current version](#generate-only-html-report-for-current-version)
   - [Generate comparative HTML report for two releases](#generate-comparative-html-report-for-two-releases)
   - [Ping local server](#ping-local-server)
+  - [Set static proxy response](#set-static-proxy-response)
   - [GitHub Action](#github-action)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
@@ -153,6 +154,46 @@ To check a custom port explicitly:
 ```shell
 lampa server ping --port 46899
 ```
+
+### Set static proxy response
+
+You can configure an endpoint to always return a static response via control API.
+
+Basic example:
+
+```shell
+lampa server proxy set \
+  --endpoint /example \
+  --response.status 200 \
+  --response.content json \
+  --response.body '{"ok":true}'
+```
+
+`lampa server set` is also supported as a shortcut:
+
+```shell
+lampa server set --endpoint /example --response.body 'hello'
+```
+
+Optional repeatable headers:
+
+```shell
+lampa server proxy set \
+  --endpoint /example \
+  --response.body 'hello' \
+  --response.header 'X-Debug:1' \
+  --response.header 'Cache-Control:no-store'
+```
+
+Content presets:
+- `json` -> `application/json`
+- `text` -> `text/plain`
+- `html` -> `text/html`
+- `raw` -> no auto `Content-Type`
+
+If you pass `--response.header 'Content-Type:...'`, it overrides the preset.
+
+> Note: runtime configuration is in-memory only and is not persisted across server restarts.
 
 ### GitHub Action
 

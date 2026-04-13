@@ -8,6 +8,8 @@ func CreateCliCommand() *cli.Command {
 		Usage: "control server operations",
 		Commands: []*cli.Command{
 			createPingCommand(),
+			createSetCommand(),
+			createProxyCommand(),
 		},
 	}
 }
