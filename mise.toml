@@ -2,3 +2,21 @@
 golang = "1.26.2"
 java = "temurin-17"
 android-sdk = "9.0"
+
+[tasks.build-cli]
+description = "Build lampa CLI binary"
+run = "mkdir -p out && go build -o out/lampa ./cmd/cli"
+
+[tasks.build-library]
+description = "Build Android AAR library"
+run = "./server/core/scripts/build-aar.sh"
+
+[tasks.build-android]
+description = "Build Android debug APK"
+depends = ["build-library"]
+run = "cd server/android && ./gradlew :app:assembleDebug"
+
+[tasks.build-all]
+description = "Build library, Android app, and CLI"
+depends = ["build-library", "build-android", "build-cli"]
+run = "echo 'Build complete'"
