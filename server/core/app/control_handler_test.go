@@ -130,6 +130,115 @@ func TestControlProcSetHandler_JS_InvalidScript(t *testing.T) {
 	}
 }
 
+func TestControlProcSetHandler_Seq_Success(t *testing.T) {
+	store := processor.NewInMemoryReqProcessorStore(nil, nil)
+	handler := NewControlProcSetHandler(store)
+
+	body := []byte(`{"kind":"seq","endpoint":"/seq","sequence":[{"response":{"status":500,"body":"fail","headers":{"X-Step":["1"]}}},{"response":{"status":200,"contentType":"application/json","body":"{\"ok\":true}"}}]}`)
+	req := httptest.NewRequest(http.MethodPost, RouteProcSet, bytes.NewReader(body))
+	rr := httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusOK; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := payload["status"], "ok"; got != want {
+		t.Fatalf("unexpected status payload: got %v, want %v", got, want)
+	}
+	if got, want := payload["endpoint"], "/seq"; got != want {
+		t.Fatalf("unexpected endpoint payload: got %v, want %v", got, want)
+	}
+	if got, want := payload["kind"], "seq"; got != want {
+		t.Fatalf("unexpected kind payload: got %v, want %v", got, want)
+	}
+
+	proc, ok := store.EndpointProcessor("/seq")
+	if !ok {
+		t.Fatal("expected processor to be stored")
+	}
+
+	seqProc, ok := proc.(*processor.SequenceReqProcessor)
+	if !ok {
+		t.Fatalf("unexpected processor type: %T", proc)
+	}
+	if got, want := len(seqProc.Processors), 2; got != want {
+		t.Fatalf("unexpected sequence processors count: got %d, want %d", got, want)
+	}
+
+	step1, ok := seqProc.Processors[0].(processor.StaticReqProcessor)
+	if !ok {
+		t.Fatalf("unexpected first step processor type: %T", seqProc.Processors[0])
+	}
+	if got, want := step1.StatusCode, 500; got != want {
+		t.Fatalf("unexpected first step status: got %d, want %d", got, want)
+	}
+	if got, want := step1.Headers.Get("X-Step"), "1"; got != want {
+		t.Fatalf("unexpected first step header: got %q, want %q", got, want)
+	}
+
+	step2, ok := seqProc.Processors[1].(processor.StaticReqProcessor)
+	if !ok {
+		t.Fatalf("unexpected second step processor type: %T", seqProc.Processors[1])
+	}
+	if got, want := step2.StatusCode, 200; got != want {
+		t.Fatalf("unexpected second step status: got %d, want %d", got, want)
+	}
+	if got, want := step2.Headers.Get("Content-Type"), "application/json"; got != want {
+		t.Fatalf("unexpected second step content type: got %q, want %q", got, want)
+	}
+}
+
+func TestControlProcSetHandler_Seq_InvalidPayload(t *testing.T) {
+	store := processor.NewInMemoryReqProcessorStore(nil, nil)
+	handler := NewControlProcSetHandler(store)
+
+	t.Run("empty sequence", func(t *testing.T) {
+		body := []byte(`{"kind":"seq","endpoint":"/seq","sequence":[]}`)
+		req := httptest.NewRequest(http.MethodPost, RouteProcSet, bytes.NewReader(body))
+		rr := httptest.NewRecorder()
+
+		handler.ServeHTTP(rr, req)
+
+		if got, want := rr.Code, http.StatusBadRequest; got != want {
+			t.Fatalf("unexpected status code: got %d, want %d", got, want)
+		}
+
+		var payload map[string]any
+		if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+			t.Fatalf("failed to parse response body as JSON: %v", err)
+		}
+		if got, want := payload["error"], "invalid sequence"; got != want {
+			t.Fatalf("unexpected error payload: got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("invalid step status", func(t *testing.T) {
+		body := []byte(`{"kind":"seq","endpoint":"/seq","sequence":[{"response":{"status":200,"body":"ok"}},{"response":{"status":99,"body":"bad"}}]}`)
+		req := httptest.NewRequest(http.MethodPost, RouteProcSet, bytes.NewReader(body))
+		rr := httptest.NewRecorder()
+
+		handler.ServeHTTP(rr, req)
+
+		if got, want := rr.Code, http.StatusBadRequest; got != want {
+			t.Fatalf("unexpected status code: got %d, want %d", got, want)
+		}
+
+		var payload map[string]any
+		if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+			t.Fatalf("failed to parse response body as JSON: %v", err)
+		}
+		if got, want := payload["error"], "invalid sequence step 2: invalid status"; got != want {
+			t.Fatalf("unexpected error payload: got %v, want %v", got, want)
+		}
+	})
+}
+
 func TestControlProcSetHandler_BadJSON(t *testing.T) {
 	store := processor.NewInMemoryReqProcessorStore(nil, nil)
 	handler := NewControlProcSetHandler(store)

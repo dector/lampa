@@ -18,15 +18,22 @@ const (
 
 	controlProcKindStatic = "static"
 	controlProcKindJS     = "js"
+	controlProcKindSeq    = "seq"
 	controlProcKindPass   = "pass"
 )
 
 // ControlProcSetRequest defines payload for processor upsert.
 type ControlProcSetRequest struct {
-	Kind     string                   `json:"kind"`
-	Endpoint string                   `json:"endpoint"`
-	Response ControlStaticResponse    `json:"response"`
-	JS       *ControlJSProcessorInput `json:"js,omitempty"`
+	Kind     string                    `json:"kind"`
+	Endpoint string                    `json:"endpoint"`
+	Response ControlStaticResponse     `json:"response"`
+	Sequence []ControlSeqProcessorStep `json:"sequence,omitempty"`
+	JS       *ControlJSProcessorInput  `json:"js,omitempty"`
+}
+
+// ControlSeqProcessorStep defines one step for sequence processor config.
+type ControlSeqProcessorStep struct {
+	Response ControlStaticResponse `json:"response"`
 }
 
 // ControlStaticResponse defines static response returned by StaticReqProcessor.
@@ -152,24 +159,17 @@ func NewControlProcSetHandler(store processor.ReqProcessorStore) http.HandlerFun
 
 		switch strings.TrimSpace(payload.Kind) {
 		case controlProcKindStatic:
-			staticResponse := payload.Response
-			headers := staticResponse.Headers.Clone()
-			if headers == nil {
-				headers = make(http.Header)
-			}
-			if strings.TrimSpace(staticResponse.ContentType) != "" {
-				headers.Set("Content-Type", strings.TrimSpace(staticResponse.ContentType))
-			}
-
-			store.SetEndpointProcessor(payload.Endpoint, processor.StaticReqProcessor{
-				StatusCode: staticResponse.Status,
-				Headers:    headers,
-				Body:       []byte(staticResponse.Body),
-			})
+			store.SetEndpointProcessor(payload.Endpoint, newStaticReqProcessor(payload.Response))
 		case controlProcKindJS:
 			store.SetEndpointProcessor(payload.Endpoint, processor.QuickJSReqProcessor{
 				Script: payload.JS.Script,
 			})
+		case controlProcKindSeq:
+			seqProcessors := make([]processor.ReqProcessor, 0, len(payload.Sequence))
+			for _, step := range payload.Sequence {
+				seqProcessors = append(seqProcessors, newStaticReqProcessor(step.Response))
+			}
+			store.SetEndpointProcessor(payload.Endpoint, processor.NewSequenceReqProcessor(seqProcessors))
 		default:
 			writeControlError(w, http.StatusBadRequest, "invalid kind")
 			return
@@ -229,9 +229,8 @@ func validateControlProcSetRequest(payload ControlProcSetRequest) error {
 
 	switch strings.TrimSpace(payload.Kind) {
 	case controlProcKindStatic:
-		status := payload.Response.Status
-		if status < 100 || status > 599 {
-			return fmt.Errorf("invalid status")
+		if err := validateControlStaticResponse(payload.Response); err != nil {
+			return err
 		}
 		return nil
 	case controlProcKindJS:
@@ -239,8 +238,42 @@ func validateControlProcSetRequest(payload ControlProcSetRequest) error {
 			return fmt.Errorf("invalid js script")
 		}
 		return nil
+	case controlProcKindSeq:
+		if len(payload.Sequence) == 0 {
+			return fmt.Errorf("invalid sequence")
+		}
+		for idx, step := range payload.Sequence {
+			if err := validateControlStaticResponse(step.Response); err != nil {
+				return fmt.Errorf("invalid sequence step %d: %w", idx+1, err)
+			}
+		}
+		return nil
 	default:
 		return fmt.Errorf("invalid kind")
+	}
+}
+
+func validateControlStaticResponse(response ControlStaticResponse) error {
+	status := response.Status
+	if status < 100 || status > 599 {
+		return fmt.Errorf("invalid status")
+	}
+	return nil
+}
+
+func newStaticReqProcessor(response ControlStaticResponse) processor.StaticReqProcessor {
+	headers := response.Headers.Clone()
+	if headers == nil {
+		headers = make(http.Header)
+	}
+	if strings.TrimSpace(response.ContentType) != "" {
+		headers.Set("Content-Type", strings.TrimSpace(response.ContentType))
+	}
+
+	return processor.StaticReqProcessor{
+		StatusCode: response.Status,
+		Headers:    headers,
+		Body:       []byte(response.Body),
 	}
 }
 
