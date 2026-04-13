@@ -20,6 +20,7 @@ func BuildControlMux(store processor.ReqProcessorStore, opts ControlMuxOptions) 
 	pingHandler := NewControlPingHandler(store)
 	mux.HandleFunc(ComposeControlPath(opts.BasePath, RoutePing), pingHandler)
 	mux.HandleFunc(ComposeControlPath(opts.BasePath, RouteProcCount), NewControlProcCountHandler(store))
+	mux.HandleFunc(ComposeControlPath(opts.BasePath, RouteProcSet), NewControlProcSetHandler(store))
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)

@@ -46,6 +46,7 @@ func TestBuildControlMux_BasePathRoot(t *testing.T) {
 
 	assertPingEndpoint(t, mux, "/ping")
 	assertProcCountEndpoint(t, mux, "/api/v0/proc_count")
+	assertProcSetEndpoint(t, mux, "/api/v0/proc/set")
 	assertNotFound(t, mux, "/")
 }
 
@@ -54,6 +55,7 @@ func TestBuildControlMux_BasePathControl(t *testing.T) {
 
 	assertPingEndpoint(t, mux, "/control/ping")
 	assertProcCountEndpoint(t, mux, "/control/api/v0/proc_count")
+	assertProcSetEndpoint(t, mux, "/control/api/v0/proc/set")
 	assertNotFound(t, mux, "/ping")
 	assertNotFound(t, mux, "/")
 }
@@ -112,6 +114,29 @@ func assertProcCountEndpoint(t *testing.T, h http.Handler, requestPath string) {
 
 	if got := rr.Header().Get("Content-Type"); !strings.HasPrefix(got, "application/json") {
 		t.Fatalf("unexpected content type: got %q", got)
+	}
+}
+
+func assertProcSetEndpoint(t *testing.T, h http.Handler, requestPath string) {
+	t.Helper()
+
+	req := httptest.NewRequest(http.MethodGet, requestPath, nil)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusMethodNotAllowed; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := payload["status"], "error"; got != want {
+		t.Fatalf("unexpected status: got %v, want %v", got, want)
+	}
+	if got, want := payload["error"], "method not allowed"; got != want {
+		t.Fatalf("unexpected error message: got %v, want %v", got, want)
 	}
 }
 

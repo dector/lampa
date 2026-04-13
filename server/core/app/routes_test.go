@@ -14,6 +14,7 @@ func TestComposeControlPath(t *testing.T) {
 		{name: "nested base ping route", basePath: "/control", route: RoutePing, want: "/control/ping"},
 		{name: "nested base with trailing slash", basePath: "/control/", route: RoutePing, want: "/control/ping"},
 		{name: "nested base proc_count route", basePath: "/control", route: RouteProcCount, want: "/control/api/v0/proc_count"},
+		{name: "nested base proc_set route", basePath: "/control", route: RouteProcSet, want: "/control/api/v0/proc/set"},
 		{name: "empty route returns clean base", basePath: "/control/", route: "", want: "/control"},
 	}
 
@@ -32,5 +33,8 @@ func TestControlRouteConstants(t *testing.T) {
 	}
 	if got, want := RouteProcCount, "/api/v0/proc_count"; got != want {
 		t.Fatalf("unexpected RouteProcCount: got %q, want %q", got, want)
+	}
+	if got, want := RouteProcSet, "/api/v0/proc/set"; got != want {
+		t.Fatalf("unexpected RouteProcSet: got %q, want %q", got, want)
 	}
 }

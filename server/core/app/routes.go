@@ -10,6 +10,8 @@ const (
 	RoutePing = "/ping"
 	// RouteProcCount is control endpoint that returns configured processor count.
 	RouteProcCount = "/api/v0/proc_count"
+	// RouteProcSet is control endpoint that sets endpoint processor runtime config.
+	RouteProcSet = "/api/v0/proc/set"
 )
 
 // ControlMuxOptions defines control routes mounting behavior.
