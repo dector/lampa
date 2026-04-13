@@ -96,6 +96,8 @@ lampa server set \
   --script-file ./handler.js
 ```
 
+More JS request-processing script samples: [`docs/server/response-js.md`](./server/response-js.md).
+
 ---
 
 ## Flags
