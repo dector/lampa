@@ -39,6 +39,7 @@
   - [Generate comparative HTML report for two releases](#generate-comparative-html-report-for-two-releases)
   - [Ping local server](#ping-local-server)
   - [Set proxy response processor](#set-proxy-response-processor)
+  - [Get proxy request/response logs](#get-proxy-requestresponse-logs)
   - [GitHub Action](#github-action)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
@@ -221,6 +222,31 @@ lampa server proxy set-default \
 `set-default` accepts only `--kind pass` and requires full upstream URL in `--server`.
 
 > Note: runtime configuration is in-memory only and is not persisted across server restarts.
+
+### Get proxy request/response logs
+
+You can fetch latest in-memory proxy logs via control CLI:
+
+```shell
+lampa proxy logs get-all -n 20
+```
+
+Custom control port:
+
+```shell
+lampa proxy logs get-all --port 46899 -n 50
+```
+
+Control API endpoint:
+
+```text
+GET /api/v0/proxy/logs?n=N
+```
+
+Notes:
+- logs are kept in memory only
+- total log memory is capped at 30MB
+- oldest entries are evicted first when cap is exceeded
 
 ### GitHub Action
 

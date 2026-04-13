@@ -5,11 +5,12 @@ Use these commands when the Lampa server is already running.
 ## Purpose
 - Check control plane health.
 - Configure static or JS processors for proxy endpoints at runtime.
+- Fetch latest in-memory proxy request/response logs.
 
 ## Defaults
 - Control host: `localhost`
 - Control port: `8081`
-- Command namespace: `lampa server ...`
+- Command namespace: `lampa server ...` and `lampa proxy ...`
 
 ---
 
@@ -121,6 +122,35 @@ lampa server proxy set-default \
 
 ---
 
+## 4) Get proxy logs
+
+Fetch latest N entries (latest first):
+
+```bash
+lampa proxy logs get-all -n 20
+```
+
+Custom control port:
+
+```bash
+lampa proxy logs get-all --port 46899 -n 50
+```
+
+Control API used by the CLI:
+
+```text
+GET /api/v0/proxy/logs?n=N
+```
+
+Response includes:
+- `status`
+- `count` (returned entries)
+- `total` (entries currently stored)
+- `sizeBytes` (approximate retained memory size)
+- `entries` (latest-first)
+
+---
+
 ## Flags
 
 Required:
@@ -130,6 +160,7 @@ Required:
 
 Optional:
 - `--port` (default `8081`)
+- `-n` (for `lampa proxy logs get-all`, must be `>0`)
 - `--kind` (`static|js`, default `static`) for `set`/`proxy set`
 - `--response.status` (default `200`, valid `100..599`, static only)
 - `--response.content` (`json|text|html|raw`, default `text`, static only)
@@ -170,4 +201,5 @@ lampa -v server proxy set --endpoint /x --response.body '...'
 
 ## Notes
 - Runtime config is **in-memory** (not persisted across restarts).
+- Proxy logs are **in-memory** with a 30MB cap and oldest-first eviction.
 - Re-setting same endpoint replaces previous config (upsert behavior).
