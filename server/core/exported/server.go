@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/dector/lampa/server/core/app"
+	"github.com/dector/lampa/server/core/logstore"
 	"github.com/dector/lampa/server/core/processor"
 )
 
@@ -266,13 +267,14 @@ func (s *Server) startLocked() error {
 	s.config = cfg
 
 	sharedStore := processor.NewDefaultReqProcessorStore()
+	sharedLogs := logstore.NewInMemoryStore(logstore.DefaultMaxBytes)
 
-	proxyMux := app.BuildProxyMux(app.ServerConfig{
+	proxyMux := app.BuildProxyMuxWithLogStore(app.ServerConfig{
 		ListenAddress: cfg.ProxyListenAddress,
 		RoutePath:     cfg.ProxyRoutePath,
-	}, sharedStore)
+	}, sharedStore, sharedLogs)
 
-	controlMux := app.BuildControlMux(sharedStore, app.ControlMuxOptions{
+	controlMux := app.BuildControlMuxWithLogStore(sharedStore, sharedLogs, app.ControlMuxOptions{
 		BasePath: cfg.ControlRoutePath,
 	})
 

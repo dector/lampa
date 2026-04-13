@@ -16,6 +16,7 @@ func TestComposeControlPath(t *testing.T) {
 		{name: "nested base proc_count route", basePath: "/control", route: RouteProcCount, want: "/control/api/v0/proc_count"},
 		{name: "nested base proc_set route", basePath: "/control", route: RouteProcSet, want: "/control/api/v0/proc/set"},
 		{name: "nested base proc_set_default route", basePath: "/control", route: RouteProcSetDefault, want: "/control/api/v0/proc/default/set"},
+		{name: "nested base proxy logs route", basePath: "/control", route: RouteProxyLogs, want: "/control/api/v0/proxy/logs"},
 		{name: "empty route returns clean base", basePath: "/control/", route: "", want: "/control"},
 	}
 
@@ -40,5 +41,8 @@ func TestControlRouteConstants(t *testing.T) {
 	}
 	if got, want := RouteProcSetDefault, "/api/v0/proc/default/set"; got != want {
 		t.Fatalf("unexpected RouteProcSetDefault: got %q, want %q", got, want)
+	}
+	if got, want := RouteProxyLogs, "/api/v0/proxy/logs"; got != want {
+		t.Fatalf("unexpected RouteProxyLogs: got %q, want %q", got, want)
 	}
 }

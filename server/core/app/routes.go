@@ -14,6 +14,8 @@ const (
 	RouteProcSet = "/api/v0/proc/set"
 	// RouteProcSetDefault is control endpoint that sets fallback/default processor runtime config.
 	RouteProcSetDefault = "/api/v0/proc/default/set"
+	// RouteProxyLogs is control endpoint that returns latest proxy request/response logs.
+	RouteProxyLogs = "/api/v0/proxy/logs"
 )
 
 // ControlMuxOptions defines control routes mounting behavior.

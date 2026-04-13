@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	coreapp "github.com/dector/lampa/server/core/app"
+	"github.com/dector/lampa/server/core/logstore"
 	"github.com/dector/lampa/server/core/processor"
 )
 
@@ -16,7 +17,11 @@ func RunProxy(cfg ServerConfig, listen func(addr string, h http.Handler) error) 
 }
 
 func RunProxyWithStore(cfg ServerConfig, store processor.ReqProcessorStore, listen func(addr string, h http.Handler) error) error {
-	mux := coreapp.BuildProxyMux(cfg, store)
+	return RunProxyWithStoreAndLogs(cfg, store, nil, listen)
+}
+
+func RunProxyWithStoreAndLogs(cfg ServerConfig, store processor.ReqProcessorStore, logs logstore.Store, listen func(addr string, h http.Handler) error) error {
+	mux := coreapp.BuildProxyMuxWithLogStore(cfg, store, logs)
 
 	fmt.Printf("Server listening on %s\n", cfg.ListenAddress)
 	return listen(cfg.ListenAddress, mux)
@@ -24,15 +29,16 @@ func RunProxyWithStore(cfg ServerConfig, store processor.ReqProcessorStore, list
 
 func RunWithControl(cfg ServerConfig, listen func(addr string, h http.Handler) error) error {
 	sharedStore := processor.NewDefaultReqProcessorStore()
+	sharedLogs := logstore.NewInMemoryStore(logstore.DefaultMaxBytes)
 
 	errCh := make(chan error, 2)
 
 	go func() {
-		errCh <- RunProxyWithStore(cfg, sharedStore, listen)
+		errCh <- RunProxyWithStoreAndLogs(cfg, sharedStore, sharedLogs, listen)
 	}()
 
 	go func() {
-		controlMux := coreapp.BuildControlMux(sharedStore, coreapp.ControlMuxOptions{
+		controlMux := coreapp.BuildControlMuxWithLogStore(sharedStore, sharedLogs, coreapp.ControlMuxOptions{
 			BasePath: "/",
 		})
 

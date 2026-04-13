@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
+	"github.com/dector/lampa/server/core/logstore"
 	"github.com/dector/lampa/server/core/processor"
 )
 
@@ -252,5 +254,77 @@ func TestControlProcSetDefaultHandler_InvalidServer(t *testing.T) {
 	}
 	if got, want := payload["error"], "invalid server"; got != want {
 		t.Fatalf("unexpected error payload: got %v, want %v", got, want)
+	}
+}
+
+func TestControlProxyLogsHandler_Success(t *testing.T) {
+	logs := logstore.NewInMemoryStore(1024 * 1024)
+	logs.Add(logstore.Entry{Timestamp: time.Unix(1, 0).UTC(), Request: logstore.Request{Path: "/one"}})
+	logs.Add(logstore.Entry{Timestamp: time.Unix(2, 0).UTC(), Request: logstore.Request{Path: "/two"}})
+	logs.Add(logstore.Entry{Timestamp: time.Unix(3, 0).UTC(), Request: logstore.Request{Path: "/three"}})
+
+	handler := NewControlProxyLogsHandler(logs)
+	req := httptest.NewRequest(http.MethodGet, RouteProxyLogs+"?n=2", nil)
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusOK; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := payload["status"], "ok"; got != want {
+		t.Fatalf("unexpected status: got %v, want %v", got, want)
+	}
+	if got, want := payload["count"], float64(2); got != want {
+		t.Fatalf("unexpected count: got %v, want %v", got, want)
+	}
+	if got, want := payload["total"], float64(3); got != want {
+		t.Fatalf("unexpected total: got %v, want %v", got, want)
+	}
+
+	entries, ok := payload["entries"].([]any)
+	if !ok {
+		t.Fatalf("unexpected entries shape: %#v", payload["entries"])
+	}
+	if got, want := len(entries), 2; got != want {
+		t.Fatalf("unexpected entries len: got %d, want %d", got, want)
+	}
+
+	entry0, ok := entries[0].(map[string]any)
+	if !ok {
+		t.Fatalf("unexpected first entry shape: %#v", entries[0])
+	}
+	request0, ok := entry0["request"].(map[string]any)
+	if !ok {
+		t.Fatalf("unexpected first entry request shape: %#v", entry0["request"])
+	}
+	if got, want := request0["path"], "/three"; got != want {
+		t.Fatalf("unexpected first entry path: got %v, want %v", got, want)
+	}
+}
+
+func TestControlProxyLogsHandler_InvalidN(t *testing.T) {
+	handler := NewControlProxyLogsHandler(logstore.NewInMemoryStore(1024))
+	req := httptest.NewRequest(http.MethodGet, RouteProxyLogs+"?n=abc", nil)
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusBadRequest; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+}
+
+func TestControlProxyLogsHandler_NoStore(t *testing.T) {
+	handler := NewControlProxyLogsHandler(nil)
+	req := httptest.NewRequest(http.MethodGet, RouteProxyLogs, nil)
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusInternalServerError; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
 	}
 }

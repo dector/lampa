@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
+	"github.com/dector/lampa/server/core/logstore"
 	"github.com/dector/lampa/server/core/processor"
 )
 
@@ -74,6 +76,50 @@ func NewControlProcCountHandler(store processor.ReqProcessorStore) http.HandlerF
 			count = store.ResponsesCount()
 		}
 		writeJSON(w, http.StatusOK, map[string]any{"count": count})
+	}
+}
+
+// NewControlProxyLogsHandler returns latest proxy request/response logs.
+func NewControlProxyLogsHandler(logs logstore.Store) http.HandlerFunc {
+	const (
+		defaultN = 10
+		maxN     = 1000
+	)
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			writeControlError(w, http.StatusMethodNotAllowed, "method not allowed")
+			return
+		}
+
+		if logs == nil {
+			writeControlError(w, http.StatusInternalServerError, "log store is not configured")
+			return
+		}
+
+		n := defaultN
+		rawN := strings.TrimSpace(r.URL.Query().Get("n"))
+		if rawN != "" {
+			parsedN, err := strconv.Atoi(rawN)
+			if err != nil || parsedN <= 0 {
+				writeControlError(w, http.StatusBadRequest, "invalid n")
+				return
+			}
+			n = parsedN
+		}
+		if n > maxN {
+			n = maxN
+		}
+
+		entries := logs.Latest(n)
+		writeJSON(w, http.StatusOK, map[string]any{
+			"status":    controlStatusOK,
+			"count":     len(entries),
+			"total":     logs.Count(),
+			"sizeBytes": logs.SizeBytes(),
+			"entries":   entries,
+		})
 	}
 }
 
