@@ -16,9 +16,10 @@ const (
 
 // ControlProcSetRequest defines payload for processor upsert.
 type ControlProcSetRequest struct {
-	Kind     string                `json:"kind"`
-	Endpoint string                `json:"endpoint"`
-	Response ControlStaticResponse `json:"response"`
+	Kind     string                   `json:"kind"`
+	Endpoint string                   `json:"endpoint"`
+	Response ControlStaticResponse    `json:"response"`
+	JS       *ControlJSProcessorInput `json:"js,omitempty"`
 }
 
 // ControlStaticResponse defines static response returned by StaticReqProcessor.
@@ -27,6 +28,11 @@ type ControlStaticResponse struct {
 	ContentType string      `json:"contentType"`
 	Headers     http.Header `json:"headers"`
 	Body        string      `json:"body"`
+}
+
+// ControlJSProcessorInput defines JS processor config for kind="js".
+type ControlJSProcessorInput struct {
+	Script string `json:"script"`
 }
 
 // NewControlPingHandler returns control ping handler.
@@ -87,20 +93,30 @@ func NewControlProcSetHandler(store processor.ReqProcessorStore) http.HandlerFun
 			return
 		}
 
-		staticResponse := payload.Response
-		headers := staticResponse.Headers.Clone()
-		if headers == nil {
-			headers = make(http.Header)
-		}
-		if strings.TrimSpace(staticResponse.ContentType) != "" {
-			headers.Set("Content-Type", strings.TrimSpace(staticResponse.ContentType))
-		}
+		switch strings.TrimSpace(payload.Kind) {
+		case "static":
+			staticResponse := payload.Response
+			headers := staticResponse.Headers.Clone()
+			if headers == nil {
+				headers = make(http.Header)
+			}
+			if strings.TrimSpace(staticResponse.ContentType) != "" {
+				headers.Set("Content-Type", strings.TrimSpace(staticResponse.ContentType))
+			}
 
-		store.SetEndpointProcessor(payload.Endpoint, processor.StaticReqProcessor{
-			StatusCode: staticResponse.Status,
-			Headers:    headers,
-			Body:       []byte(staticResponse.Body),
-		})
+			store.SetEndpointProcessor(payload.Endpoint, processor.StaticReqProcessor{
+				StatusCode: staticResponse.Status,
+				Headers:    headers,
+				Body:       []byte(staticResponse.Body),
+			})
+		case "js":
+			store.SetEndpointProcessor(payload.Endpoint, processor.QuickJSReqProcessor{
+				Script: payload.JS.Script,
+			})
+		default:
+			writeControlError(w, http.StatusBadRequest, "invalid kind")
+			return
+		}
 
 		writeJSON(w, http.StatusOK, map[string]any{
 			"status":   controlStatusOK,
@@ -116,16 +132,21 @@ func validateControlProcSetRequest(payload ControlProcSetRequest) error {
 		return fmt.Errorf("invalid endpoint")
 	}
 
-	if strings.TrimSpace(payload.Kind) != "static" {
+	switch strings.TrimSpace(payload.Kind) {
+	case "static":
+		status := payload.Response.Status
+		if status < 100 || status > 599 {
+			return fmt.Errorf("invalid status")
+		}
+		return nil
+	case "js":
+		if payload.JS == nil || strings.TrimSpace(payload.JS.Script) == "" {
+			return fmt.Errorf("invalid js script")
+		}
+		return nil
+	default:
 		return fmt.Errorf("invalid kind")
 	}
-
-	status := payload.Response.Status
-	if status < 100 || status > 599 {
-		return fmt.Errorf("invalid status")
-	}
-
-	return nil
 }
 
 func writeControlError(w http.ResponseWriter, statusCode int, message string) {

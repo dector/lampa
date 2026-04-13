@@ -62,6 +62,72 @@ func TestControlProcSetHandler_Success(t *testing.T) {
 	}
 }
 
+func TestControlProcSetHandler_JS_Success(t *testing.T) {
+	store := processor.NewInMemoryReqProcessorStore(nil, nil)
+	handler := NewControlProcSetHandler(store)
+
+	body := []byte(`{"kind":"js","endpoint":"/js","js":{"script":"function handle(req){ return Response.json({ok:true}); }"}}`)
+	req := httptest.NewRequest(http.MethodPost, RouteProcSet, bytes.NewReader(body))
+	rr := httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusOK; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	proc, ok := store.EndpointProcessor("/js")
+	if !ok {
+		t.Fatal("expected processor to be stored")
+	}
+
+	jsProc, ok := proc.(processor.QuickJSReqProcessor)
+	if !ok {
+		t.Fatalf("unexpected processor type: %T", proc)
+	}
+	if jsProc.Script == "" {
+		t.Fatal("expected non-empty script")
+	}
+}
+
+func TestControlProcSetHandler_JS_MissingConfig(t *testing.T) {
+	store := processor.NewInMemoryReqProcessorStore(nil, nil)
+	handler := NewControlProcSetHandler(store)
+
+	body := []byte(`{"kind":"js","endpoint":"/js"}`)
+	req := httptest.NewRequest(http.MethodPost, RouteProcSet, bytes.NewReader(body))
+	rr := httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusBadRequest; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+}
+
+func TestControlProcSetHandler_JS_InvalidScript(t *testing.T) {
+	store := processor.NewInMemoryReqProcessorStore(nil, nil)
+	handler := NewControlProcSetHandler(store)
+
+	body := []byte(`{"kind":"js","endpoint":"/js","js":{"script":"  "}}`)
+	req := httptest.NewRequest(http.MethodPost, RouteProcSet, bytes.NewReader(body))
+	rr := httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusBadRequest; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to parse response body as JSON: %v", err)
+	}
+	if got, want := payload["error"], "invalid js script"; got != want {
+		t.Fatalf("unexpected error payload: got %v, want %v", got, want)
+	}
+}
+
 func TestControlProcSetHandler_BadJSON(t *testing.T) {
 	store := processor.NewInMemoryReqProcessorStore(nil, nil)
 	handler := NewControlProcSetHandler(store)
