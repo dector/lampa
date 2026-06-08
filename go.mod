@@ -15,7 +15,7 @@ require (
 	github.com/square/exit v1.3.0
 	github.com/tiendc/go-deepcopy v1.7.2
 	github.com/urfave/cli/v3 v3.8.0
-	golang.org/x/text v0.35.0
+	golang.org/x/text v0.38.0
 	google.golang.org/protobuf v1.36.11
 )
 
