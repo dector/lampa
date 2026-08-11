@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -49,41 +51,57 @@ func RunWithControl(cfg ServerConfig, listen func(addr string, h http.Handler) e
 	return <-errCh
 }
 
-func LoadRuntimeConfig(getenv func(string) string) ServerConfig {
-	return LoadRuntimeConfigWithArgs(getenv, nil)
+type RuntimeOptions struct {
+	WebUIEnabled bool
+	WebUIPort    int
 }
 
-func LoadRuntimeConfigWithArgs(getenv func(string) string, args []string) ServerConfig {
+func LoadRuntimeConfig(getenv func(string) string) ServerConfig {
+	return LoadRuntimeConfigWithOptions(getenv, RuntimeOptions{})
+}
+
+func LoadRuntimeConfigWithOptions(getenv func(string) string, options RuntimeOptions) ServerConfig {
 	cfg := DefaultServerConfig()
 	cfg.ProxyPort = parsePort(getenv("PORT"), cfg.ProxyPort)
 	cfg.ControlPort = parsePort(getenv("PORT_CTRL"), cfg.ControlPort)
 	cfg.ProxyBindHost = parseHost(getenv("BIND_HOST"), cfg.ProxyBindHost)
 	cfg.ControlBindHost = parseHost(getenv("BIND_HOST_CTRL"), cfg.ControlBindHost)
-	cfg = applyCLIConfig(cfg, args)
+
+	if options.WebUIEnabled {
+		cfg.WebUI.Enabled = true
+		cfg.CaptureTraffic = true
+	}
+	if options.WebUIPort != 0 {
+		cfg.WebUI.Port = options.WebUIPort
+	}
+
 	cfg.ListenAddress = coreapp.ComposeListenAddress(cfg.ProxyBindHost, cfg.ProxyPort)
 	cfg.ControlListenAddress = coreapp.ComposeListenAddress(cfg.ControlBindHost, cfg.ControlPort)
 	cfg.WebUI.ListenAddress = coreapp.ComposeListenAddress(cfg.WebUI.BindHost, cfg.WebUI.Port)
 	return cfg
 }
 
-func applyCLIConfig(cfg ServerConfig, args []string) ServerConfig {
-	for i := 0; i < len(args); i++ {
-		arg := strings.TrimSpace(args[i])
-		switch {
-		case arg == "--webui":
-			cfg.WebUI.Enabled = true
-			cfg.CaptureTraffic = true
-			if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
-				cfg.WebUI.Port = parsePort(args[i+1], cfg.WebUI.Port)
-				i++
-			}
-		case strings.HasPrefix(arg, "--webui="):
-			cfg.WebUI.Enabled = true
-			cfg.CaptureTraffic = true
-			cfg.WebUI.Port = parsePort(strings.TrimPrefix(arg, "--webui="), cfg.WebUI.Port)
-		}
+func parseRuntimeOptions(args []string, defaults ServerConfig) (RuntimeOptions, error) {
+	flags := flag.NewFlagSet("lampa-server", flag.ContinueOnError)
+	flags.SetOutput(io.Discard)
+
+	webUIEnabled := flags.Bool("webui", defaults.WebUI.Enabled, "enable the Web UI")
+	webUIPort := flags.Int("webui-port", defaults.WebUI.Port, "Web UI port")
+
+	if err := flags.Parse(args); err != nil {
+		return RuntimeOptions{}, err
 	}
-	return cfg
+	if flags.NArg() > 0 {
+		return RuntimeOptions{}, fmt.Errorf("unexpected positional argument: %s", flags.Arg(0))
+	}
+	if *webUIPort <= 0 || *webUIPort > 65535 {
+		return RuntimeOptions{}, fmt.Errorf("invalid --webui-port value: %d", *webUIPort)
+	}
+
+	return RuntimeOptions{
+		WebUIEnabled: *webUIEnabled,
+		WebUIPort:    *webUIPort,
+	}, nil
 }
 
 func parsePort(raw string, fallback int) int {
@@ -107,7 +125,12 @@ func parseHost(raw string, fallback string) string {
 }
 
 func main() {
-	cfg := LoadRuntimeConfigWithArgs(os.Getenv, os.Args[1:])
+	options, err := parseRuntimeOptions(os.Args[1:], DefaultServerConfig())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to parse arguments: %v\n", err)
+		os.Exit(2)
+	}
+	cfg := LoadRuntimeConfigWithOptions(os.Getenv, options)
 	if cfg.WebUI.Enabled {
 		fmt.Printf("Web UI enabled on %s\n", cfg.WebUI.ListenAddress)
 	}

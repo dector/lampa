@@ -290,8 +290,8 @@ func TestLoadRuntimeConfig_WebUIDisabledByDefault(t *testing.T) {
 	}
 }
 
-func TestLoadRuntimeConfigWithArgs_EnablesWebUIWithDefaultPort(t *testing.T) {
-	cfg := LoadRuntimeConfigWithArgs(func(string) string { return "" }, []string{"--webui"})
+func TestLoadRuntimeConfigWithOptions_EnablesWebUIWithDefaultPort(t *testing.T) {
+	cfg := LoadRuntimeConfigWithOptions(func(string) string { return "" }, RuntimeOptions{WebUIEnabled: true})
 
 	if !cfg.WebUI.Enabled {
 		t.Fatal("expected Web UI to be enabled")
@@ -307,8 +307,8 @@ func TestLoadRuntimeConfigWithArgs_EnablesWebUIWithDefaultPort(t *testing.T) {
 	}
 }
 
-func TestLoadRuntimeConfigWithArgs_EnablesWebUIWithCustomPort(t *testing.T) {
-	cfg := LoadRuntimeConfigWithArgs(func(string) string { return "" }, []string{"--webui", "8890"})
+func TestLoadRuntimeConfigWithOptions_EnablesWebUIWithCustomPort(t *testing.T) {
+	cfg := LoadRuntimeConfigWithOptions(func(string) string { return "" }, RuntimeOptions{WebUIEnabled: true, WebUIPort: 8890})
 
 	if !cfg.WebUI.Enabled {
 		t.Fatal("expected Web UI to be enabled")
@@ -324,8 +324,12 @@ func TestLoadRuntimeConfigWithArgs_EnablesWebUIWithCustomPort(t *testing.T) {
 	}
 }
 
-func TestLoadRuntimeConfigWithArgs_EnablesWebUIWithEqualsPort(t *testing.T) {
-	cfg := LoadRuntimeConfigWithArgs(func(string) string { return "" }, []string{"--webui=8891"})
+func TestParseRuntimeOptions_ParsesWebUIWithEqualsPort(t *testing.T) {
+	options, err := parseRuntimeOptions([]string{"--webui", "--webui-port=8891"}, DefaultServerConfig())
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+	cfg := LoadRuntimeConfigWithOptions(func(string) string { return "" }, options)
 
 	if !cfg.WebUI.Enabled {
 		t.Fatal("expected Web UI to be enabled")
@@ -338,6 +342,26 @@ func TestLoadRuntimeConfigWithArgs_EnablesWebUIWithEqualsPort(t *testing.T) {
 	}
 	if got, want := cfg.WebUI.ListenAddress, "127.0.0.1:8891"; got != want {
 		t.Fatalf("unexpected Web UI listen address: got %q, want %q", got, want)
+	}
+}
+
+func TestParseRuntimeOptions_RejectsInvalidWebUIPort(t *testing.T) {
+	_, err := parseRuntimeOptions([]string{"--webui", "--webui-port", "70000"}, DefaultServerConfig())
+	if err == nil {
+		t.Fatal("expected invalid Web UI port error")
+	}
+	if !strings.Contains(err.Error(), "invalid --webui-port") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestParseRuntimeOptions_RejectsWebUIPositionalPort(t *testing.T) {
+	_, err := parseRuntimeOptions([]string{"--webui", "8890"}, DefaultServerConfig())
+	if err == nil {
+		t.Fatal("expected positional argument error")
+	}
+	if !strings.Contains(err.Error(), "unexpected positional argument") {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
