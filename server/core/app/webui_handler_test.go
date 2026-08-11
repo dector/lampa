@@ -180,6 +180,50 @@ func TestBuildWebUIMux_RequestsReturnsDatastarStream(t *testing.T) {
 	}
 }
 
+func TestBuildWebUIMux_TrafficClearClearsLogsAndReturnsDatastarStream(t *testing.T) {
+	logs := logstore.NewInMemoryStore(logstore.UnlimitedMaxBytes)
+	logs.Add(logstore.Entry{
+		Timestamp: time.Date(2024, 1, 1, 13, 14, 15, 0, time.Local),
+		Request:   logstore.Request{Method: "GET", Path: "/one", Body: []byte("request")},
+		Response:  logstore.Response{Status: http.StatusOK, Body: []byte("response")},
+	})
+
+	mux := BuildWebUIMux(DefaultServerConfig(), logs)
+	req := httptest.NewRequest(http.MethodPost, "/traffic/clear", nil)
+	rr := httptest.NewRecorder()
+	mux.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusOK; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+	if got := logs.Count(); got != 0 {
+		t.Fatalf("expected logs to be cleared, got %d", got)
+	}
+	if got := rr.Header().Get("Content-Type"); !strings.HasPrefix(got, "text/event-stream") {
+		t.Fatalf("unexpected content type: got %q", got)
+	}
+	body := rr.Body.String()
+	for _, want := range []string{"event: datastar-patch-elements", "id=\"requests\"", "No requests yet.", "id=\"stats\"", "Requests count", "0", "Requests size bytes"} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("expected body to contain %q, got %q", want, body)
+		}
+	}
+}
+
+func TestBuildWebUIMux_TrafficClearRejectsGet(t *testing.T) {
+	mux := BuildWebUIMux(DefaultServerConfig(), logstore.NewInMemoryStore(logstore.UnlimitedMaxBytes))
+	req := httptest.NewRequest(http.MethodGet, "/traffic/clear", nil)
+	rr := httptest.NewRecorder()
+	mux.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusMethodNotAllowed; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+	if got, want := rr.Header().Get("Allow"), http.MethodPost; got != want {
+		t.Fatalf("unexpected allow header: got %q, want %q", got, want)
+	}
+}
+
 func TestBuildWebUIMux_DatastarAsset(t *testing.T) {
 	mux := BuildWebUIMux(DefaultServerConfig(), nil)
 	req := httptest.NewRequest(http.MethodGet, WebUIAssetsPath+"datastar-1.0.2.js", nil)

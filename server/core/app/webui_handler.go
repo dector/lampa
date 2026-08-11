@@ -133,6 +133,37 @@ func NewWebUIRequestsHandler(logs logstore.Store) http.HandlerFunc {
 	}
 }
 
+// NewWebUITrafficClearHandler returns the clear captured traffic action handler.
+func NewWebUITrafficClearHandler(cfg ServerConfig, logs logstore.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		if r.URL.Path != "/traffic/clear" {
+			http.NotFound(w, r)
+			return
+		}
+
+		if logs != nil {
+			logs.Clear()
+		}
+
+		requests, hidden := webUIRequestsSnapshot(logs)
+		trafficCount, trafficSize := webUIStatsSnapshot(logs)
+		sse := datastar.NewSSE(w, r)
+		if err := sse.PatchElementTempl(WebUIRequests(requests, hidden)); err != nil {
+			http.Error(w, "failed to render requests", http.StatusInternalServerError)
+			return
+		}
+		if err := sse.PatchElementTempl(WebUIStats(cfg, trafficCount, trafficSize)); err != nil {
+			http.Error(w, "failed to render stats", http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 // NewWebUIHealthHandler returns the Web UI health-check handler.
 func NewWebUIHealthHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

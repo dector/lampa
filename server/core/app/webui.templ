@@ -107,6 +107,9 @@ templ WebUITrafficPage(requests []webUIRequestLog, hidden int) {
 				a { color: #93c5fd; text-decoration: none; }
 				a:hover { color: #bfdbfe; }
 				.requests-header { align-items: baseline; display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+				.requests-actions { align-items: center; display: flex; gap: .75rem; }
+				button { background: #292524; border: 1px solid #57534e; color: #e7e2dc; cursor: pointer; font: inherit; padding: .35rem .65rem; }
+				button:hover { background: #3b3836; }
 				h1 { margin: 0; }
 				.requests-list { display: grid; gap: .45rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
 				.request-row { align-items: center; background: #151515; border: 1px solid #292524; color: inherit; display: grid; gap: .7rem; grid-template-columns: 5.5rem 3.5rem 3.8rem minmax(0, 1fr) 9rem; padding: .55rem .65rem; }
@@ -134,7 +137,10 @@ templ WebUITrafficPage(requests []webUIRequestLog, hidden int) {
 			<main>
 				<div class="requests-header">
 					<h1>Traffic</h1>
-					<a href="/">Back</a>
+					<div class="requests-actions">
+						<button type="button" data-on-click="@post('/traffic/clear')">Clear</button>
+						<a href="/">Back</a>
+					</div>
 				</div>
 				@WebUIRequests(requests, hidden)
 			</main>
