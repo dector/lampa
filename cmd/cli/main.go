@@ -15,7 +15,9 @@ import (
 func main() {
 	// log.Printf("os.Args: %v", os.Args)
 
-	G.Init()
+	if err := G.Init(); err != nil {
+		handleError(err)
+	}
 
 	cmd := CreateCliCommand()
 	err := cmd.Run(context.Background(), os.Args)
