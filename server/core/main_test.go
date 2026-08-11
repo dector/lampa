@@ -87,6 +87,46 @@ func TestRunWithControl_StartsBothServers(t *testing.T) {
 	}
 }
 
+func TestRunWithControl_StartsWebUIWhenEnabled(t *testing.T) {
+	cfg := DefaultServerConfig()
+	cfg.WebUI.Enabled = true
+	cfg.CaptureTraffic = true
+	cfg.ListenAddress = "localhost:18180"
+	cfg.ControlListenAddress = "localhost:18181"
+	cfg.WebUI.ListenAddress = "127.0.0.1:18880"
+
+	ready := make(chan struct{})
+	var calls atomic.Int32
+
+	err := RunWithControl(cfg, func(addr string, h http.Handler) error {
+		switch addr {
+		case cfg.ListenAddress, cfg.ControlListenAddress:
+		case cfg.WebUI.ListenAddress:
+			req := httptest.NewRequest(http.MethodGet, "/health", nil)
+			rr := httptest.NewRecorder()
+			h.ServeHTTP(rr, req)
+			if rr.Code != http.StatusOK {
+				t.Fatalf("unexpected Web UI health status code: got %d, want %d", rr.Code, http.StatusOK)
+			}
+		default:
+			return errors.New("unexpected listen address")
+		}
+
+		if calls.Add(1) == 3 {
+			close(ready)
+		}
+		<-ready
+		return nil
+	})
+
+	if err != nil {
+		t.Fatalf("RunWithControl returned unexpected error: %v", err)
+	}
+	if got := calls.Load(); got != 3 {
+		t.Fatalf("unexpected listen calls: got %d, want %d", got, 3)
+	}
+}
+
 func TestRunWithControl_RegistersPingHandler(t *testing.T) {
 	cfg := DefaultServerConfig()
 	cfg.ListenAddress = "localhost:18090"

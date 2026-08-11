@@ -19,6 +19,14 @@ func BuildProxyMuxWithLogStore(cfg ServerConfig, store processor.ReqProcessorSto
 	return mux
 }
 
+// BuildWebUIMux constructs HTTP mux with Web UI route registration.
+func BuildWebUIMux(cfg ServerConfig, logs logstore.Store) *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/health", NewWebUIHealthHandler())
+	mux.HandleFunc("/", NewWebUIIndexHandler(cfg, logs))
+	return mux
+}
+
 // BuildControlMux constructs HTTP mux with control route registration.
 func BuildControlMux(store processor.ReqProcessorStore, opts ControlMuxOptions) *http.ServeMux {
 	return BuildControlMuxWithLogStore(store, nil, opts)

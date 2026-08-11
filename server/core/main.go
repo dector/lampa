@@ -37,7 +37,7 @@ func RunWithControl(cfg ServerConfig, listen func(addr string, h http.Handler) e
 	}
 	sharedLogs := logstore.NewInMemoryStore(logMaxBytes)
 
-	errCh := make(chan error, 2)
+	errCh := make(chan error, 3)
 
 	go func() {
 		errCh <- RunProxyWithStoreAndLogs(cfg, sharedStore, sharedLogs, listen)
@@ -51,6 +51,15 @@ func RunWithControl(cfg ServerConfig, listen func(addr string, h http.Handler) e
 		fmt.Printf("Control server listening on %s\n", cfg.ControlListenAddress)
 		errCh <- listen(cfg.ControlListenAddress, controlMux)
 	}()
+
+	if cfg.WebUI.Enabled {
+		go func() {
+			webUIMux := coreapp.BuildWebUIMux(cfg, sharedLogs)
+
+			fmt.Printf("Web UI server listening on %s\n", cfg.WebUI.ListenAddress)
+			errCh <- listen(cfg.WebUI.ListenAddress, webUIMux)
+		}()
+	}
 
 	return <-errCh
 }
