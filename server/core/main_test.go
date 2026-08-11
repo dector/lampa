@@ -270,6 +270,77 @@ func TestLoadRuntimeConfig_Defaults(t *testing.T) {
 	}
 }
 
+func TestLoadRuntimeConfig_WebUIDisabledByDefault(t *testing.T) {
+	cfg := LoadRuntimeConfig(func(string) string { return "" })
+
+	if cfg.WebUI.Enabled {
+		t.Fatal("expected Web UI to be disabled by default")
+	}
+	if cfg.CaptureTraffic {
+		t.Fatal("expected traffic capture to be disabled by default")
+	}
+	if got, want := cfg.WebUI.Port, 8880; got != want {
+		t.Fatalf("unexpected Web UI port: got %d, want %d", got, want)
+	}
+	if got, want := cfg.WebUI.BindHost, "127.0.0.1"; got != want {
+		t.Fatalf("unexpected Web UI host: got %q, want %q", got, want)
+	}
+	if got, want := cfg.WebUI.ListenAddress, "127.0.0.1:8880"; got != want {
+		t.Fatalf("unexpected Web UI listen address: got %q, want %q", got, want)
+	}
+}
+
+func TestLoadRuntimeConfigWithArgs_EnablesWebUIWithDefaultPort(t *testing.T) {
+	cfg := LoadRuntimeConfigWithArgs(func(string) string { return "" }, []string{"--webui"})
+
+	if !cfg.WebUI.Enabled {
+		t.Fatal("expected Web UI to be enabled")
+	}
+	if !cfg.CaptureTraffic {
+		t.Fatal("expected traffic capture to be enabled")
+	}
+	if got, want := cfg.WebUI.Port, 8880; got != want {
+		t.Fatalf("unexpected Web UI port: got %d, want %d", got, want)
+	}
+	if got, want := cfg.WebUI.ListenAddress, "127.0.0.1:8880"; got != want {
+		t.Fatalf("unexpected Web UI listen address: got %q, want %q", got, want)
+	}
+}
+
+func TestLoadRuntimeConfigWithArgs_EnablesWebUIWithCustomPort(t *testing.T) {
+	cfg := LoadRuntimeConfigWithArgs(func(string) string { return "" }, []string{"--webui", "8890"})
+
+	if !cfg.WebUI.Enabled {
+		t.Fatal("expected Web UI to be enabled")
+	}
+	if !cfg.CaptureTraffic {
+		t.Fatal("expected traffic capture to be enabled")
+	}
+	if got, want := cfg.WebUI.Port, 8890; got != want {
+		t.Fatalf("unexpected Web UI port: got %d, want %d", got, want)
+	}
+	if got, want := cfg.WebUI.ListenAddress, "127.0.0.1:8890"; got != want {
+		t.Fatalf("unexpected Web UI listen address: got %q, want %q", got, want)
+	}
+}
+
+func TestLoadRuntimeConfigWithArgs_EnablesWebUIWithEqualsPort(t *testing.T) {
+	cfg := LoadRuntimeConfigWithArgs(func(string) string { return "" }, []string{"--webui=8891"})
+
+	if !cfg.WebUI.Enabled {
+		t.Fatal("expected Web UI to be enabled")
+	}
+	if !cfg.CaptureTraffic {
+		t.Fatal("expected traffic capture to be enabled")
+	}
+	if got, want := cfg.WebUI.Port, 8891; got != want {
+		t.Fatalf("unexpected Web UI port: got %d, want %d", got, want)
+	}
+	if got, want := cfg.WebUI.ListenAddress, "127.0.0.1:8891"; got != want {
+		t.Fatalf("unexpected Web UI listen address: got %q, want %q", got, want)
+	}
+}
+
 func TestLoadRuntimeConfig_UsesEnvValues(t *testing.T) {
 	cfg := LoadRuntimeConfig(func(key string) string {
 		switch key {
