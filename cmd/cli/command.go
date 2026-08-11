@@ -10,6 +10,7 @@ import (
 	"github.com/dector/lampa/cmd/cli/compare"
 	"github.com/dector/lampa/cmd/cli/generate"
 	"github.com/dector/lampa/cmd/cli/proxy"
+	"github.com/dector/lampa/cmd/cli/stats"
 	lampa "github.com/dector/lampa/internal"
 	"github.com/dector/lampa/internal/out"
 
@@ -34,8 +35,7 @@ func CreateCliCommand() *cli.Command {
 			},
 		},
 		Commands: []*cli.Command{
-			collect.CreateCliCommand(),
-			compare.CreateCliCommand(),
+			stats.CreateCliCommand(),
 			generate.CreateCliCommand(),
 			proxy.CreateCliCommand(),
 			CreateVersionCommand(),

@@ -84,12 +84,16 @@ All commands are executed inside the root folder of Android project
 
 Remember that you can always use `lampa help` if you forget something.
 
+> [!NOTE]
+> Before version `0.3.3`, stats commands were available as `lampa collect` and `lampa compare`.
+> Starting with version `0.3.3`, use `lampa stats collect` and `lampa stats compare`.
+
 ### Generate JSON report for current version
 
 You will need to use this report for comparative HTML report.
 
 ``` shell
-lampa collect
+lampa stats collect
 ```
 
 If program finished successfully - you can find report file
@@ -99,7 +103,7 @@ Be aware that by-default program is not rewriting report if it exists.
 But you can opt-in for such behavior explicitly by adding `--overwrite` flag:
 
 ``` shell
-lampa collect --overwrite
+lampa stats collect --overwrite
 ```
 
 Other useful flags are:
@@ -115,7 +119,7 @@ Other useful flags are:
 ### Generate only HTML report for current version
 
 ``` shell
-lampa collect --format html
+lampa stats collect --format html
 ```
 
 [Sample report](http://dector.space/lampa/github/libre-tube/LibreTube/v0.28.1.html).
@@ -125,18 +129,18 @@ lampa collect --format html
 First, you need to generate JSON report for release 1 (e.g. `1.json`).
 Then, you need to generate JSON report for release 2 (e.g. `2.json`).
 
-After, you need to generate comparative report with `lampa compare`.
+After, you need to generate comparative report with `lampa stats compare`.
 
 For example:
 
 ``` shell
 git checkout v0.28.0
-lampa collect --to-dir build --file-name v0.28.0
+lampa stats collect --to-dir build --file-name v0.28.0
 
 git checkout v0.28.1
-lampa collect --to-dir build --file-name v0.28.1
+lampa stats collect --to-dir build --file-name v0.28.1
 
-lampa compare build/v0.28.0.json build/v0.28.1.json build/diff.html
+lampa stats compare build/v0.28.0.json build/v0.28.1.json build/diff.html
 ```
 
 [Sample report](https://dector.space/lampa/github/libre-tube/LibreTube/v0.28.0..v0.28.1.html).

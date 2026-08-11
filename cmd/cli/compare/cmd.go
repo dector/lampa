@@ -17,7 +17,7 @@ import (
 func CreateCliCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "compare",
-		Usage:  "generate comperative report between versions",
+		Usage:  "generate comparative report between versions",
 		Action: ActionCmdCompare,
 	}
 }
@@ -26,7 +26,7 @@ func ActionCmdCompare(context context.Context, cmd *cli.Command) error {
 	lampa.PrintHeader()
 
 	if cmd.NArg() != 3 {
-		return fmt.Errorf("usage: lampa report1.json report2.json out.html")
+		return fmt.Errorf("usage: lampa stats compare report1.json report2.json out.html")
 	}
 
 	file1, err := checkReportFile(cmd.Args().Get(0))
