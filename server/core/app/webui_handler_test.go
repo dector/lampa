@@ -3,6 +3,7 @@ package app
 import (
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -93,13 +94,62 @@ func TestBuildWebUIMux_TrafficPageShowsLatestRequests(t *testing.T) {
 		t.Fatalf("unexpected status code: got %d, want %d", got, want)
 	}
 	body := rr.Body.String()
-	for _, want := range []string{"Traffic", "[13:14:15]", "201", "POST", "/foo/bar", "class=\"status status-ok\"", "class=\"method method-post\"", "7B", "data-on-interval__duration.1s=\"@get('/ds/requests')\"", "2 more hidden..."} {
+	for _, want := range []string{"Traffic", "[13:14:15]", "201", "POST", "/foo/bar", "class=\"status status-ok\"", "class=\"method method-post\"", "href=\"/traffic/102\"", "7B", "data-on-interval__duration.1s=\"@get('/ds/requests')\"", "2 more hidden..."} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("expected body to contain %q, got %q", want, body)
 		}
 	}
 	if got := rr.Header().Get("Content-Type"); !strings.HasPrefix(got, "text/html") {
 		t.Fatalf("unexpected content type: got %q", got)
+	}
+}
+
+func TestBuildWebUIMux_TrafficDetailPageShowsAvailableInfo(t *testing.T) {
+	logs := logstore.NewInMemoryStore(logstore.UnlimitedMaxBytes)
+	entry := logs.Add(logstore.Entry{
+		Timestamp:  time.Date(2024, 1, 1, 13, 14, 15, 0, time.Local),
+		DurationMs: 42,
+		Request: logstore.Request{
+			Method:  "POST",
+			URL:     "https://example.test/foo/bar?x=1",
+			Path:    "/foo/bar",
+			Headers: http.Header{"Content-Type": []string{"application/json"}},
+			Body:    []byte(`{"ok":true}`),
+		},
+		Response: logstore.Response{
+			Status:  http.StatusCreated,
+			Headers: http.Header{"X-Test": []string{"yes"}},
+			Body:    []byte("created"),
+		},
+	})
+
+	mux := BuildWebUIMux(DefaultServerConfig(), logs)
+	req := httptest.NewRequest(http.MethodGet, "/traffic/"+strconv.FormatInt(entry.ID, 10), nil)
+	rr := httptest.NewRecorder()
+	mux.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusOK; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
+	}
+	body := rr.Body.String()
+	for _, want := range []string{"Traffic #1", "2024-01-01T13:14:15", "42ms", "201", "POST", "/foo/bar", "https://example.test/foo/bar?x=1", "Content-Type", "application/json", `{&#34;ok&#34;:true}`, "X-Test", "yes", "created"} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("expected body to contain %q, got %q", want, body)
+		}
+	}
+	if got := rr.Header().Get("Content-Type"); !strings.HasPrefix(got, "text/html") {
+		t.Fatalf("unexpected content type: got %q", got)
+	}
+}
+
+func TestBuildWebUIMux_TrafficDetailPageNotFound(t *testing.T) {
+	mux := BuildWebUIMux(DefaultServerConfig(), logstore.NewInMemoryStore(logstore.UnlimitedMaxBytes))
+	req := httptest.NewRequest(http.MethodGet, "/traffic/404", nil)
+	rr := httptest.NewRecorder()
+	mux.ServeHTTP(rr, req)
+
+	if got, want := rr.Code, http.StatusNotFound; got != want {
+		t.Fatalf("unexpected status code: got %d, want %d", got, want)
 	}
 }
 
@@ -123,7 +173,7 @@ func TestBuildWebUIMux_RequestsReturnsDatastarStream(t *testing.T) {
 		t.Fatalf("unexpected content type: got %q", got)
 	}
 	body := rr.Body.String()
-	for _, want := range []string{"event: datastar-patch-elements", "id=\"requests\"", "[13:14:15]", "404", "DELETE", "/gone", "status status-warn", "method method-delete", "7B"} {
+	for _, want := range []string{"event: datastar-patch-elements", "id=\"requests\"", "[13:14:15]", "404", "DELETE", "/gone", "href=\"/traffic/1\"", "status status-warn", "method method-delete", "7B"} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("expected body to contain %q, got %q", want, body)
 		}

@@ -2,6 +2,8 @@ package app
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/dector/lampa/server/core/logstore"
 	"github.com/starfederation/datastar-go/datastar"
@@ -48,6 +50,40 @@ func NewWebUITrafficPageHandler(logs logstore.Store) http.HandlerFunc {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		if err := WebUITrafficPage(requests, hidden).Render(r.Context(), w); err != nil {
 			http.Error(w, "failed to render traffic", http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+// NewWebUITrafficDetailPageHandler returns the Web UI traffic detail page handler.
+func NewWebUITrafficDetailPageHandler(logs logstore.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		if !strings.HasPrefix(r.URL.Path, "/traffic/") {
+			http.NotFound(w, r)
+			return
+		}
+
+		idText := strings.TrimPrefix(r.URL.Path, "/traffic/")
+		id, err := strconv.ParseInt(idText, 10, 64)
+		if err != nil || id <= 0 {
+			http.NotFound(w, r)
+			return
+		}
+
+		detail, ok := webUITrafficDetailSnapshot(logs, id)
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := WebUITrafficDetailPage(detail).Render(r.Context(), w); err != nil {
+			http.Error(w, "failed to render traffic detail", http.StatusInternalServerError)
 			return
 		}
 	}

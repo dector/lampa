@@ -109,7 +109,8 @@ templ WebUITrafficPage(requests []webUIRequestLog, hidden int) {
 				.requests-header { align-items: baseline; display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
 				h1 { margin: 0; }
 				.requests-list { display: grid; gap: .45rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
-				.request-row { align-items: center; background: #151515; border: 1px solid #292524; display: grid; gap: .7rem; grid-template-columns: 5.5rem 3.5rem 3.8rem minmax(0, 1fr) 9rem; padding: .55rem .65rem; }
+				.request-row { align-items: center; background: #151515; border: 1px solid #292524; color: inherit; display: grid; gap: .7rem; grid-template-columns: 5.5rem 3.5rem 3.8rem minmax(0, 1fr) 9rem; padding: .55rem .65rem; }
+				.request-row:hover { background: #1f1f1f; border-color: #3b3836; }
 				.request-time { color: #a8a29e; }
 				.status, .method { font-weight: 800; }
 				.status-ok { color: #86efac; }
@@ -141,6 +142,102 @@ templ WebUITrafficPage(requests []webUIRequestLog, hidden int) {
 	</html>
 }
 
+templ WebUITrafficDetailPage(detail webUITrafficDetail) {
+	<!doctype html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>Lampa Traffic #{ detail.ID }</title>
+			<style>
+				:root { color-scheme: dark; }
+				body { background: #121212; color: #e7e2dc; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.5; margin: 0; padding: 2rem; }
+				main { background: #1a1a1a; border: 1px solid #2a2a2a; margin: 0 auto; max-width: 64rem; padding: 1.5rem; }
+				a { color: #93c5fd; text-decoration: none; }
+				a:hover { color: #bfdbfe; }
+				h1 { margin: 0; }
+				h2 { border-bottom: 1px solid #292524; font-size: 1.05rem; margin: 1.5rem 0 .75rem; padding-bottom: .35rem; }
+				dl { display: grid; grid-template-columns: max-content 1fr; gap: .65rem 1rem; margin: 1rem 0; }
+				dt { color: #a8a29e; font-weight: 700; }
+				dd { margin: 0; overflow-wrap: anywhere; }
+				.detail-header { align-items: baseline; display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+				.meta, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+				pre { background: #151515; border: 1px solid #292524; overflow: auto; padding: .75rem; white-space: pre-wrap; }
+				.notice { color: #fde68a; }
+				.error { color: #fca5a5; }
+			</style>
+		</head>
+		<body>
+			<main>
+				<div class="detail-header">
+					<h1>Traffic #{ detail.ID }</h1>
+					<a href="/traffic">Back</a>
+				</div>
+				<dl class="meta">
+					if detail.Time != "" {
+						<dt>Time</dt><dd>{ detail.Time }</dd>
+					}
+					if detail.Duration != "" {
+						<dt>Duration</dt><dd>{ detail.Duration }</dd>
+					}
+					if detail.Status != "" {
+						<dt>Status</dt><dd>{ detail.Status }</dd>
+					}
+					if detail.Method != "" {
+						<dt>Method</dt><dd>{ detail.Method }</dd>
+					}
+					if detail.Path != "" {
+						<dt>Path</dt><dd>{ detail.Path }</dd>
+					}
+					if detail.URL != "" {
+						<dt>URL</dt><dd>{ detail.URL }</dd>
+					}
+				</dl>
+				if detail.Error != "" {
+					<h2>Error</h2>
+					<pre class="error">{ detail.Error }</pre>
+				}
+				if len(detail.RequestHeaders) > 0 || detail.RequestBody != "" || detail.RequestTruncated {
+					<h2>Request</h2>
+					if len(detail.RequestHeaders) > 0 {
+						<h3>Headers</h3>
+						<dl class="meta">
+							for _, header := range detail.RequestHeaders {
+								<dt>{ header.Name }</dt><dd>{ header.Value }</dd>
+							}
+						</dl>
+					}
+					if detail.RequestBody != "" {
+						<h3>Body</h3>
+						<pre>{ detail.RequestBody }</pre>
+					}
+					if detail.RequestTruncated {
+						<p class="notice">Request body was truncated.</p>
+					}
+				}
+				if len(detail.ResponseHeaders) > 0 || detail.ResponseBody != "" || detail.ResponseTruncated {
+					<h2>Response</h2>
+					if len(detail.ResponseHeaders) > 0 {
+						<h3>Headers</h3>
+						<dl class="meta">
+							for _, header := range detail.ResponseHeaders {
+								<dt>{ header.Name }</dt><dd>{ header.Value }</dd>
+							}
+						</dl>
+					}
+					if detail.ResponseBody != "" {
+						<h3>Body</h3>
+						<pre>{ detail.ResponseBody }</pre>
+					}
+					if detail.ResponseTruncated {
+						<p class="notice">Response body was truncated.</p>
+					}
+				}
+			</main>
+		</body>
+	</html>
+}
+
 templ WebUIRequests(requests []webUIRequestLog, hidden int) {
 	<section id="requests" data-on-interval__duration.1s="@get('/ds/requests')">
 		if len(requests) == 0 {
@@ -148,7 +245,7 @@ templ WebUIRequests(requests []webUIRequestLog, hidden int) {
 		} else {
 			<div class="requests-list">
 				for _, request := range requests {
-					<div class="request-row">
+					<a class="request-row" href={ request.Href }>
 						<span class="request-time">[{ request.Time }]</span>
 						<span class={ request.StatusClass }>{ request.Status }</span>
 						<span class={ request.MethodClass }>{ request.Method }</span>
@@ -159,7 +256,7 @@ templ WebUIRequests(requests []webUIRequestLog, hidden int) {
 							<svg width="14" height="12" viewBox="0 0 20 16" aria-hidden="true"><path fill="currentColor" d="M16.53 3.22a.75.75 0 0 1 0 1.06L12.81 8l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Zm-7 0a.75.75 0 0 1 0 1.06L5.81 8l3.72 3.72a.75.75 0 1 1-1.06 1.06L4.22 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path></svg>
 							<span>{ request.ResponseBytes }B</span>
 						</span>
-					</div>
+					</a>
 				}
 			</div>
 		}

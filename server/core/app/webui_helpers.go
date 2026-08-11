@@ -2,7 +2,9 @@ package app
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
+	"sort"
 	"strings"
 	"time"
 
@@ -12,6 +14,8 @@ import (
 const webUIRequestsLimit = 100
 
 type webUIRequestLog struct {
+	ID            int64
+	Href          string
 	Time          string
 	Status        string
 	Method        string
@@ -20,6 +24,28 @@ type webUIRequestLog struct {
 	ResponseBytes int
 	StatusClass   string
 	MethodClass   string
+}
+
+type webUITrafficDetail struct {
+	ID                int64
+	Time              string
+	Duration          string
+	Status            string
+	Method            string
+	URL               string
+	Path              string
+	RequestHeaders    []webUIHeader
+	RequestBody       string
+	RequestTruncated  bool
+	ResponseHeaders   []webUIHeader
+	ResponseBody      string
+	ResponseTruncated bool
+	Error             string
+}
+
+type webUIHeader struct {
+	Name  string
+	Value string
 }
 
 func webUIStatsSnapshot(logs logstore.Store) (int, int64) {
@@ -39,6 +65,8 @@ func webUIRequestsSnapshot(logs logstore.Store) ([]webUIRequestLog, int) {
 	requests := make([]webUIRequestLog, 0, len(entries))
 	for _, entry := range entries {
 		requests = append(requests, webUIRequestLog{
+			ID:            entry.ID,
+			Href:          formatWebUITrafficDetailHref(entry.ID),
 			Time:          formatWebUIRequestTime(entry.Timestamp),
 			Status:        formatWebUIRequestStatus(entry.Response.Status),
 			Method:        entry.Request.Method,
@@ -57,11 +85,75 @@ func webUIRequestsSnapshot(logs logstore.Store) ([]webUIRequestLog, int) {
 	return requests, hidden
 }
 
+func webUITrafficDetailSnapshot(logs logstore.Store, id int64) (webUITrafficDetail, bool) {
+	if logs == nil {
+		return webUITrafficDetail{}, false
+	}
+
+	entry, ok := logs.Get(id)
+	if !ok {
+		return webUITrafficDetail{}, false
+	}
+
+	return webUITrafficDetail{
+		ID:                entry.ID,
+		Time:              formatWebUITrafficDetailTime(entry.Timestamp),
+		Duration:          formatWebUITrafficDuration(entry.DurationMs),
+		Status:            formatWebUIRequestStatus(entry.Response.Status),
+		Method:            entry.Request.Method,
+		URL:               entry.Request.URL,
+		Path:              formatWebUIRequestPath(entry.Request),
+		RequestHeaders:    formatWebUIHeaders(entry.Request.Headers),
+		RequestBody:       string(entry.Request.Body),
+		RequestTruncated:  entry.RequestTruncated,
+		ResponseHeaders:   formatWebUIHeaders(entry.Response.Headers),
+		ResponseBody:      string(entry.Response.Body),
+		ResponseTruncated: entry.ResponseTruncated,
+		Error:             entry.Error,
+	}, true
+}
+
 func formatWebUIRequestTime(t time.Time) string {
 	if t.IsZero() {
 		return "--:--:--"
 	}
 	return t.Local().Format("15:04:05")
+}
+
+func formatWebUITrafficDetailTime(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.Local().Format(time.RFC3339)
+}
+
+func formatWebUITrafficDuration(durationMs int64) string {
+	if durationMs <= 0 {
+		return ""
+	}
+	return fmt.Sprintf("%dms", durationMs)
+}
+
+func formatWebUITrafficDetailHref(id int64) string {
+	return fmt.Sprintf("/traffic/%d", id)
+}
+
+func formatWebUIHeaders(headers http.Header) []webUIHeader {
+	if len(headers) == 0 {
+		return nil
+	}
+
+	names := make([]string, 0, len(headers))
+	for name := range headers {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	out := make([]webUIHeader, 0, len(names))
+	for _, name := range names {
+		out = append(out, webUIHeader{Name: name, Value: strings.Join(headers.Values(name), ", ")})
+	}
+	return out
 }
 
 func formatWebUIRequestStatus(status int) string {

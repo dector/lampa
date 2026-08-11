@@ -27,6 +27,7 @@ func BuildWebUIMux(cfg ServerConfig, logs logstore.Store) *http.ServeMux {
 	mux.HandleFunc("/ds/stats", NewWebUIStatsHandler(cfg, logs))
 	mux.HandleFunc("/ds/requests", NewWebUIRequestsHandler(logs))
 	mux.HandleFunc("/traffic", NewWebUITrafficPageHandler(logs))
+	mux.HandleFunc("/traffic/", NewWebUITrafficDetailPageHandler(logs))
 	mux.HandleFunc("/", NewWebUIIndexHandler(cfg, logs))
 	return mux
 }
