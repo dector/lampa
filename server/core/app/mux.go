@@ -23,6 +23,8 @@ func BuildProxyMuxWithLogStore(cfg ServerConfig, store processor.ReqProcessorSto
 func BuildWebUIMux(cfg ServerConfig, logs logstore.Store) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", NewWebUIHealthHandler())
+	mux.HandleFunc(WebUIAssetsPath, NewWebUIAssetHandler())
+	mux.HandleFunc("/ds/stats", NewWebUIStatsHandler(cfg, logs))
 	mux.HandleFunc("/", NewWebUIIndexHandler(cfg, logs))
 	return mux
 }

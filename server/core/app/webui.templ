@@ -7,6 +7,7 @@ templ WebUIIndexPage(cfg ServerConfig, trafficCount int, trafficSize int64) {
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>Lampa Web UI</title>
+			<script type="module" src="/assets/datastar-1.0.2.js"></script>
 			<style>
 				:root { color-scheme: dark; }
 				body {
@@ -53,13 +54,17 @@ templ WebUIIndexPage(cfg ServerConfig, trafficCount int, trafficSize int64) {
 			<main>
 				<h1>Lampa Web UI</h1>
 				<div class="status-row">Server: <span class="pill">running</span></div>
-				<dl>
-					<dt>Proxy port</dt><dd>{ cfg.ProxyPort }</dd>
-					<dt>Control port</dt><dd>{ cfg.ControlPort }</dd>
-					<dt>Traffic count</dt><dd>{ trafficCount }</dd>
-					<dt>Traffic size bytes</dt><dd>{ trafficSize }</dd>
-				</dl>
+				@WebUIStats(cfg, trafficCount, trafficSize)
 			</main>
 		</body>
 	</html>
+}
+
+templ WebUIStats(cfg ServerConfig, trafficCount int, trafficSize int64) {
+	<dl id="stats" data-on-interval__duration.1s="@get('/ds/stats')">
+		<dt>Proxy port</dt><dd>{ cfg.ProxyPort }</dd>
+		<dt>Control port</dt><dd>{ cfg.ControlPort }</dd>
+		<dt>Traffic count</dt><dd>{ trafficCount }</dd>
+		<dt>Traffic size bytes</dt><dd>{ trafficSize }</dd>
+	</dl>
 }
