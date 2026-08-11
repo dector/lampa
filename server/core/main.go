@@ -31,7 +31,11 @@ func RunProxyWithStoreAndLogs(cfg ServerConfig, store processor.ReqProcessorStor
 
 func RunWithControl(cfg ServerConfig, listen func(addr string, h http.Handler) error) error {
 	sharedStore := processor.NewDefaultReqProcessorStore()
-	sharedLogs := logstore.NewInMemoryStore(logstore.DefaultMaxBytes)
+	logMaxBytes := logstore.DefaultMaxBytes
+	if cfg.WebUI.Enabled && cfg.CaptureTraffic {
+		logMaxBytes = logstore.UnlimitedMaxBytes
+	}
+	sharedLogs := logstore.NewInMemoryStore(logMaxBytes)
 
 	errCh := make(chan error, 2)
 

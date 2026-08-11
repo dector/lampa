@@ -9,6 +9,9 @@ import (
 const (
 	// DefaultMaxBytes caps retained logs in memory at 30MB.
 	DefaultMaxBytes int64 = 30 * 1024 * 1024
+
+	// UnlimitedMaxBytes disables log retention size limits.
+	UnlimitedMaxBytes int64 = -1
 )
 
 // Entry describes one proxied request/response interaction.
@@ -47,6 +50,8 @@ type Response struct {
 type Store interface {
 	Add(entry Entry) Entry
 	Latest(n int) []Entry
+	Get(id int64) (Entry, bool)
+	Clear()
 	Count() int
 	SizeBytes() int64
 }
@@ -62,7 +67,7 @@ type InMemoryStore struct {
 
 // NewInMemoryStore creates bounded in-memory log store.
 func NewInMemoryStore(maxBytes int64) *InMemoryStore {
-	if maxBytes <= 0 {
+	if maxBytes == 0 || maxBytes < UnlimitedMaxBytes {
 		maxBytes = DefaultMaxBytes
 	}
 	return &InMemoryStore{maxBytes: maxBytes}
@@ -79,31 +84,32 @@ func (s *InMemoryStore) Add(entry Entry) Entry {
 		entry.Timestamp = time.Now().UTC()
 	}
 
-	entry = fitEntryToCap(entry, s.maxBytes)
+	if s.maxBytes != UnlimitedMaxBytes {
+		entry = fitEntryToCap(entry, s.maxBytes)
+	}
 	entry.SizeBytes = EstimateSizeBytes(entry)
 
 	s.entries = append(s.entries, cloneEntry(entry))
 	s.totalSize += entry.SizeBytes
 
-	for s.totalSize > s.maxBytes && len(s.entries) > 0 {
-		oldest := s.entries[0]
-		s.entries = s.entries[1:]
-		s.totalSize -= oldest.SizeBytes
+	if s.maxBytes != UnlimitedMaxBytes {
+		for s.totalSize > s.maxBytes && len(s.entries) > 0 {
+			oldest := s.entries[0]
+			s.entries = s.entries[1:]
+			s.totalSize -= oldest.SizeBytes
+		}
 	}
 
 	return cloneEntry(entry)
 }
 
 // Latest returns up to n latest entries ordered latest-first.
+// If n <= 0, it returns all entries ordered latest-first.
 func (s *InMemoryStore) Latest(n int) []Entry {
-	if n <= 0 {
-		return nil
-	}
-
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if n > len(s.entries) {
+	if n <= 0 || n > len(s.entries) {
 		n = len(s.entries)
 	}
 
@@ -112,6 +118,28 @@ func (s *InMemoryStore) Latest(n int) []Entry {
 		out = append(out, cloneEntry(s.entries[i]))
 	}
 	return out
+}
+
+// Get returns entry by ID.
+func (s *InMemoryStore) Get(id int64) (Entry, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for _, entry := range s.entries {
+		if entry.ID == id {
+			return cloneEntry(entry), true
+		}
+	}
+	return Entry{}, false
+}
+
+// Clear removes all retained entries. Sequence IDs keep increasing.
+func (s *InMemoryStore) Clear() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.entries = nil
+	s.totalSize = 0
 }
 
 // Count returns current entries count.
