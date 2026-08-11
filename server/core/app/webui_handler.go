@@ -30,6 +30,29 @@ func NewWebUIIndexHandler(cfg ServerConfig, logs logstore.Store) http.HandlerFun
 	}
 }
 
+// NewWebUITrafficPageHandler returns the Web UI traffic page handler.
+func NewWebUITrafficPageHandler(logs logstore.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		if r.URL.Path != "/traffic" {
+			http.NotFound(w, r)
+			return
+		}
+
+		requests, hidden := webUIRequestsSnapshot(logs)
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := WebUITrafficPage(requests, hidden).Render(r.Context(), w); err != nil {
+			http.Error(w, "failed to render traffic", http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 // NewWebUIStatsHandler returns the polling stats fragment handler.
 func NewWebUIStatsHandler(cfg ServerConfig, logs logstore.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +70,28 @@ func NewWebUIStatsHandler(cfg ServerConfig, logs logstore.Store) http.HandlerFun
 		sse := datastar.NewSSE(w, r)
 		if err := sse.PatchElementTempl(WebUIStats(cfg, trafficCount, trafficSize)); err != nil {
 			http.Error(w, "failed to render stats", http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+// NewWebUIRequestsHandler returns the polling requests fragment handler.
+func NewWebUIRequestsHandler(logs logstore.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		if r.URL.Path != "/ds/requests" {
+			http.NotFound(w, r)
+			return
+		}
+
+		requests, hidden := webUIRequestsSnapshot(logs)
+		sse := datastar.NewSSE(w, r)
+		if err := sse.PatchElementTempl(WebUIRequests(requests, hidden)); err != nil {
+			http.Error(w, "failed to render requests", http.StatusInternalServerError)
 			return
 		}
 	}

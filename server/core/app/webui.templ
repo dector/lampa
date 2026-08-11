@@ -27,6 +27,8 @@ templ WebUIIndexPage(cfg ServerConfig, trafficCount int, trafficSize int64) {
 				  padding: 1.5rem;
 				}
 				h1 { margin: 0 0 1rem; }
+				a { color: #93c5fd; text-decoration: none; }
+				a:hover { color: #bfdbfe; }
 				dl { display: grid; grid-template-columns: max-content 1fr; gap: .75rem 1rem; margin: 1.5rem 0 0; }
 				dt { color: #a8a29e; font-weight: 700; }
 				dd { margin: 0; }
@@ -48,6 +50,26 @@ templ WebUIIndexPage(cfg ServerConfig, trafficCount int, trafficSize int64) {
 				  height: .4rem;
 				  width: .4rem;
 				}
+				.requests-header { align-items: baseline; display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+				.requests-list { display: grid; gap: .45rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+				.request-row { align-items: center; background: #151515; border: 1px solid #292524; display: grid; gap: .7rem; grid-template-columns: 5.5rem 3.5rem 3.8rem minmax(0, 1fr); padding: .55rem .65rem; }
+				.request-time { color: #a8a29e; }
+				.status, .method { font-weight: 800; }
+				.status-ok { color: #86efac; }
+				.status-redirect { color: #93c5fd; }
+				.status-warn { color: #fde68a; }
+				.status-error { color: #fca5a5; }
+				.status-muted { color: #78716c; }
+				.method-get { color: #67e8f9; }
+				.method-post { color: #c4b5fd; }
+				.method-put, .method-patch { color: #fdba74; }
+				.method-delete { color: #f87171; }
+				.method-other { color: #e7e5e4; }
+				.request-path { color: #f5f5f4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+				.request-size { align-items: center; color: #a8a29e; display: inline-flex; gap: .3rem; justify-content: flex-end; text-align: right; }
+				.request-size svg { color: #78716c; height: .9rem; width: .9rem; }
+				.request-size-dot { color: #57534e; }
+				.requests-empty, .requests-hidden { color: #a8a29e; padding: .75rem 0 0; }
 			</style>
 		</head>
 		<body>
@@ -55,6 +77,7 @@ templ WebUIIndexPage(cfg ServerConfig, trafficCount int, trafficSize int64) {
 				<h1>Lampa Web UI</h1>
 				<div class="status-row">Server: <span class="pill">running</span></div>
 				@WebUIStats(cfg, trafficCount, trafficSize)
+				<p><a href="/traffic">View traffic</a></p>
 			</main>
 		</body>
 	</html>
@@ -64,7 +87,84 @@ templ WebUIStats(cfg ServerConfig, trafficCount int, trafficSize int64) {
 	<dl id="stats" data-on-interval__duration.1s="@get('/ds/stats')">
 		<dt>Proxy port</dt><dd>{ cfg.ProxyPort }</dd>
 		<dt>Control port</dt><dd>{ cfg.ControlPort }</dd>
-		<dt>Traffic count</dt><dd>{ trafficCount }</dd>
-		<dt>Traffic size bytes</dt><dd>{ trafficSize }</dd>
+		<dt>Requests count</dt><dd>{ trafficCount }</dd>
+		<dt>Requests size bytes</dt><dd>{ trafficSize }</dd>
 	</dl>
+}
+
+templ WebUITrafficPage(requests []webUIRequestLog, hidden int) {
+	<!doctype html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>Lampa Traffic</title>
+			<script type="module" src="/assets/datastar-1.0.2.js"></script>
+			<style>
+				:root { color-scheme: dark; }
+				body { background: #121212; color: #e7e2dc; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.5; margin: 0; padding: 2rem; }
+				main { background: #1a1a1a; border: 1px solid #2a2a2a; margin: 0 auto; max-width: 64rem; padding: 1.5rem; }
+				a { color: #93c5fd; text-decoration: none; }
+				a:hover { color: #bfdbfe; }
+				.requests-header { align-items: baseline; display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+				h1 { margin: 0; }
+				.requests-list { display: grid; gap: .45rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+				.request-row { align-items: center; background: #151515; border: 1px solid #292524; display: grid; gap: .7rem; grid-template-columns: 5.5rem 3.5rem 3.8rem minmax(0, 1fr) 9rem; padding: .55rem .65rem; }
+				.request-time { color: #a8a29e; }
+				.status, .method { font-weight: 800; }
+				.status-ok { color: #86efac; }
+				.status-redirect { color: #93c5fd; }
+				.status-warn { color: #fde68a; }
+				.status-error { color: #fca5a5; }
+				.status-muted { color: #78716c; }
+				.method-get { color: #67e8f9; }
+				.method-post { color: #c4b5fd; }
+				.method-put, .method-patch { color: #fdba74; }
+				.method-delete { color: #f87171; }
+				.method-other { color: #e7e5e4; }
+				.request-path { color: #f5f5f4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+				.request-size { align-items: center; color: #a8a29e; display: inline-flex; gap: .3rem; justify-content: flex-end; text-align: right; }
+				.request-size svg { color: #78716c; height: .9rem; width: .9rem; }
+				.request-size-dot { color: #57534e; }
+				.requests-empty, .requests-hidden { color: #a8a29e; padding: .75rem 0 0; }
+			</style>
+		</head>
+		<body>
+			<main>
+				<div class="requests-header">
+					<h1>Traffic</h1>
+					<a href="/">Back</a>
+				</div>
+				@WebUIRequests(requests, hidden)
+			</main>
+		</body>
+	</html>
+}
+
+templ WebUIRequests(requests []webUIRequestLog, hidden int) {
+	<section id="requests" data-on-interval__duration.1s="@get('/ds/requests')">
+		if len(requests) == 0 {
+			<div class="requests-empty">No requests yet.</div>
+		} else {
+			<div class="requests-list">
+				for _, request := range requests {
+					<div class="request-row">
+						<span class="request-time">[{ request.Time }]</span>
+						<span class={ request.StatusClass }>{ request.Status }</span>
+						<span class={ request.MethodClass }>{ request.Method }</span>
+						<span class="request-path">{ request.Path }</span>
+						<span class="request-size">
+							<svg width="14" height="12" viewBox="0 0 20 16" aria-hidden="true"><path fill="currentColor" d="M3.47 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L7.19 8 3.47 4.28a.75.75 0 0 1 0-1.06Zm7 0a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 1 1-1.06-1.06L14.19 8l-3.72-3.72a.75.75 0 0 1 0-1.06Z"></path></svg>
+							<span>{ request.RequestBytes }B</span>
+							<svg width="14" height="12" viewBox="0 0 20 16" aria-hidden="true"><path fill="currentColor" d="M16.53 3.22a.75.75 0 0 1 0 1.06L12.81 8l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Zm-7 0a.75.75 0 0 1 0 1.06L5.81 8l3.72 3.72a.75.75 0 1 1-1.06 1.06L4.22 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path></svg>
+							<span>{ request.ResponseBytes }B</span>
+						</span>
+					</div>
+				}
+			</div>
+		}
+		if hidden > 0 {
+			<div class="requests-hidden">{ hidden } more hidden...</div>
+		}
+	</section>
 }
