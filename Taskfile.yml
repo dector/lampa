@@ -37,10 +37,17 @@ tasks:
     silent: true
 
   gen:
+    deps:
+      - gen:templ
     cmds:
       - mkdir -p internal/globals/gen
-      - go tool templ generate
       - go generate ./...
+    silent: true
+
+  gen:templ:
+    cmds:
+      - go tool templ generate
+      - cd server/core && go tool templ generate
     silent: true
 
   proto:gen:

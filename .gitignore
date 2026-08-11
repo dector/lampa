@@ -1,2 +1,4 @@
 /out/
+
+# templ generated files
 *_templ.go
