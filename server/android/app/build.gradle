@@ -33,7 +33,7 @@ configurations.all {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.8.0'
 
     // Keep Kotlin stdlib aligned when transitive deps pull legacy jdk7/jdk8 artifacts.
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
