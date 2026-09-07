@@ -3,7 +3,7 @@ module github.com/dector/lampa/server/core
 go 1.25.5
 
 require (
-	github.com/a-h/templ v0.3.1001
+	github.com/a-h/templ v0.3.1020
 	github.com/google/go-cmp v0.7.0
 	github.com/starfederation/datastar-go v1.2.2
 	modernc.org/quickjs v0.17.2
